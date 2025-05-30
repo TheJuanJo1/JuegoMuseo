@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bienvenidos al Museo Historico</title>
+  <style>
+    body {
+      color: rgb(79, 238, 79);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-color: rgba(114, 71, 22, 0.911);
+      font-family: Arial, sans-serif;
+    }
+
+    h1 {
+      margin-top: 20px;
+      color: gold;
+      text-shadow: 0 0 10px gold, 0 0 20px orange, 0 0 30px red;
+      font-size: 36px;
+      font-weight: bold;
+    }
+
+    #interface {
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      width: 800px;
+      margin-top: 10px;
+      padding: 10px;
+      background-color: #000000;
+      border-radius: 8px;
+    }
+
+    .info {
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    canvas {
+      border: 2px solid #333;
+      background-color: rgba(114, 71, 22, 0.911);
+      margin-top: 10px;
+    }
+
+    #countdown {
+      font-size: 48px;
+      font-weight: bold;
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background-color: rgba(255, 255, 255, 0.7);
+      padding: 20px 40px;
+      border-radius: 10px;
+      border: 2px solid #333;
+      color: gold;
+      text-shadow: 0 0 10px gold, 0 0 20px orange, 0 0 30px red;
+      box-shadow: 0 0 20px gold, 0 0 40px orange;
+    }
+  </style>
+</head>
+<body>
+  <h1>¡Bienvenidos al Museo Histórico!</h1>
+  <div id="interface">
+    <div class="info">Puntuación: <span id="score">0</span></div>
+    <div class="info">Vidas: <span id="lives">3</span></div>
+  </div>
+  <div id="countdown">3</div>
+  <canvas id="gameCanvas" width="1200" height="430"></canvas>
+  <audio id="backgroundMusic" loop>
+    <source src="audio/musica.mp3" type="audio/mpeg">
+  </audio>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const scoreEl = document.getElementById("score");
+    const livesEl = document.getElementById("lives");
+    const countdownEl = document.getElementById("countdown");
+    const music = document.getElementById("backgroundMusic");
+
+    let score = 0;
+    let lives = 3;
+    let hitEffect = 0;
+    let cameraX = 0;
+    let keys = {};
+
+    const FLOOR_Y = 360;
+
+    const background = new Image();
+    background.src = "img/piso.png";
+
+    const bullImage = new Image();
+    bullImage.src = "img/Bull-removebg-preview.png";
+
+    const playerImage = new Image();
+    playerImage.src = "img/indigena.png";
+
+    const cofreImage = new Image();
+    cofreImage.src = "img/cofre.png";
+
+    const coinImage = new Image();
+    coinImage.src = "img/moneda.png";
+
+    const player = {
+      x: 200,
+      y: FLOOR_Y - 60,
+      width: 40,
+      height: 60,
+      vy: 0,
+      speed: 5,
+      gravity: 1.2,
+      jumpForce: -20,
+      onGround: true,
+      image: playerImage
+    };
+
+    const bull = {
+      x: 100,
+      y: FLOOR_Y - 50,
+      width: 96,
+      height: 96,
+      vy: 0,
+      gravity: 1.2,
+      speed: 4.9,
+      jumpForce: -15,
+      onGround: true,
+      image: bullImage
+    };
+
+    let structures = [];
+    let coins = [];
+
+    function checkCollision(a, b) {
+      return (
+        a.x < b.x + b.width &&
+        a.x + a.width > b.x &&
+        a.y < b.y + b.height &&
+        a.y + a.height > b.y
+      );
+    }
+
+    function applyPhysics(obj) {
+      obj.vy += obj.gravity;
+      obj.onGround = false;
+      let nextY = obj.y + obj.vy;
+
+      for (let plat of structures) {
+        if (
+          obj.x + obj.width > plat.x &&
+          obj.x < plat.x + plat.width &&
+          obj.y + obj.height <= plat.y &&
+          nextY + obj.height >= plat.y
+        ) {
+          obj.y = plat.y - obj.height;
+          obj.vy = 0;
+          obj.onGround = true;
+          return;
+        }
+      }
+
+      if (nextY + obj.height >= FLOOR_Y) {
+        obj.y = FLOOR_Y - obj.height;
+        obj.vy = 0;
+        obj.onGround = true;
+      } else {
+        obj.y = nextY;
+      }
+    }
+
+    function preventStructureOverlap(entity) {
+      for (let plat of structures) {
+        if (checkCollision(entity, plat)) {
+          if (entity.x + entity.width > plat.x && entity.x < plat.x) {
+            entity.x = plat.x - entity.width;
+          } else if (entity.x < plat.x + plat.width && entity.x + entity.width > plat.x + plat.width) {
+            entity.x = plat.x + plat.width;
+          }
+        }
+      }
+    }
+
+    function update() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#888";
+      ctx.fillRect(0, FLOOR_Y, canvas.width, canvas.height - FLOOR_Y);
+
+      if (keys["ArrowRight"] || keys["d"]) {
+        player.x += player.speed;
+        preventStructureOverlap(player);
+      }
+      if (keys["ArrowLeft"] || keys["a"]) {
+        player.x -= player.speed;
+        preventStructureOverlap(player);
+      }
+
+      applyPhysics(player);
+      applyPhysics(bull);
+
+      for (let plat of structures) {
+        if (
+          checkCollision({ ...bull, y: bull.y + 1 }, plat) &&
+          bull.onGround &&
+          bull.y + bull.height <= plat.y + 5
+        ) {
+          bull.vy = bull.jumpForce;
+          bull.onGround = false;
+          break;
+        }
+      }
+
+      if (bull.x < player.x - 40) bull.x += bull.speed;
+      else if (bull.x > player.x + 40) bull.x -= bull.speed;
+
+      if (checkCollision(player, bull)) {
+        lives--;
+        livesEl.textContent = lives;
+        hitEffect = 10;
+        if (lives <= 0) {
+          music.pause();
+          alert("¡Game Over!");
+          document.location.reload();
+          return;
+        } else {
+          bull.x = player.x - 100;
+        }
+      }
+
+      cameraX = player.x - 200;
+
+      if (hitEffect > 0) {
+        ctx.fillStyle = "rgba(255,0,0,0.5)";
+        ctx.fillRect(player.x - cameraX, player.y, player.width, player.height);
+        hitEffect--;
+      } else {
+        ctx.drawImage(player.image, player.x - cameraX, player.y, player.width, player.height);
+      }
+
+      ctx.drawImage(bull.image, bull.x - cameraX, bull.y, bull.width, bull.height);
+
+      // Dibujar estructuras (cofres)
+      for (let i = 0; i < structures.length; i++) {
+        const plat = structures[i];
+        ctx.save();
+        ctx.shadowBlur = 20;
+        ctx.shadowColor = "gold";
+        ctx.drawImage(cofreImage, plat.x - cameraX, plat.y, plat.width, plat.height);
+        ctx.restore();
+
+        if (plat.x + plat.width < cameraX) {
+          structures.splice(i, 1);
+          i--;
+        }
+      }
+
+      // Dibujar y recolectar monedas
+for (let i = 0; i < coins.length; i++) {
+  const coin = coins[i];
+
+  // Animación de giro
+  coin.frame = (coin.frame || 0) + 0.1;
+  const scaleX = 0.5 + Math.abs(Math.sin(coin.frame)) * 0.5;
+
+  ctx.save();
+  ctx.translate(coin.x - cameraX + coin.width / 2, coin.y + coin.height / 2);
+  ctx.scale(scaleX, 1);
+  ctx.drawImage(coinImage, -coin.width / 2, -coin.height / 2, coin.width, coin.height);
+  ctx.restore();
+
+  if (checkCollision(player, {
+    x: coin.x,
+    y: coin.y,
+    width: coin.width,
+    height: coin.height
+  })) {
+    score++;
+    scoreEl.textContent = score;
+    coins.splice(i, 1);
+    i--;
+  }
+}
+
+      // Generar estructuras y monedas
+      if (structures.length < 5) {
+        const type = Math.floor(Math.random() * 3);
+        const newX = player.x + 600 + Math.random() * 300;
+        let newWidth = 40 + Math.random() * 60;
+        let newHeight = 40 + Math.random() * 20;
+        let newY = FLOOR_Y - newHeight;
+
+        if (type === 1) {
+          newY -= 40 + Math.random() * 60;
+        } else if (type === 2) {
+          newWidth = 30 + Math.random() * 20;
+          newHeight = 50 + Math.random() * 20;
+          newY -= Math.random() * 50;
+        }
+
+        structures.push({
+          x: newX,
+          y: newY,
+          width: newWidth,
+          height: newHeight
+        });
+
+        // Agregar una moneda sobre la estructura
+        if (Math.random() < 0.6) {
+          coins.push({
+            x: newX + newWidth / 2 - 15,
+            y: newY - 30,
+            width: 30,
+            height: 30
+          });
+        }
+      }
+
+      requestAnimationFrame(update);
+    }
+
+    document.addEventListener("keydown", (e) => {
+      keys[e.key] = true;
+      if ((e.code === "Space" || e.key === "ArrowUp") && player.onGround) {
+        player.vy = player.jumpForce;
+        player.onGround = false;
+      }
+    });
+
+    document.addEventListener("keyup", (e) => {
+      keys[e.key] = false;
+    });
+
+    let count = 3;
+    const countdownInterval = setInterval(() => {
+      countdownEl.textContent = count;
+      if (count === 0) {
+        countdownEl.style.display = "none";
+        clearInterval(countdownInterval);
+        music.play();
+        update();
+      }
+      count--;
+    }, 1000);
+  </script>
+</body>
+</html>

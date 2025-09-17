@@ -1,65 +1,135 @@
-import express from "express"
-import bcrypt from "bcryptjs"
-import { prisma } from "../lib/prisma.js"
+// backend/src/routes/empresas.js
+import express from "express";
+import bcrypt from "bcryptjs";
+import { prisma } from "../lib/prisma.js";
+import crypto from "crypto";
+import nodemailer from "nodemailer";
 
-const router = express.Router()
+const router = express.Router();
 
-// Registrar Empresa
-router.post("/register", async (req, res) => {
+// Configuración del transporte de correos
+const transporter = nodemailer.createTransport({
+  service: "gmail", // o tu servicio SMTP
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+});
+
+/* ================================
+   Paso 1: Pre-registro con envío de código
+================================== */
+// Paso 1: Pre-registro con envío de código
+router.post("/pre-register", async (req, res) => {
   try {
-    const { nombre_empresa, nit_empresa, correo_contacto, contrasena, confirmar_contrasena } = req.body
+    console.log("📩 Body recibido:", req.body);
 
-    // Validar campos
+    const { nombre_empresa, nit_empresa, correo_contacto, contrasena, confirmar_contrasena } = req.body;
+
     if (!nombre_empresa || !nit_empresa || !correo_contacto || !contrasena || !confirmar_contrasena) {
-      return res.status(400).json({ error: "Todos los campos son requeridos" })
+      console.log("❌ Faltan campos");
+      return res.status(400).json({ error: "Todos los campos son requeridos" });
     }
 
     if (contrasena !== confirmar_contrasena) {
-      return res.status(400).json({ error: "Las contraseñas no coinciden" })
+      console.log("❌ Contraseñas no coinciden");
+      return res.status(400).json({ error: "Las contraseñas no coinciden" });
     }
 
-    // Validar si ya existe empresa con ese NIT o correo
-    const existe = await prisma.usuarios.findFirst({
-      where: {
-        OR: [
-          { nit_empresa },
-          { correo_contacto }
-        ]
+    console.log("✅ Validación OK, generando código...");
+
+    // Generar código
+    const codigo = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Guardar en DB
+    const saveCode = await prisma.codigos_verificacion.create({
+      data: {
+        correo: correo_contacto,
+        codigo,
+        contrasena_temp: contrasena,
+        nombre_empresa,
+        nit_empresa,
+        expiracion: new Date(Date.now() + 10 * 60 * 1000) // 10 minutos
       }
-    })
+    });
 
-    if (existe) {
-      return res.status(400).json({ error: "La empresa ya está registrada con ese NIT o correo" })
+    console.log("💾 Código guardado en DB:", saveCode);
+
+    // Enviar email
+    const transporter = nodemailer.createTransport({
+      service: process.env.EMAIL_SERVICE,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      }
+    });
+
+    await transporter.sendMail({
+      from: `"FluxData" <${process.env.EMAIL_USER}>`,
+      to: correo_contacto,
+      subject: "Código de verificación",
+      text: `Tu código de verificación es: ${codigo}`
+    });
+
+    console.log("📨 Correo enviado a:", correo_contacto);
+
+    res.json({ msg: "Se envió un código de verificación al correo." });
+
+  } catch (err) {
+    console.error("💥 Error en /pre-register:", err);
+    res.status(500).json({ error: "Error en pre-registro" });
+  }
+});
+
+
+/* ================================
+   Paso 2: Verificar código y crear usuario
+================================== */
+router.post("/verify-code", async (req, res) => {
+  try {
+    const { correo, codigo } = req.body;
+
+    const registro = await prisma.codigos_verificacion.findFirst({
+      where: { correo, codigo }
+    });
+
+    if (!registro) {
+      return res.status(400).json({ error: "Código inválido" });
     }
 
-    // Hashear contraseña
-    const hashedPass = await bcrypt.hash(contrasena, 10)
+    if (new Date() > registro.expiracion) {
+      return res.status(400).json({ error: "El código ha expirado" });
+    }
 
-    // Crear empresa en la BD
+    // Crear empresa en Usuarios
     const empresa = await prisma.usuarios.create({
       data: {
-        nombre_usuario: nombre_empresa,   // 👈 en tu tabla Usuarios
-        nit_empresa,
-        correo_contacto,
-        contrasena_usuario: hashedPass,
-        rol_usuario: "empresa"           // 👈 rol opcional
+        nombre_usuario: registro.nombre_empresa,
+        nit_empresa: registro.nit_empresa,
+        correo_contacto: registro.correo,
+        contrasena_usuario: registro.contrasena_temp,
+        rol_usuario: "empresa"
       }
-    })
+    });
+
+    // Eliminar el registro temporal
+    await prisma.codigos_verificacion.delete({
+      where: { id: registro.id }
+    });
 
     res.json({
-      message: "Empresa registrada exitosamente",
+      message: "Empresa verificada y registrada",
       empresa: {
         id: empresa.id_usuario,
-        nombre_empresa: empresa.nombre_usuario,
-        nit_empresa: empresa.nit_empresa,
-        correo_contacto: empresa.correo_contacto
+        nombre: empresa.nombre_usuario,
+        correo: empresa.correo_contacto
       }
-    })
+    });
 
-  } catch (error) {
-    console.error(error)
-    res.status(500).json({ error: "Error en el registro de empresa" })
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Error en verificación" });
   }
-})
+});
 
-export default router
+export default router;

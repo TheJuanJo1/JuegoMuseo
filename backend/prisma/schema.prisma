@@ -103,3 +103,14 @@ model PasswordResetToken {
   expiresAt DateTime
   createdAt DateTime @default(now())
 }
+
+model codigos_verificacion {
+  id             Int      @id @default(autoincrement())
+  correo         String
+  codigo         String
+  contrasena_temp String
+  nombre_empresa String
+  nit_empresa    String
+  expiracion     DateTime
+}
+

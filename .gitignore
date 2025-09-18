@@ -12,3 +12,4 @@ frontend/dist/
 
 # Archivos del sistema
 .DS_Store
+node_modules

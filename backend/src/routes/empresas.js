@@ -22,21 +22,21 @@ const transporter = nodemailer.createTransport({
 // Paso 1: Pre-registro con envío de código
 router.post("/pre-register", async (req, res) => {
   try {
-    console.log("📩 Body recibido:", req.body);
+    console.log("Body recibido:", req.body);
 
     const { nombre_empresa, nit_empresa, correo_contacto, contrasena, confirmar_contrasena } = req.body;
 
     if (!nombre_empresa || !nit_empresa || !correo_contacto || !contrasena || !confirmar_contrasena) {
-      console.log("❌ Faltan campos");
+      console.log("Faltan campos");
       return res.status(400).json({ error: "Todos los campos son requeridos" });
     }
 
     if (contrasena !== confirmar_contrasena) {
-      console.log("❌ Contraseñas no coinciden");
+      console.log("Contraseñas no coinciden");
       return res.status(400).json({ error: "Las contraseñas no coinciden" });
     }
 
-    console.log("✅ Validación OK, generando código...");
+    console.log("Validación OK, generando código...");
 
     // Generar código
     const codigo = Math.floor(100000 + Math.random() * 900000).toString();
@@ -53,7 +53,7 @@ router.post("/pre-register", async (req, res) => {
       }
     });
 
-    console.log("💾 Código guardado en DB:", saveCode);
+    console.log("Código guardado en DB:", saveCode);
 
     // Enviar email
     const transporter = nodemailer.createTransport({
@@ -71,12 +71,12 @@ router.post("/pre-register", async (req, res) => {
       text: `Tu código de verificación es: ${codigo}`
     });
 
-    console.log("📨 Correo enviado a:", correo_contacto);
+    console.log("Correo enviado a:", correo_contacto);
 
     res.json({ msg: "Se envió un código de verificación al correo." });
 
   } catch (err) {
-    console.error("💥 Error en /pre-register:", err);
+    console.error("Error en /pre-register:", err);
     res.status(500).json({ error: "Error en pre-registro" });
   }
 });

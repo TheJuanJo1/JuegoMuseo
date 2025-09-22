@@ -7,14 +7,19 @@ import empresasRoutes from './routes/empresas.js'   //Importar empresas
 import loginRoutes from "./routes/login.js"
 import forgotPasswordRoutes from "./routes/forgotPassword.js";
 import resetPasswordRoutes from "./routes/resetPassword.js";
+import facturasNotasRoutes from "./routes/facturasnotas.js";
+import cookieParser from "cookie-parser";
 import { authRequired } from './middleware/auth.js'
 
 dotenv.config()
 
 const app = express()
-app.use(cors())
+app.use(cors({
+  origin: "http://localhost:5173",
+  credentials: true,
+}));
 app.use(express.json())
-
+app.use(cookieParser());
 app.get('/', (req, res) => {
   res.json({ ok: true, msg: 'API FluxData Auth funcionando' })
 })
@@ -26,7 +31,7 @@ app.use('/api/auth', authRoutes)
 app.use('/api/clientes', clientesRoutes)
 
 // Rutas de empresas
-app.use('/api/empresas', empresasRoutes)  //Habilitar empresas
+app.use('/api/empresas', empresasRoutes)//Habilitar empresas
 
 app.use("/api/login", loginRoutes)
 
@@ -36,6 +41,9 @@ app.use('/api/auth/me', authRequired)
 app.use("/api/forgot-password", forgotPasswordRoutes);
 
 app.use("/api/reset-password", resetPasswordRoutes);
+
+app.use("/api/facturas-notas", facturasNotasRoutes);
+
 
 
 // Versión protegida de /me

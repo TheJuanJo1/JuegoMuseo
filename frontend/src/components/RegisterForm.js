@@ -11,7 +11,7 @@ export default function RegisterForm() {
   });
 
   const [msg, setMsg] = useState("");
-  const [step, setStep] = useState(1); // 👈 Paso 1: registro, Paso 2: verificación
+  const [step, setStep] = useState(1); //Paso 1: registro, Paso 2: verificación
   const [codigo, setCodigo] = useState(""); // Para guardar el código ingresado
   const navigate = useNavigate();
 
@@ -35,12 +35,12 @@ export default function RegisterForm() {
       if (!res.ok) {
         setMsg(data.error || "Error en el registro");
       } else {
-        setMsg("📧 Código enviado a tu correo, revisa tu bandeja");
-        setStep(2); // 👈 Ir al paso de verificación
+        setMsg("Código enviado a tu correo, revisa tu bandeja");
+        setStep(2); // Ir al paso de verificación
       }
     } catch (error) {
       console.error(error);
-      setMsg("⚠️ Error de conexión con el servidor");
+      setMsg("Error de conexión con el servidor");
     }
   };
 
@@ -63,13 +63,13 @@ export default function RegisterForm() {
       if (!res.ok) {
         setMsg(data.error || "Código inválido");
       } else {
-        setMsg("✅ Empresa registrada exitosamente");
+        setMsg("Empresa registrada exitosamente");
         // Redirigir al login automáticamente
         setTimeout(() => navigate("/login"), 2000);
       }
     } catch (error) {
       console.error(error);
-      setMsg("⚠️ Error de conexión con el servidor");
+      setMsg("Error de conexión con el servidor");
     }
   };
 

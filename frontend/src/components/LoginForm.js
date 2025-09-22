@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 
-// 👇 Importar imágenes desde assets
+//Importar imágenes desde assets
 import fluxLogo from "../assets/fluxdata.png";
 import backArrow from "../assets/back-arrow.png";
 import laptopImage from "../assets/laptop.png";
@@ -16,11 +16,12 @@ export default function LoginForm() {
     e.preventDefault();
     setError("");
 
-    try {
+        try {
       const res = await fetch("http://localhost:3000/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ emailOrName, password }),
+        credentials: "include", //Ahora sí enviamos/recibimos cookies
       });
 
       const data = await res.json();
@@ -30,8 +31,8 @@ export default function LoginForm() {
         return;
       }
 
-      localStorage.setItem("token", data.token);
-      window.location.href = "/dashboard";
+      // Ya no guardamos token en localStorage
+      navigate("/dashboard");
     } catch (err) {
       setError("No se pudo conectar con el servidor");
     }

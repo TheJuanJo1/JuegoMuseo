@@ -6,15 +6,12 @@ import { prisma } from "../lib/prisma.js";
 
 const router = Router();
 
-// LOGIN: acepta nombre de usuario o correo + contraseña
 router.post("/", async (req, res) => {
   try {
     const { emailOrName, password } = req.body;
 
     if (!emailOrName || !password) {
-      return res
-        .status(400)
-        .json({ error: "usuario/email y password son requeridos" });
+      return res.status(400).json({ error: "usuario/email y password son requeridos" });
     }
 
     // Buscar por correo_contacto o nombre_usuario
@@ -44,8 +41,16 @@ router.post("/", async (req, res) => {
       { expiresIn: process.env.JWT_EXPIRES_IN || "1d" }
     );
 
+    //Guardamos el token en una cookie HTTPOnly
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: false, //cambiar a true si usas HTTPS
+      sameSite: "Strict",
+      maxAge: 24 * 60 * 60 * 1000, // 1 día
+    });
+
     return res.json({
-      token,
+      message: "Login exitoso",
       user: {
         id: user.id_usuario,
         name: user.nombre_usuario,

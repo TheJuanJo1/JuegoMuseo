@@ -1,9 +1,9 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import RegisterForm from "./components/RegisterForm";
-import LoginForm from "./components/LoginForm";
-import Dashboard from "./components/Dashboard"; 
-import ForgotPassword from "./components/ForgotPassword";
-import ResetPassword from "./components/ResetPassword";
+import RegisterForm from "./pages/RegisterForm";
+import LoginForm from "./pages/LoginForm";
+import Dashboard from "./pages/Dashboard"; 
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 
 function App() {

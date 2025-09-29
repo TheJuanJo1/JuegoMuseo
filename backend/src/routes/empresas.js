@@ -115,6 +115,52 @@ router.post("/verify-code", async (req, res) => {
     res.status(500).json({ error: "Error en verificación" });
   }
 });
+// Reenviar código
+router.post("/resend-code", async (req, res) => {
+  try {
+    const { correo_contacto } = req.body;
+
+    if (!correo_contacto) {
+      return res.status(400).json({ error: "El correo es obligatorio" });
+    }
+
+    // Buscar registro temporal
+    const registro = await prisma.codigos_verificacion.findFirst({
+      where: { correo: correo_contacto },
+      orderBy: { id: "desc" } // tomar el más reciente
+    });
+
+    if (!registro) {
+      return res.status(404).json({ error: "No se encontró un registro previo para este correo" });
+    }
+
+    // Generar un nuevo código
+    const nuevoCodigo = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Actualizar el registro con nuevo código y nueva expiración
+    await prisma.codigos_verificacion.update({
+      where: { id: registro.id },
+      data: {
+        codigo: nuevoCodigo,
+        expiracion: new Date(Date.now() + 10 * 60 * 1000) // 10 min más
+      }
+    });
+
+    // Enviar correo con el nuevo código
+    await transporter.sendMail({
+      from: `"FluxData" <${process.env.EMAIL_USER}>`,
+      to: correo_contacto,
+      subject: "Código de verificación - Reenvío",
+      text: `Tu nuevo código de verificación es: ${nuevoCodigo}`
+    });
+
+    res.json({ msg: "Se ha enviado un nuevo código a tu correo" });
+
+  } catch (error) {
+    console.error("Error en /resend-code:", error);
+    res.status(500).json({ error: "Error reenviando código" });
+  }
+});
 
 export default router;
 

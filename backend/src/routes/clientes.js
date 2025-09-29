@@ -4,9 +4,8 @@ import { PrismaClient } from "@prisma/client";
 const router = express.Router();
 const prisma = new PrismaClient();
 
-// Ruta para registrar un cliente
+// Registrar un cliente
 router.post("/register", async (req, res) => {
-  console.log("Body recibido:", req.body);
   try {
     const {
       nombre_cliente,
@@ -14,11 +13,15 @@ router.post("/register", async (req, res) => {
       tipo_documento,
       numero_documento,
       direccion_cliente,
-      correo_cliente,
-      id_usuario
+      correo_cliente
     } = req.body;
 
-    // Guardar cliente en la BD
+    // Validar campos obligatorios
+    if (!nombre_cliente || !apellido_cliente || !tipo_documento || !numero_documento) {
+      return res.status(400).json({ error: "Faltan campos obligatorios" });
+    }
+
+    // Crear cliente
     const nuevoCliente = await prisma.clientes.create({
       data: {
         nombre_cliente,
@@ -27,15 +30,16 @@ router.post("/register", async (req, res) => {
         numero_documento,
         direccion_cliente,
         correo_cliente,
-        id_usuario
-      }
+        id_usuario: null // No vinculamos usuario
+      },
     });
 
     res.status(201).json({ message: "Cliente registrado", cliente: nuevoCliente });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Error al registrar cliente", error });
+    res.status(500).json({ error: error.message || "Error al registrar cliente" });
   }
 });
 
 export default router;
+

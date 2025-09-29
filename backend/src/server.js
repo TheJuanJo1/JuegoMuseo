@@ -10,6 +10,9 @@ import resetPasswordRoutes from "./routes/resetPassword.js";
 import facturasNotasRoutes from "./routes/facturasnotas.js";
 import cookieParser from "cookie-parser";
 import { authRequired } from './middleware/auth.js'
+import ultimosRoutes from "./routes/ultimos.js";
+import estadisticasRoutes from "./routes/estadisticas.js";
+import filtrarRoutes from "./routes/filtrar.js";
 
 dotenv.config()
 
@@ -44,6 +47,11 @@ app.use("/api/reset-password", resetPasswordRoutes);
 
 app.use("/api/facturas-notas", facturasNotasRoutes);
 
+app.use("/api/ultimos", ultimosRoutes);
+
+app.use("/api/estadisticas", estadisticasRoutes);
+
+app.use("/api/filtrar", filtrarRoutes);
 
 
 // Versión protegida de /me

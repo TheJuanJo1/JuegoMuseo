@@ -1,7 +1,21 @@
+// src/layouts/MainLayout.js
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import TopBar from "./TopBar"; // 👈 importa aquí
+
+// Importa tus imágenes
+import Logo from "../assets/Logo.png";
+import B from "../assets/B.png";
+import D1 from "../assets/D1.png";
+import D2 from "../assets/D2.png";
+import R from "../assets/R.png";
+import C from "../assets/C.png";
+import A from "../assets/A.png";
+import C2 from "../assets/C2.png";
 
 export default function MainLayout() {
   const navigate = useNavigate();
+  const [collapsed, setCollapsed] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -18,78 +32,129 @@ export default function MainLayout() {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-100 font-worksans">
-      {/* Sidebar */}
-      <aside className="w-60 bg-sidebar text-white flex flex-col p-4">
-        <h2 className="text-xl font-bold mb-6">FluxData</h2>
-
-        <nav className="flex flex-col space-y-3">
-          <NavLink
-            to="/dashboard"
-            className={({ isActive }) =>
-              `px-3 py-2 rounded-md transition ${
-                isActive ? "bg-[#D9D9D9] text-black" : "hover:bg-[#D9D9D9]/60"
-              }`
-            }
-          >
-            Dashboard
-          </NavLink>
-          <NavLink
-            to="/documentos"
-            className={({ isActive }) =>
-              `px-3 py-2 rounded-md transition ${
-                isActive ? "bg-[#D9D9D9] text-black" : "hover:bg-[#D9D9D9]/60"
-              }`
-            }
-          >
-            Documentos
-          </NavLink>
-          <NavLink
-            to="/reportes"
-            className={({ isActive }) =>
-              `px-3 py-2 rounded-md transition ${
-                isActive ? "bg-[#D9D9D9] text-black" : "hover:bg-[#D9D9D9]/60"
-              }`
-            }
-          >
-            Reportes
-          </NavLink>
-          <NavLink
-            to="/configuracion"
-            className={({ isActive }) =>
-              `px-3 py-2 rounded-md transition ${
-                isActive ? "bg-[#D9D9D9] text-black" : "hover:bg-[#D9D9D9]/60"
-              }`
-            }
-          >
-            Configuración Técnica
-          </NavLink>
-          <NavLink
-            to="/ayuda"
-            className={({ isActive }) =>
-              `px-3 py-2 rounded-md transition ${
-                isActive ? "bg-[#D9D9D9] text-black" : "hover:bg-[#D9D9D9]/60"
-              }`
-            }
-          >
-            Ayuda
-          </NavLink>
-        </nav>
-
-        {/* Botón logout */}
-        <button
-          onClick={handleLogout}
-          className="mt-auto px-3 py-2 rounded-md hover:bg-[#D9D9D9]/60 text-left transition"
+    <div className="flex bg-gray-100 font-worksans min-h-screen">
+      {/* Sidebar fija */}
+      <aside
+        className={`fixed top-0 left-0 flex flex-col bg-gray-800 text-white transition-all duration-300
+        ${collapsed ? "w-32" : "w-80"} h-screen`}
+      >
+        {/* Encabezado con Logo y botón cerrar */}
+        <div
+          className={`flex items-center p-4 border-b border-gray-700 ${
+            collapsed ? "justify-center" : "justify-between"
+          }`}
         >
-          Cerrar sesión
-        </button>
+          {!collapsed && (
+            <img src={Logo} alt="Logo" className="h-6 w-auto object-contain" />
+          )}
+          <img
+            src={B}
+            alt="Cerrar barra"
+            className="h-5 w-5 cursor-pointer"
+            onClick={() => setCollapsed(!collapsed)}
+          />
+        </div>
+
+        {/* Contenido scrollable */}
+        <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
+          <nav className="flex flex-col space-y-3 p-4">
+            <NavLink
+              to="/dashboard"
+              className={({ isActive }) =>
+                `flex items-center ${
+                  collapsed ? "justify-center" : "gap-6 pl-6 justify-start"
+                } px-3 py-3 rounded-md transition ${
+                  isActive ? "bg-gray-700 text-white" : "hover:bg-gray-700/60"
+                }`
+              }
+            >
+              <img src={D1} alt="Dashboard" className="h-7 w-7" />
+              {!collapsed && <span>Dashboard</span>}
+            </NavLink>
+
+            <NavLink
+              to="/documentos"
+              className={({ isActive }) =>
+                `flex items-center ${
+                  collapsed ? "justify-center" : "gap-6 pl-6 justify-start"
+                } px-3 py-3 rounded-md transition ${
+                  isActive ? "bg-gray-700 text-white" : "hover:bg-gray-700/60"
+                }`
+              }
+            >
+              <img src={D2} alt="Documentos" className="h-7 w-7" />
+              {!collapsed && <span>Documentos</span>}
+            </NavLink>
+
+            <NavLink
+              to="/reportes"
+              className={({ isActive }) =>
+                `flex items-center ${
+                  collapsed ? "justify-center" : "gap-6 pl-6 justify-start"
+                } px-3 py-3 rounded-md transition ${
+                  isActive ? "bg-gray-700 text-white" : "hover:bg-gray-700/60"
+                }`
+              }
+            >
+              <img src={R} alt="Reportes" className="h-7 w-7" />
+              {!collapsed && <span>Reportes</span>}
+            </NavLink>
+
+            <NavLink
+              to="/configuracion"
+              className={({ isActive }) =>
+                `flex items-center ${
+                  collapsed ? "justify-center" : "gap-6 pl-6 justify-start"
+                } px-3 py-3 rounded-md transition ${
+                  isActive ? "bg-gray-700 text-white" : "hover:bg-gray-700/60"
+                }`
+              }
+            >
+              <img src={C} alt="Configuración" className="h-7 w-7" />
+              {!collapsed && <span>Configuración Técnica</span>}
+            </NavLink>
+
+            <NavLink
+              to="/ayuda"
+              className={({ isActive }) =>
+                `flex items-center ${
+                  collapsed ? "justify-center" : "gap-6 pl-6 justify-start"
+                } px-3 py-3 rounded-md transition ${
+                  isActive ? "bg-gray-700 text-white" : "hover:bg-gray-700/60"
+                }`
+              }
+            >
+              <img src={A} alt="Ayuda" className="h-7 w-7" />
+              {!collapsed && <span>Ayuda</span>}
+            </NavLink>
+          </nav>
+        </div>
+
+        {/* Botón logout fijo abajo */}
+        <div className="p-4 border-t border-gray-700">
+          <button
+            onClick={handleLogout}
+            className={`flex items-center w-full px-3 py-3 rounded-md hover:bg-gray-700/60 transition ${
+              collapsed ? "justify-center" : "gap-5 justify-start"
+            }`}
+          >
+            <img src={C2} alt="Cerrar sesión" className="h-7 w-7" />
+            {!collapsed && <span>Cerrar sesión</span>}
+          </button>
+        </div>
       </aside>
 
-      {/* Main content */}
-      <main className="flex-1 p-6">
-        <Outlet />
-      </main>
+      {/* Main content con margen a la izquierda */}
+      <div
+        className={`flex-1 flex flex-col transition-all duration-300 ${
+          collapsed ? "ml-32" : "ml-80"
+        }`}
+      >
+        <TopBar /> {/* 👈 Barra superior */}
+        <main className="flex-1 p-6">
+          <Outlet />
+        </main>
+      </div>
     </div>
   );
 }
-

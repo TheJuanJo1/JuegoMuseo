@@ -48,8 +48,6 @@ router.get("/", async (req, res) => {
     });
 
     const total = Factura + NotaCredito + NotaDebito;
-
-    // ⚡ Formato EXACTO que espera el Dashboard.jsx
     res.json({
       Aceptado,
       Rechazado,

@@ -235,15 +235,24 @@ export default function Documentos() {
         </div>
 
         {/* Paginación */}
-        <div className="flex justify-center items-center space-x-4 mt-2">
-          <button onClick={() => setPage((p) => Math.max(1, p - 1))} className="bg-blue-900 text-white px-3 py-1 rounded">
-            Anterior
-          </button>
-          <span>{page} / {totalPages}</span>
-          <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} className="bg-blue-900 text-white px-3 py-1 rounded">
-            Siguiente
-          </button>
-        </div>
+<div className="flex justify-between items-center mt-2 px-2">
+  <button
+    onClick={() => setPage((p) => Math.max(1, p - 1))}
+    className="bg-white bg-opacity-30 text-black px-3 py-1 rounded hover:bg-opacity-50 transition"
+  >
+    Anterior
+  </button>
+
+  <span className="text-black font-semibold">{page} / {totalPages}</span>
+
+  <button
+    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+    className="bg-white bg-opacity-30 text-black px-3 py-1 rounded hover:bg-opacity-50 transition"
+  >
+    Siguiente
+  </button>
+</div>
+
       </div>
     </div>
   );

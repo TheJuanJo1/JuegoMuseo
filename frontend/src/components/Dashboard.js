@@ -348,53 +348,40 @@ export default function Dashboard() {
         </tr>
 
         {selectedDoc === i && (
-          <tr>
-            <td colSpan="5" className="p-4 bg-gray-50">
-              <strong>Detalles del documento:</strong>
+  <tr>
+    <td colSpan="5" className="p-4 bg-gray-50">
+      <strong>Detalles del documento:</strong>
 
-              {/* Si tiene cliente registrado */}
-              {d.id_cliente ? (
-                <>
-                  <p>
-                    Cliente: {d.Clientes?.nombre_cliente || "-"}{" "}
-                    {d.Clientes?.apellido_cliente || "-"}
-                  </p>
-                  {d.Producto_Factura?.length > 0 ? (
-                    <>
-                      <p className="mt-2 font-semibold">Productos:</p>
-                      <ul className="list-disc ml-5">
-                        {d.Producto_Factura.map((p, idx) => (
-                          <li key={idx}>
-                            {p.nombre_producto} - Cantidad: {p.cantidad} - Valor: ${p.valor}
-                          </li>
-                        ))}
-                      </ul>
-                    </>
-                  ) : (
-                    <p>Total facturado: ${d.valor_total}</p>
-                  )}
-                  <p className="mt-2 text-sm text-gray-500">
-                    Hora: {new Date(d.fecha_emision).toLocaleTimeString()}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    Usuario: {d.Usuarios?.nombre_usuario || "-"}
-                  </p>
-                </>
-              ) : (
-                // Si no tiene cliente registrado, solo mostrar total y usuario
-                <>
-                  <p>Total facturado: ${d.valor_total}</p>
-                  <p className="mt-2 text-sm text-gray-500">
-                    Hora: {new Date(d.fecha_emision).toLocaleTimeString()}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    Usuario: {d.Usuarios?.nombre_usuario || "-"}
-                  </p>
-                </>
-              )}
-            </td>
-          </tr>
-        )}
+      {d.Producto_Factura?.length > 0 ? (
+        <>
+          <p className="mt-2 font-semibold">Productos:</p>
+          <ul className="list-disc ml-5">
+            {d.Producto_Factura.map((p, idx) => (
+              <li key={idx}>
+                {p.nombre_producto} - Cantidad: {p.cantidad} - Valor: ${p.valor}
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : (
+        <p>Total facturado: ${d.valor_total}</p>
+      )}
+
+      <p className="mt-2 text-sm text-gray-500">
+  Hora: {(() => {
+    const date = new Date(d.fecha_emision);
+    // Convertir a hora “local” ignorando la zona horaria
+    const h = String(date.getUTCHours()).padStart(2, '0');
+    const m = String(date.getUTCMinutes()).padStart(2, '0');
+    const s = String(date.getUTCSeconds()).padStart(2, '0');
+    return `${h}:${m}:${s}`;
+  })()}
+</p>
+
+    </td>
+  </tr>
+)}
+
       </React.Fragment>
     ))}
             </tbody>

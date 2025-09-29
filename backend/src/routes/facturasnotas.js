@@ -105,7 +105,11 @@ router.get("/historial", async (req, res) => {
   try {
     const historial = await prisma.Documentos_XML.findMany({
       orderBy: { fecha_emision: "desc" },
-      include: { Producto_Factura: true },
+      include: { 
+        Producto_Factura: true,
+        Clientes: true, 
+        Usuarios: true,
+       },
     });
 
     res.json(historial);

@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import fluxLogo from "../assets/fluxdata.png";
 import backArrow from "../assets/back-arrow.png";
 import laptopImage from "../assets/laptop2.jpg";
+import laptop1 from "../assets/im1.png";
 
 export default function ResetPassword() {
   const { token } = useParams();
@@ -49,7 +50,13 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-[#EAF0F6] font-[Work Sans]">
+    <div className="flex items-center justify-center min-h-screen bg-[#EAF0F6] font-[Work Sans]"
+    style={{
+        backgroundImage: `url(${laptop1})`,
+        backgroundRepeat: "no-repeat",
+        backgroundPosition: "left center",
+        backgroundSize: "62.5% auto",        
+        }}>
       <div className="shadow-xl rounded-2xl flex overflow-hidden w-[1150px] h-[700px] bg-white">
         
         {/* Panel izquierdo con imagen */}

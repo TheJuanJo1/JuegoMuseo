@@ -4,6 +4,7 @@ import { useNavigate, Link } from "react-router-dom";
 import fluxLogo from "../assets/fluxdata.png";
 import backArrow from "../assets/back-arrow.png";
 import laptopImage from "../assets/laptop.jpg";
+import laptop from "../assets/im.png";
 
 export default function LoginForm() {
   const [emailOrName, setEmailOrName] = useState("");
@@ -12,30 +13,49 @@ export default function LoginForm() {
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
+  e.preventDefault();
+  setError("");
 
-    try {
-      const res = await fetch("http://localhost:3000/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ emailOrName, password }),
-        credentials: "include",
-      });
+  try {
+    const res = await fetch("http://localhost:3000/api/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ emailOrName, password }),
+      credentials: "include",
+    });
 
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.error || "Error en login");
-        return;
-      }
-      navigate("/dashboard");
-    } catch (err) {
-      setError("No se pudo conectar con el servidor");
+    const data = await res.json();
+    if (!res.ok) {
+      setError(data.error || "Error en login");
+      return;
     }
-  };
+
+    const usuarioId = data.user.id;
+    localStorage.setItem("usuarioId", usuarioId); // ID del usuario
+
+    //Verificar si completó el formulario
+    const estadoRes = await fetch(`http://localhost:3000/api/configuracion/estado/${usuarioId}`);
+    const estadoData = await estadoRes.json();
+
+    if (estadoData.completado) {
+      navigate("/dashboard"); // ya completó → dashboard
+    } else {
+      navigate(`/empresa/${usuarioId}`); // no completó → formulario empresa
+    }
+
+  } catch (err) {
+    setError("No se pudo conectar con el servidor");
+  }
+};
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-[#EAF0F6] font-[Work Sans]">
+    <div className="flex items-center justify-center min-h-screen bg-[#EAF0F6] font-[Work Sans]"
+      style={{
+        backgroundImage: `url(${laptop})`,
+        backgroundRepeat: "no-repeat",
+        backgroundPosition: "left center",
+        backgroundSize: "62.5% auto",        
+        }}>
       {/* contenedor principal */}
       <div
               className="shadow-xl rounded-2xl flex overflow-hidden w-[1150px] h-[700px]"

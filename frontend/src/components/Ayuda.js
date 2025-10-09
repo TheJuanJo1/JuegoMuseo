@@ -1,4 +1,3 @@
-// frontend/src/pages/Ayuda.js
 import React, { useState } from "react";
 
 const preguntas = [
@@ -33,10 +32,6 @@ export default function Ayuda() {
 
   return (
     <div className="p-10 bg-gray-100 min-h-screen">
-      <h1 className="text-4xl font-bold text-blue-900 mb-8 text-center">
-        Centro de Ayuda
-      </h1>
-
       <div className="bg-white shadow-2xl rounded-2xl p-8 max-w-5xl mx-auto">
         {preguntas.map((item, index) => (
           <div key={index} className="border-b border-gray-200">

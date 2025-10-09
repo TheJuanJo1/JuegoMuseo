@@ -6,6 +6,8 @@ import fluxLogo from "../assets/fluxdata.png";
 import backArrow from "../assets/back-arrow.png";
 import registerImage from "../assets/register.jpg"; 
 import verifyImage from "../assets/Imagenes (7).jpg";
+import im3 from "../assets/im3.png";
+import im2 from "../assets/im2.png";
 
 export default function RegisterForm() {
   const [form, setForm] = useState({
@@ -70,13 +72,25 @@ export default function RegisterForm() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-[#EAF0F6] font-[Work Sans]">
-      <div className="shadow-xl rounded-2xl flex overflow-hidden w-[1050px] h-[650px] bg-white">
-
-        {/* Panel izquierdo */}
+    <div className="flex items-center justify-center min-h-screen bg-[#EAF0F6] font-[Work Sans]"
+    style={
+      step === 1
+        ? {
+            backgroundImage: `url(${im2})`,
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "right center",
+            backgroundSize: "62.5% auto",
+          }:
+          step === 2 ? {
+            backgroundImage: `url(${im3})`,
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "right center",
+            backgroundSize: "62.5% auto", 
+          }:
+          {}
+          }>
+        <div className="shadow-xl rounded-2xl flex overflow-hidden w-[1050px] h-[650px] bg-white">
         <div className="w-1/2 flex flex-col justify-center px-12 rounded-l-2xl" style={{ backgroundColor: "#FFFFFF", clipPath: "polygon(0 0, 92% 0, 100% 100%, 0% 100%)" }}>
-          
-          {/* Header: diferente según step */}
           {step === 2 ? (
             <div className="relative mb-6">
               <div className="flex justify-between items-center absolute top-0 w-full" style={{ marginTop: '-130px' }}>
@@ -100,8 +114,6 @@ export default function RegisterForm() {
               />
             </div>
           )}
-
-          {/* Título */}
           <div className="text-center mb-6">
             {step === 1 ? (
               <>
@@ -117,8 +129,6 @@ export default function RegisterForm() {
               </>
             )}
           </div>
-
-          {/* Contenido según step */}
           {step === 1 ? (
             <form onSubmit={handleSubmit} className="w-full max-w-sm mx-auto">
               <input type="text" name="nombre_empresa" placeholder="Nombre de Empresa" value={form.nombre_empresa} onChange={handleChange} className="w-full p-3 mb-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" />
@@ -164,8 +174,6 @@ export default function RegisterForm() {
             </div>
           )}
         </div>
-
-        {/* Panel derecho */}
         <div className="w-1/2 p-4 rounded-r-2xl flex">
           <img src={step === 1 ? registerImage : verifyImage} alt="Panel derecho" className="object-contain w-full h-full rounded-lg" />
         </div>

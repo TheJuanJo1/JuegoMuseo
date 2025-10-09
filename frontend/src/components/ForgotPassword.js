@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import fluxLogo from "../assets/fluxdata.png";
 import backArrow from "../assets/back-arrow.png";
 import laptopImage from "../assets/laptop2.jpg";
+import laptop1 from "../assets/im1.png";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -38,7 +39,13 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-[#EAF0F6] font-[Work Sans]">
+    <div className="flex items-center justify-center min-h-screen bg-[#EAF0F6] font-[Work Sans]"
+    style={{
+            backgroundImage: `url(${laptop1})`,
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "left center",
+            backgroundSize: "62.5% auto",        
+            }}>
       {/* Contenedor principal */}
       <div
         className="shadow-xl rounded-2xl flex overflow-hidden w-[1150px] h-[700px]"

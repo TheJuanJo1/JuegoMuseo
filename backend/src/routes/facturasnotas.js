@@ -119,26 +119,4 @@ router.get("/historial", async (req, res) => {
   }
 });
 
-// DESCARGAR PDF
-router.get("/descargar-pdf/:id", async (req, res) => {
-  const { id } = req.params;
-  const doc = await prisma.documentos_XML.findUnique({ where: { id_documento: parseInt(id) } });
-  if (!doc || !doc.pdf_archivo) return res.status(404).send("PDF no encontrado");
-
-  res.setHeader("Content-Disposition", `attachment; filename=doc_${doc.numero_documento}.pdf`);
-  res.setHeader("Content-Type", "application/pdf");
-  res.send(doc.pdf_archivo);
-});
-
-// DESCARGAR XML
-router.get("/descargar-xml/:id", async (req, res) => {
-  const { id } = req.params;
-  const doc = await prisma.documentos_XML.findUnique({ where: { id_documento: parseInt(id) } });
-  if (!doc || !doc.xml_archivo) return res.status(404).send("XML no encontrado");
-
-  res.setHeader("Content-Disposition", `attachment; filename=doc_${doc.numero_documento}.xml`);
-  res.setHeader("Content-Type", "application/xml");
-  res.send(doc.xml_archivo);
-});
-
 export default router;

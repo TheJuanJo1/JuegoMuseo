@@ -313,11 +313,7 @@ const ticks = Array.from(new Set([0, midTick, Math.round(maxMonthly)]));
     </ResponsiveContainer>
   </div>
 </div>
-
-
-      {/* Segunda fila de gráficas */}
-      <div className="grid grid-cols-3 gap-6 mb-10">
-        {/* Cuarta gráfica: Documentos por tipo y por mes */}
+<div className="grid grid-cols-3 gap-6 mb-10">
 <div className="bg-white p-4 rounded shadow-md relative">
   <div className="flex">
     {/* Leyenda lateral izquierda */}
@@ -434,7 +430,7 @@ const ticks = Array.from(new Set([0, midTick, Math.round(maxMonthly)]));
   <ResponsiveContainer width="100%" height={300}>
   <BarChart
     data={getMonthlyData(documentos)}
-    margin={{ top: 20, right: 30, left: 1, bottom: 5 }} // 👈 margen izquierdo más amplio
+    margin={{ top: 20, right: 30, left: 1, bottom: 5 }}
   >
     <XAxis dataKey="mes" />
     <YAxis

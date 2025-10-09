@@ -15,6 +15,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@material-tailwind/react": "^2.1.10",
     "@prisma/client": "^6.15.0",
     "bcryptjs": "^3.0.2",
     "cookie-parser": "^1.4.7",
@@ -26,6 +27,8 @@
     "multer": "^2.0.2",
     "nodemailer": "^7.0.6",
     "pg": "^8.16.3",
+    "qrcode": "^1.5.4",
+    "tailwind-scrollbar": "^4.0.2",
     "xml2js": "^0.6.2"
   },
   "devDependencies": {

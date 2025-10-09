@@ -83,32 +83,39 @@ export default function Documentos() {
   const toggleExpand = (id) => {
     setExpandedDocId(expandedDocId === id ? null : id);
   };
-
   // Descargar XML/PDF
-  const descargarArchivo = async (id, tipo) => {
-    try {
-      const res = await fetch(`http://localhost:3000/api/facturas-notas/descargar-${tipo}/${id}`, {
-        credentials: "include",
-      });
+const descargarArchivo = async (id, tipo) => {
+  try {
+    // tipo será "pdf" o "xml"
+    const res = await fetch(`http://localhost:3000/api/${tipo}/${id}`, {
+      credentials: "include",
+    });
 
-      if (!res.ok) throw new Error("Error descargando archivo");
+    if (!res.ok) throw new Error("Error descargando archivo");
 
-      const blob = await res.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
+    // convertir a blob
+    const blob = await res.blob();
 
-      const doc = docs.find((d) => d.id_documento === id) || {};
-      link.download = `${doc.numero_documento || "doc"}.${tipo === "pdf" ? "pdf" : "xml"}`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error(err);
-      alert("No se pudo descargar el archivo");
-    }
-  };
+    // crear enlace temporal
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+
+    // nombre del archivo: usa numero_documento si existe
+    const doc = docs.find((d) => d.id_documento === id) || {};
+    link.download = `${doc.numero_documento || "documento"}.${tipo}`;
+
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    // liberar memoria
+    window.URL.revokeObjectURL(url);
+  } catch (err) {
+    console.error(err);
+    alert("No se pudo descargar el archivo");
+  }
+};
 
   return (
     <div className="p-6">

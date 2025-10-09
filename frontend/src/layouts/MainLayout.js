@@ -1,9 +1,6 @@
-// src/layouts/MainLayout.js
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import TopBar from "./TopBar"; // 👈 importa aquí
-
-// Importa tus imágenes
+import TopBar from "./TopBar";
 import Logo from "../assets/Logo.png";
 import B from "../assets/B.png";
 import D1 from "../assets/D1.png";
@@ -33,24 +30,22 @@ export default function MainLayout() {
 
   return (
     <div className="flex bg-gray-100 font-worksans min-h-screen">
-      {/* Sidebar fija */}
       <aside
         className={`fixed top-0 left-0 flex flex-col bg-gray-800 text-white transition-all duration-300
         ${collapsed ? "w-32" : "w-80"} h-screen`}
       >
-        {/* Encabezado con Logo y botón cerrar */}
         <div
           className={`flex items-center p-4 border-b border-gray-700 ${
             collapsed ? "justify-center" : "justify-between"
           }`}
         >
           {!collapsed && (
-            <img src={Logo} alt="Logo" className="h-6 w-auto object-contain" />
+            <img src={Logo} alt="Logo" className="h-14 w-auto object-contain" />
           )}
           <img
             src={B}
             alt="Cerrar barra"
-            className="h-5 w-5 cursor-pointer"
+            className="h-7 w-7 cursor-pointer"
             onClick={() => setCollapsed(!collapsed)}
           />
         </div>
@@ -150,7 +145,7 @@ export default function MainLayout() {
           collapsed ? "ml-32" : "ml-80"
         }`}
       >
-        <TopBar /> {/* 👈 Barra superior */}
+        <TopBar />
         <main className="flex-1 p-6">
           <Outlet />
         </main>

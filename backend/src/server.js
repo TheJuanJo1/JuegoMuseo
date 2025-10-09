@@ -13,8 +13,10 @@ import { authRequired } from './middleware/auth.js'
 import ultimosRoutes from "./routes/ultimos.js";
 import estadisticasRoutes from "./routes/estadisticas.js";
 import filtrarRoutes from "./routes/filtrar.js";
-
-dotenv.config()
+import configurarRoutes from "./routes/configuracion.js";
+import tokenRoutes from "./routes/token.js";
+import pdfRoutes from "./routes/pdf.js";
+import xmlRoutes from "./routes/xml.js";
 
 const app = express()
 app.use(cors({
@@ -53,7 +55,13 @@ app.use("/api/estadisticas", estadisticasRoutes);
 
 app.use("/api/filtrar", filtrarRoutes);
 
+app.use("/api/configuracion", configurarRoutes)
 
+app.use("/api/token", tokenRoutes);
+
+app.use("/api/pdf", pdfRoutes);
+
+app.use("/api/xml", xmlRoutes);
 // Versión protegida de /me
 app.get('/api/auth/me', authRequired, (req, res) => {
   res.json({ user: req.user })

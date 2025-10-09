@@ -368,16 +368,12 @@ export default function Dashboard() {
       )}
 
       <p className="mt-2 text-sm text-gray-500">
-  Hora: {(() => {
-    const date = new Date(d.fecha_emision);
-    // Convertir a hora “local” ignorando la zona horaria
-    const h = String(date.getUTCHours()).padStart(2, '0');
-    const m = String(date.getUTCMinutes()).padStart(2, '0');
-    const s = String(date.getUTCSeconds()).padStart(2, '0');
-    return `${h}:${m}:${s}`;
-  })()}
+  Hora: {new Date(d.fecha_emision).toLocaleTimeString("es-CO", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false
+  })}
 </p>
-
     </td>
   </tr>
 )}
@@ -388,8 +384,6 @@ export default function Dashboard() {
           </table>
         </div>
       </div>
-
-      {/* Avisos + Historial */}
       <div className="flex justify-between items-start mt-4">
         <div className="bg-white border border-gray-200 rounded p-3 w-1/3 shadow-sm">
           <h3 className="text-sm font-semibold text-black mb-2">Avisos</h3>
@@ -399,14 +393,12 @@ export default function Dashboard() {
             <li>Última sincronización exitosa.</li>
           </ul>
         </div>
-
         <button
           onClick={() => navigate("/historial")}
           className="text-blue-600 hover:underline"
         >
           Ver historial completo
         </button>
-
         {modalOpen && (
   <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
     <div className="bg-white rounded-lg p-6 w-96 h-96 relative flex flex-col items-center justify-center">
@@ -439,7 +431,6 @@ export default function Dashboard() {
     </div>
   </div>
 )}
-
       </div>
     </div>
   );

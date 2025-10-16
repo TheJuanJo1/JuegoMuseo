@@ -29,7 +29,9 @@ export default function LoginForm() {
       setError(data.error || "Error en login");
       return;
     }
-
+     if (data.user.role === "admin") {
+        navigate("/dashboard"); // el admin va directo al dashboard
+      } else {
     const usuarioId = data.user.id;
     localStorage.setItem("usuarioId", usuarioId); // ID del usuario
 
@@ -42,7 +44,7 @@ export default function LoginForm() {
     } else {
       navigate(`/empresa/${usuarioId}`); // no completó → formulario empresa
     }
-
+  }
   } catch (err) {
     setError("No se pudo conectar con el servidor");
   }

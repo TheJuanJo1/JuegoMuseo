@@ -92,13 +92,9 @@ export default function FormularioEmpresa({ usuarioId }) {
    return (
     <div className="flex min-h-screen items-center justify-center bg-[#EAF0F6]">
       <div className="flex rounded-2xl overflow-hidden w-[1250px] h-[780px] bg-white shadow-xl">
-        
-        {/* Panel izquierdo */}
-<div className="w-2/5 bg-[#27374D] flex flex-col items-center justify-start text-white p-8">
-  <div className="flex flex-row items-center justify-center space-x-10 mb-10 mt-8">
-    {/* Logo principal */}
+        <div className="w-2/5 bg-[#27374D] flex flex-col items-center justify-start text-white p-8">
+        <div className="flex flex-row items-center justify-center space-x-10 mb-10 mt-8">
     <img src={Logo} className="w-20" alt="Logo principal" />
-    {/* Logo fluxdata */}
     <img src={Fluxdata} className="w-32" alt="Fluxdata" />
   </div>
 

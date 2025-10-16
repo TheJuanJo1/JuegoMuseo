@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+
 export default function FacturasNotas() {
   const [form, setForm] = useState({
     tipo_documento: "Factura",
@@ -56,12 +57,12 @@ export default function FacturasNotas() {
       });
       const data = await res.json();
       if (!res.ok) return setMsg(data.error || "Error enviando documento");
-      setMsg(`✅ Documento enviado: ${data.documento.estado_dian}, Total: ${formatCOP(data.documento.valor_total)}`);
+      setMsg(`Documento enviado: ${data.documento.estado_dian}, Total: ${formatCOP(data.documento.valor_total)}`);
       setForm({ tipo_documento: "Factura", numero_documento: "", fecha_emision: "", id_usuario: "", id_cliente: "", factura_relacionada: "", valor_total: "", impuestos: "" });
       setProductos([]);
     } catch (err) {
       console.error(err);
-      setMsg("⚠️ Error de conexión");
+      setMsg("Error de conexión");
     }
   };
 
@@ -77,7 +78,7 @@ export default function FacturasNotas() {
         </select>
 
         <input type="text" name="numero_documento" placeholder="Número documento" value={form.numero_documento} onChange={handleChangeForm} className="w-full p-2 border rounded" />
-        <input type="date" name="fecha_emision" value={form.fecha_emision} onChange={handleChangeForm} className="w-full p-2 border rounded" />
+        <input type="datetime-local" name="fecha_emision" value={form.fecha_emision} onChange={handleChangeForm} className="w-full p-2 border rounded" />
         <input type="number" name="id_usuario" placeholder="ID Usuario" value={form.id_usuario} onChange={handleChangeForm} className="w-full p-2 border rounded" />
         <input type="number" name="id_cliente" placeholder="ID Cliente" value={form.id_cliente} onChange={handleChangeForm} className="w-full p-2 border rounded" />
 

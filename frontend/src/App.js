@@ -1,4 +1,3 @@
-// src/App.jsx
 import { BrowserRouter as Router, Routes, Route, Navigate, useParams } from "react-router-dom";
 
 // Formularios y páginas
@@ -8,6 +7,8 @@ import ForgotPassword from "./components/ForgotPassword";
 import ResetPassword from "./components/ResetPassword";
 import Clientes from "./components/Clientes";
 import FacturasNotas from "./components/FacturasNotas";
+import Inicio from "./components/Inicio";
+import FAQ from "./components/FAQ";
 
 // Formulario obligatorio después del login
 import FormularioEmpresa from "./components/FormularioEmpresa";
@@ -38,21 +39,16 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Rutas públicas */}
-        <Route path="/" element={<Navigate to="/login" />} />
+        <Route path="/inicio" element={<Inicio />} />
+        <Route path="/faq" element={<FAQ />} />
+        <Route path="/" element={<Navigate to="/inicio" />} />
         <Route path="/login" element={<LoginForm />} />
         <Route path="/register" element={<RegisterForm />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
-
-        {/* Formulario obligatorio después del login */}
         <Route path="/empresa/:usuarioId" element={<FormularioEmpresaWrapper />} />
-
-        {/* Rutas independientes sin layout */}
         <Route path="/clientes" element={<Clientes />} />
         <Route path="/facturas-notas" element={<FacturasNotas />} />
-
-        {/* Rutas con layout */}
         <Route element={<MainLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/documentos" element={<Documentos />} />
@@ -61,9 +57,7 @@ function App() {
           <Route path="/ayuda" element={<Ayuda />} />
           <Route path="/configuracion" element={<ConfiguracionTecnicaWrapper />} />
         </Route>
-
-        {/* Ruta por defecto en caso de no encontrar ninguna */}
-        <Route path="*" element={<Navigate to="/login" />} />
+        <Route path="*" element={<Navigate to="/inicio" />} /> 
       </Routes>
     </Router>
   );

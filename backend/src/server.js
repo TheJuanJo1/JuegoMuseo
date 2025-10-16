@@ -17,7 +17,6 @@ import configurarRoutes from "./routes/configuracion.js";
 import tokenRoutes from "./routes/token.js";
 import pdfRoutes from "./routes/pdf.js";
 import xmlRoutes from "./routes/xml.js";
-
 const app = express()
 app.use(cors({
   origin: "http://localhost:5173",
@@ -62,7 +61,8 @@ app.use("/api/token", tokenRoutes);
 app.use("/api/pdf", pdfRoutes);
 
 app.use("/api/xml", xmlRoutes);
-// Versión protegida de /me
+
+
 app.get('/api/auth/me', authRequired, (req, res) => {
   res.json({ user: req.user })
 })

@@ -1,7 +1,6 @@
 // src/components/RegisterForm.jsx
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import fluxLogo from "../assets/fluxdata.png";
 import backArrow from "../assets/back-arrow.png";
 import registerImage from "../assets/register.jpg"; 
@@ -22,6 +21,7 @@ export default function RegisterForm() {
   const [step, setStep] = useState(1);
   const [codigo, setCodigo] = useState(Array(6).fill(""));
   const navigate = useNavigate();
+  const location = useLocation(); 
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -64,7 +64,13 @@ export default function RegisterForm() {
       if (!res.ok) setMsg(data.error || "Código inválido");
       else {
         setMsg("Empresa registrada exitosamente");
-        setTimeout(() => navigate("/login"), 2000);
+        setTimeout(() => {
+          if (location.state?.fromInicio) {
+            navigate("/", { replace: true });
+          } else {
+            navigate("/login");
+          }
+        }, 2000);
       }
     } catch (error) {
       setMsg("Error de conexión con el servidor");
@@ -106,11 +112,14 @@ export default function RegisterForm() {
           ) : (
             <div className="flex justify-between items-center mb-8 mt-2">
               <img src={fluxLogo} alt="FluxData" className="h-4" />
-              <img
-                src={backArrow}
-                alt="Volver"
-                className="h-6 cursor-pointer"
-                onClick={() => navigate("/login")}
+              <img src={backArrow} alt="Volver" className="h-6 cursor-pointer"
+              onClick={() => {
+                if (location.state?.fromInicio) {
+                  navigate("/", { replace: true });
+                } else {
+                  navigate(-1);
+                }
+              }}
               />
             </div>
           )}

@@ -1,3 +1,4 @@
+import { format, addMinutes } from 'date-fns';
 import { Router } from "express";
 import { prisma } from "../lib/prisma.js";
 import crypto from "crypto";
@@ -8,26 +9,23 @@ function generarCodigo(tipo, numero, fecha) {
   const base = `${tipo}-${numero}-${fecha}-${Date.now()}`;
   return crypto.createHash("sha256").update(base).digest("hex").slice(0, 44);
 }
+function fechaColombia(fecha) {
+  const d = new Date(fecha);
+  const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
+  return new Date(utc - (5 * 60 * 60000));
+}
 
 router.post("/enviar", async (req, res) => {
   try {
-    const {
-      tipo_documento,
-      numero_documento,
-      fecha_emision,
-      valor_total,
-      impuestos,
-      id_usuario,
-      id_cliente,
-      factura_relacionada,
-      productos,
-    } = req.body;
+    const { tipo_documento, numero_documento, fecha_emision, valor_total, impuestos, id_usuario, id_cliente, factura_relacionada, productos } = req.body;
 
     if (!tipo_documento || !numero_documento || !fecha_emision || !id_usuario) {
       return res.status(400).json({ error: "Faltan campos obligatorios" });
     }
 
-    // Calcular totales desde productos si no vienen manualmente
+    const fechaEmisionCol = fechaColombia(fecha_emision);
+    const fechaHoyCol = fechaColombia(new Date());
+
     let totalProductos = 0;
     let impuestosProductos = 0;
 
@@ -43,12 +41,8 @@ router.post("/enviar", async (req, res) => {
     const totalFinal = valor_total ? parseFloat(valor_total) : totalProductos;
     const impuestosFinal = impuestos ? parseFloat(impuestos) : impuestosProductos;
 
-    // Determinar estado
-    const fechaHoy = new Date();
-    const fechaDoc = new Date(fecha_emision);
     let estado = "Pendiente";
-
-    if (fechaDoc > fechaHoy) estado = "Rechazado";
+    if (fechaEmisionCol > fechaHoyCol) estado = "Rechazado";
     else if (!impuestosFinal || impuestosFinal <= 0) estado = "Pendiente";
     else estado = "Aceptado";
 
@@ -56,12 +50,11 @@ router.post("/enviar", async (req, res) => {
       ? generarCodigo("CUFE", numero_documento, fecha_emision)
       : generarCodigo("CUDE", numero_documento, fecha_emision);
 
-    // Crear documento
     const documento = await prisma.Documentos_XML.create({
       data: {
         tipo_documento,
         numero_documento,
-        fecha_emision: new Date(fecha_emision),
+        fecha_emision: fechaEmisionCol,
         valor_total: totalFinal,
         impuestos: impuestosFinal,
         estado_dian: estado,
@@ -74,11 +67,10 @@ router.post("/enviar", async (req, res) => {
         id_usuario: parseInt(id_usuario),
         id_cliente: id_cliente ? parseInt(id_cliente) : null,
         factura_relacionada: factura_relacionada || null,
-        fecha_respuesta_dian: new Date(),
+        fecha_respuesta_dian: fechaEmisionCol,
       },
     });
 
-    // Guardar productos
     if (Array.isArray(productos) && productos.length > 0) {
       const productosToCreate = productos.map(p => ({
         descripcion: p.descripcion,
@@ -99,7 +91,6 @@ router.post("/enviar", async (req, res) => {
     res.status(500).json({ error: "Error al crear documento" });
   }
 });
-
 // HISTORIAL
 router.get("/historial", async (req, res) => {
   try {

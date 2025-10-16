@@ -83,46 +83,31 @@ export default function Documentos() {
   const toggleExpand = (id) => {
     setExpandedDocId(expandedDocId === id ? null : id);
   };
-  // Descargar XML/PDF
 const descargarArchivo = async (id, tipo) => {
   try {
-    // tipo será "pdf" o "xml"
     const res = await fetch(`http://localhost:3000/api/${tipo}/${id}`, {
       credentials: "include",
     });
-
     if (!res.ok) throw new Error("Error descargando archivo");
-
-    // convertir a blob
     const blob = await res.blob();
-
-    // crear enlace temporal
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-
-    // nombre del archivo: usa numero_documento si existe
     const doc = docs.find((d) => d.id_documento === id) || {};
     link.download = `${doc.numero_documento || "documento"}.${tipo}`;
-
     document.body.appendChild(link);
     link.click();
     link.remove();
-
-    // liberar memoria
     window.URL.revokeObjectURL(url);
   } catch (err) {
     console.error(err);
     alert("No se pudo descargar el archivo");
   }
 };
-
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Visor de documentos enviados</h1>
-
       <div className="bg-white shadow-lg rounded-lg p-4 space-y-4">
-        {/* Filtros y búsqueda */}
         <div className="flex items-center justify-between">
           <div className="flex space-x-2">
             <input
@@ -160,8 +145,6 @@ const descargarArchivo = async (id, tipo) => {
             className="border p-1 rounded w-40"
           />
         </div>
-
-        {/* Tabla */}
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
@@ -193,8 +176,6 @@ const descargarArchivo = async (id, tipo) => {
                       </button>
                     </td>
                   </tr>
-
-                  {/* Detalles desplegados */}
                   {expandedDocId === d.id_documento && (
                     <tr>
                       <td colSpan="8" className="bg-gray-50 p-4 border">
@@ -204,7 +185,7 @@ const descargarArchivo = async (id, tipo) => {
                           <div className="flex space-x-2">
                             <button
                               onClick={() => descargarArchivo(d.id_documento, "xml")}
-                              className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-500 transition"
+                              className="bg-blue-900 text-white px-3 py-1 rounded hover:bg-blue-700 transition"
                             >
                               Descargar XML
                             </button>
@@ -216,11 +197,8 @@ const descargarArchivo = async (id, tipo) => {
                               Descargar PDF
                             </button>
                           </div>
-
                           <p><strong>Estado DIAN:</strong> {d.estado_dian}</p>
                           <p><strong>Acciones:</strong> {d.mensaje_dian || "-"}</p>
-
-                          {/* Productos si existen */}
                           {Array.isArray(d.Producto_Factura) && d.Producto_Factura.length > 0 && (
                             <>
                               <h4 className="mt-2 font-semibold">Productos</h4>
@@ -240,26 +218,17 @@ const descargarArchivo = async (id, tipo) => {
             </tbody>
           </table>
         </div>
-
-        {/* Paginación */}
-<div className="flex justify-between items-center mt-2 px-2">
-  <button
-    onClick={() => setPage((p) => Math.max(1, p - 1))}
-    className="bg-white bg-opacity-30 text-black px-3 py-1 rounded hover:bg-opacity-50 transition"
-  >
-    Anterior
-  </button>
-
-  <span className="text-black font-semibold">{page} / {totalPages}</span>
-
-  <button
-    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-    className="bg-white bg-opacity-30 text-black px-3 py-1 rounded hover:bg-opacity-50 transition"
-  >
-    Siguiente
-  </button>
-</div>
-
+        <div className="flex justify-between items-center mt-2 px-2">
+          <button onClick={() => setPage((p) => Math.max(1, p - 1))}
+          className="bg-white bg-opacity-30 text-black px-3 py-1 rounded hover:bg-opacity-50 transition">
+            Anterior
+          </button>
+          <span className="text-black font-semibold">{page} / {totalPages}</span>
+          <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+          className="bg-white bg-opacity-30 text-black px-3 py-1 rounded hover:bg-opacity-50 transition">
+            Siguiente
+          </button>
+          </div>
       </div>
     </div>
   );

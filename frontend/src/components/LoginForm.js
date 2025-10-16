@@ -30,7 +30,7 @@ export default function LoginForm() {
       return;
     }
      if (data.user.role === "admin") {
-        navigate("/dashboard"); // el admin va directo al dashboard
+        navigate("/admin/dashboard"); // el admin va directo al dashboard
       } else {
     const usuarioId = data.user.id;
     localStorage.setItem("usuarioId", usuarioId); // ID del usuario

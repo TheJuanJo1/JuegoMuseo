@@ -12,16 +12,20 @@ router.get("/", async (req, res) => {
 
     const payload = jwt.verify(token, process.env.JWT_SECRET);
 
+    // Convertir payload.sub a entero
+    const userId = parseInt(payload.sub, 10);
+    if (isNaN(userId)) return res.status(400).json({ error: "ID de usuario inválido" });
+
     // Traer los últimos 20 documentos ordenados por fecha
-    const docs = await prisma.Documentos_XML.findMany({
-      where: { id_usuario: payload.sub },
+    const docs = await prisma.documentos_XML.findMany({
+      where: { id_usuario: userId },
       orderBy: { fecha_emision: "desc" },
       take: 20,
       select: {
         id_documento: true,
         tipo_documento: true,
-        numero_documento: true, // 👈 importante para la tabla
-        valor_total: true,      // 👈 importante para gráficas
+        numero_documento: true,
+        valor_total: true,
         cufe: true,
         cude: true,
         estado_dian: true,
@@ -35,4 +39,5 @@ router.get("/", async (req, res) => {
     res.status(500).json({ error: "Error al cargar últimos documentos" });
   }
 });
-export default router
+
+export default router;

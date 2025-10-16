@@ -8,19 +8,21 @@ router.get("/", async (req, res) => {
   try {
     const token = req.cookies.token;
     if (!token) return res.status(401).json({ error: "No autenticado" });
+
     const payload = jwt.verify(token, process.env.JWT_SECRET);
+
+    // Convertir payload.sub a entero
+    const userId = parseInt(payload.sub, 10);
+    if (isNaN(userId)) return res.status(400).json({ error: "ID de usuario inválido" });
 
     // Contar por estado
     const estados = await prisma.documentos_XML.groupBy({
       by: ["estado_dian"],
       _count: { estado_dian: true },
-      where: { id_usuario: payload.sub },
+      where: { id_usuario: userId },
     });
 
-    // Inicializar en 0
-    let Aceptado = 0,
-      Rechazado = 0,
-      Pendiente = 0;
+    let Aceptado = 0, Rechazado = 0, Pendiente = 0;
 
     estados.forEach((e) => {
       const estado = e.estado_dian.toLowerCase();
@@ -29,16 +31,14 @@ router.get("/", async (req, res) => {
       if (estado === "pendiente") Pendiente = e._count.estado_dian;
     });
 
-    // Contar por tipo
+    // Contar por tipo de documento
     const tipos = await prisma.documentos_XML.groupBy({
       by: ["tipo_documento"],
       _count: { tipo_documento: true },
-      where: { id_usuario: payload.sub },
+      where: { id_usuario: userId },
     });
 
-    let Factura = 0,
-      NotaCredito = 0,
-      NotaDebito = 0;
+    let Factura = 0, NotaCredito = 0, NotaDebito = 0;
 
     tipos.forEach((t) => {
       const tipo = t.tipo_documento.toLowerCase();
@@ -48,6 +48,7 @@ router.get("/", async (req, res) => {
     });
 
     const total = Factura + NotaCredito + NotaDebito;
+
     res.json({
       Aceptado,
       Rechazado,

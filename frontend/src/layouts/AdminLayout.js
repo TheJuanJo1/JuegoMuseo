@@ -6,7 +6,7 @@ import D1 from "../assets/D1.png";
 import E from "../assets/E.png";
 import R1 from "../assets/R1.png";
 import T from "../assets/T.png";
-import L from "../assets/L.png"; // (si tienes un ícono para Logs Auditoría)
+import A from "../assets/A.png"; 
 import C from "../assets/C.png";
 import C2 from "../assets/C2.png";
 
@@ -112,20 +112,6 @@ export default function AdminLayout() {
             </NavLink>
 
             <NavLink
-              to="/admin/logs"
-              className={({ isActive }) =>
-                `flex items-center ${
-                  collapsed ? "justify-center" : "gap-6 pl-6 justify-start"
-                } px-3 py-3 rounded-md transition ${
-                  isActive ? "bg-gray-700 text-white" : "hover:bg-gray-700/60"
-                }`
-              }
-            >
-              <img src={L} alt="Logs Auditoría" className="h-7 w-7" />
-              {!collapsed && <span>Logs Auditoría</span>}
-            </NavLink>
-
-            <NavLink
               to="/admin/configuracion"
               className={({ isActive }) =>
                 `flex items-center ${
@@ -154,8 +140,6 @@ export default function AdminLayout() {
           </button>
         </div>
       </aside>
-
-      {/* Contenido principal */}
       <div
         className={`flex-1 flex flex-col transition-all duration-300 ${
           collapsed ? "ml-32" : "ml-80"
@@ -168,3 +152,4 @@ export default function AdminLayout() {
     </div>
   );
 }
+

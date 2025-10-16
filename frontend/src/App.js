@@ -15,12 +15,20 @@ import FormularioEmpresa from "./components/FormularioEmpresa";
 
 // Páginas con layout
 import MainLayout from "./layouts/MainLayout";
+import AdminLayout from "./layouts/AdminLayout";
 import Dashboard from "./components/Dashboard";
 import Documentos from "./components/Documentos";
 import Historial from "./components/Historial";
 import Reportes from "./components/Reportes";
 import Ayuda from "./components/Ayuda";
 import ConfiguracionTecnica from "./components/ConfiguracionTecnica";
+
+import DashboardAdmin from "./components/DashboardAdmin";
+import EmpresasAdmin from "./components/EmpresasAdmin";
+import RegistrosAdmin from "./components/RegistrosAdmin";
+import TokensAdmin from "./components/TokensAdmin";
+import ConfiguracionTecnicaAdmin from "./components/ConfiguracionTecnicaAdmin";
+
 
 // Wrapper para pasar usuarioId desde params a FormularioEmpresa
 const FormularioEmpresaWrapper = () => {
@@ -49,6 +57,7 @@ function App() {
         <Route path="/empresa/:usuarioId" element={<FormularioEmpresaWrapper />} />
         <Route path="/clientes" element={<Clientes />} />
         <Route path="/facturas-notas" element={<FacturasNotas />} />
+
         <Route element={<MainLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/documentos" element={<Documentos />} />
@@ -57,7 +66,17 @@ function App() {
           <Route path="/ayuda" element={<Ayuda />} />
           <Route path="/configuracion" element={<ConfiguracionTecnicaWrapper />} />
         </Route>
-        <Route path="*" element={<Navigate to="/inicio" />} /> 
+
+        <Route element={<AdminLayout />}>
+        <Route path="/admin/dashboard" element={<DashboardAdmin />} />
+        <Route path="/admin/empresas" element={<EmpresasAdmin />} />
+        <Route path="/admin/registros" element={<RegistrosAdmin />} />
+        <Route path="/admin/tokens" element={<TokensAdmin />} />
+        <Route path="/admin/configuracion" element={<ConfiguracionTecnicaAdmin />} />
+        </Route>
+
+
+        <Route path="*" element={<Navigate to="/login" />} /> 
       </Routes>
     </Router>
   );

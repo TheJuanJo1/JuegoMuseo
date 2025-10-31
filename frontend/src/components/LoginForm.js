@@ -58,12 +58,8 @@ export default function LoginForm() {
         backgroundPosition: "left center",
         backgroundSize: "62.5% auto",        
         }}>
-      {/* contenedor principal */}
-      <div
-              className="shadow-xl rounded-2xl flex overflow-hidden w-[1150px] h-[700px]"
-              style={{ backgroundColor: "#FFFFFF" }}
-            >
-              {/* Panel izquierdo con imagen (menos padding para reducir espacios arriba/abajo) */}
+      <div className="shadow-xl rounded-2xl flex overflow-hidden w-[1150px] h-[700px]"
+       style={{ backgroundColor: "#FFFFFF" }}>
       <div className="w-1/2 flex items-center justify-center bg-white p-2 rounded-l-2xl">
         <img
           src={laptopImage}
@@ -71,8 +67,6 @@ export default function LoginForm() {
           className="object-contain w-[98%] h-[98%] rounded-lg"
         />
       </div>
-
-        {/* Panel derecho */}
         <div
           className="w-1/2 flex flex-col justify-between px-12 py-8 rounded-r-2xl"
           style={{
@@ -80,7 +74,6 @@ export default function LoginForm() {
             clipPath: "polygon(6% 0, 100% 0, 100% 100%, 0% 100%)",
           }}
         >
-          {/* Header (logo + flecha arriba) */}
           <div className="flex justify-between items-center mb-6">
             <img src={fluxLogo} alt="FluxData" className="h-4" />
             <img
@@ -90,8 +83,6 @@ export default function LoginForm() {
               onClick={() => navigate("/")}
             />
           </div>
-
-          {/* Contenido central */}
           <div className="flex flex-col justify-center flex-grow">
             <div className="text-center mb-14">
               <h1 className="text-3xl font-bold text-gray-900 mb-3">
@@ -99,15 +90,12 @@ export default function LoginForm() {
               </h1>
               <p className="text-gray-500 text-lg">Bienvenido a FluxData</p>
             </div>
-
-            {/* Formulario */}
             <form onSubmit={handleSubmit} className="w-full max-w-sm mx-auto">
               {error && (
                 <div className="bg-red-100 text-red-600 p-2 mb-4 rounded text-sm">
                   {error}
                 </div>
               )}
-
               <input
                 type="text"
                 placeholder="Nombre de Usuario o Correo"
@@ -115,7 +103,6 @@ export default function LoginForm() {
                 onChange={(e) => setEmailOrName(e.target.value)}
                 className="w-full p-3 mb-5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
               />
-
               <input
                 type="password"
                 placeholder="Contraseña"
@@ -123,7 +110,6 @@ export default function LoginForm() {
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full p-3 mb-6 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
               />
-
               <div className="flex justify-end mb-8">
                 <Link
                   to="/forgot-password"

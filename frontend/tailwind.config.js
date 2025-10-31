@@ -9,7 +9,6 @@ module.exports = {
         "assets-globales-blanco-palido": "var(--assets-globales-blanco-palido)",
         "assets-globales-color-2": "var(--assets-globales-color-2)",
         "assets-globales-color-3": "var(--assets-globales-color-3)",
-        // 🎨 tu color personalizado
         sidebar: "#27374D",
       },
       fontFamily: {

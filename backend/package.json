@@ -9,7 +9,7 @@
     "prisma:pull": "prisma db pull",
     "prisma:push": "prisma db push",
     "prisma:studio": "prisma studio",
-    "start": "node server.js"
+    "start": "node backend/server.js"
   },
   "keywords": [],
   "author": "",

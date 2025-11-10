@@ -38,6 +38,15 @@ export default function RegisterForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMsg("");
+     if (form.contrasena.length < 6) {
+    setMsg("La contraseña debe tener al menos 6 caracteres");
+    return;
+  }
+
+  if (form.contrasena !== form.confirmar_contrasena) {
+    setMsg("Las contraseñas no coinciden");
+    return;
+  }
     try {
       const res = await fetch("http://localhost:3000/api/empresas/pre-register", {
         method: "POST",

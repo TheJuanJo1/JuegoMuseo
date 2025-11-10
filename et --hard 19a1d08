@@ -1,0 +1,25 @@
+[33mdec74aa[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m HEAD@{0}: pull origin main --rebase: Fast-forward
+[33mbf016c2[m HEAD@{1}: checkout: moving from dev to main
+[33m21aaee2[m[33m ([m[1;31morigin/dev[m[33m, [m[1;32mdev[m[33m)[m HEAD@{2}: checkout: moving from main to dev
+[33mbf016c2[m HEAD@{3}: checkout: moving from dev to main
+[33m21aaee2[m[33m ([m[1;31morigin/dev[m[33m, [m[1;32mdev[m[33m)[m HEAD@{4}: commit: Guardando cambios antes de cambiar de rama
+[33m999dd28[m HEAD@{5}: reset: moving to HEAD
+[33m999dd28[m HEAD@{6}: commit: Realizacion de layout e ingreso de Admin
+[33m82bbabc[m HEAD@{7}: checkout: moving from dev to dev
+[33m82bbabc[m HEAD@{8}: commit: Cambios en el front
+[33m7e5522f[m HEAD@{9}: checkout: moving from dev to dev
+[33m7e5522f[m HEAD@{10}: commit: Cambios en el front
+[33meaec92f[m HEAD@{11}: checkout: moving from dev to dev
+[33meaec92f[m HEAD@{12}: commit: Actualización de Documentos y detalles de usuario
+[33maf30302[m HEAD@{13}: checkout: moving from dev to dev
+[33maf30302[m HEAD@{14}: commit: Refactor: Unificar Prisma en prisma.js y eliminar archivos no usados
+[33ma2273f8[m HEAD@{15}: checkout: moving from dev to dev
+[33ma2273f8[m HEAD@{16}: commit: Actualización completa: Dashboard y Reportes con filtros, gráficas y detalles
+[33m19a1d08[m HEAD@{17}: commit: Guardar mi código verdadero
+[33mb148a6d[m HEAD@{18}: checkout: moving from dev to dev
+[33mb148a6d[m HEAD@{19}: reset: moving to HEAD
+[33mb148a6d[m HEAD@{20}: commit: Realizo el backend (casi todo) , tambien realize el dashboard, y simulador del prevalidador de facturas
+[33mdf79349[m HEAD@{21}: commit: Se realizo correctamente la funcion de VErificacion de la empresa a la hora de registrarse
+[33mbf016c2[m HEAD@{22}: checkout: moving from main to dev
+[33mbf016c2[m HEAD@{23}: Branch: renamed refs/heads/master to refs/heads/main
+[33mbf016c2[m HEAD@{25}: commit (initial): Adelanto en el backend

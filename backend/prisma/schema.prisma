@@ -8,15 +8,18 @@ datasource db {
 }
 
 model Clientes {
-  id_cliente        Int      @id @default(autoincrement()) @map("id_cliente")
+  id_cliente        Int              @id @default(autoincrement())
   nombre_cliente    String
   apellido_cliente  String
   tipo_documento    String
   numero_documento  String
   direccion_cliente String
   correo_cliente    String
-  id_usuario        Int
-  Usuarios          Usuarios @relation(fields: [id_usuario], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction, map: "id_usuario")
+  id_usuario        Int?
+  Usuarios          Usuarios?        @relation(fields: [id_usuario], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction, map: "id_usuario")
+  Documentos_XML    Documentos_XML[]
+
+  @@unique([numero_documento, id_usuario])
 }
 
 model Configuraciones_Firmas {
@@ -31,21 +34,25 @@ model Configuraciones_Firmas {
 }
 
 model Documentos_XML {
-  id_documento         Int                @id(map: "id_documento")
+  id_documento         Int                @id @default(autoincrement())
   tipo_documento       String
   numero_documento     String
-  fecha_emision        DateTime           @db.Date
-  valor_total          Decimal[]          @db.Decimal(15, 2)
-  impuestos            Decimal[]          @db.Decimal(15, 2)
-  esstado_dian         String
+  prefijo              String? 
+  fecha_emision        DateTime           @db.Timestamp(6)
+  valor_total          Decimal            @db.Decimal(15, 2)
+  impuestos            Decimal            @db.Decimal(15, 2)
+  estado_dian          String
   codigo_dian          String
   mensaje_dian         String
   fecha_respuesta_dian DateTime           @db.Timestamp(6)
-  cufe                 String
-  cude                 String
+  cufe                 String?
+  cude                 String?
   xml_archivo          String
   pdf_archivo          Bytes
+  id_cliente           Int?
+  factura_relacionada  String?
   id_usuario           Int
+  Clientes             Clientes?          @relation(fields: [id_cliente], references: [id_cliente])
   Usuarios             Usuarios           @relation(fields: [id_usuario], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction, map: "id_usuario")
   Eventos              Eventos[]
   Producto_Factura     Producto_Factura[]
@@ -64,14 +71,14 @@ model Eventos {
 }
 
 model Producto_Factura {
-  id_producto     Int             @id(map: "id_producto")
-  descripcion     String?
-  cantidad        Int?
-  precio_unitario Decimal[]       @db.Decimal(15, 2)
-  iva             Decimal[]       @db.Decimal(5, 2)
-  total           Decimal[]       @db.Decimal(15, 2)
-  id_documento    Int?
-  Documentos_XML  Documentos_XML? @relation(fields: [id_documento], references: [id_documento], onDelete: NoAction, onUpdate: NoAction, map: "id_documento")
+  id_producto     Int            @id @default(autoincrement())
+  descripcion     String
+  cantidad        Int
+  precio_unitario Float
+  iva             Float
+  total           Float
+  id_documento    Int
+  Documentos_XML  Documentos_XML @relation(fields: [id_documento], references: [id_documento])
 }
 
 model Usuarios {
@@ -80,7 +87,7 @@ model Usuarios {
   rol_usuario                  String?
   contrasena_usuario           String
   nit_empresa                  String
-  correo_contacto              String                   @unique 
+  correo_contacto              String                   @unique
   prefijo_numeracion           Int?
   num_inicial                  Int?
   num_final                    Int?
@@ -88,29 +95,60 @@ model Usuarios {
   contrasena_certificado       String?
   token_api                    String?
   fecha_expiracion_certificado DateTime?
+  Registros_Sistema            Registros_Sistema[] 
   Clientes                     Clientes[]
   Configuraciones_Firmas       Configuraciones_Firmas[]
   Documentos_XML               Documentos_XML[]
   Eventos                      Eventos[]
-  PasswordResetTokens          PasswordResetToken[]
+  PasswordResetToken           PasswordResetToken[]
+  configuracionTecnica         Configuracion_Tecnica?   @relation("UsuarioConfiguracion")
 }
 
 model PasswordResetToken {
-  id        Int      @id @default(autoincrement())
-  token     String   @unique
-  userId    Int      @map("id_usuario") // FK hacia Usuarios
-  usuario   Usuarios @relation(fields: [userId], references: [id_usuario])
-  expiresAt DateTime
-  createdAt DateTime @default(now())
+  id         Int      @id @default(autoincrement())
+  token      String   @unique
+  id_usuario Int
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  Usuarios   Usuarios @relation(fields: [id_usuario], references: [id_usuario])
 }
 
 model codigos_verificacion {
-  id             Int      @id @default(autoincrement())
-  correo         String
-  codigo         String
+  id              Int      @id @default(autoincrement())
+  correo          String
+  codigo          String
   contrasena_temp String
-  nombre_empresa String
-  nit_empresa    String
-  expiracion     DateTime
+  nombre_empresa  String
+  nit_empresa     String
+  expiracion      DateTime
+}
+
+model Configuracion_Tecnica {
+  id_configuracion    Int      @id @default(autoincrement())
+  direccion_empresa   String
+  regimen_tributario  String
+  certificado_firma   String
+  contrasena_cert     String
+  token_api           String
+  fecha_expiracion    DateTime
+  id_usuario          Int      @unique
+  usuario             Usuarios @relation("UsuarioConfiguracion", fields: [id_usuario], references: [id_usuario])
+   numeraciones        Json     @default("[]")
+}
+
+model Registros_Sistema {
+  id_registro       Int       @id @default(autoincrement())
+  fecha_hora        DateTime  @default(now())
+  id_usuario        Int
+  nombre_usuario    String?
+  empresa           String?
+  tipo_documento    String?
+  numero_documento  String?
+  accion            String
+  resultado         String
+  mensaje           String?
+  Usuarios          Usuarios  @relation(fields: [id_usuario], references: [id_usuario])
+
+  @@map("Registros_Sistema")
 }
 

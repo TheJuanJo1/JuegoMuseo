@@ -15,13 +15,13 @@ export default function FAQ() {
       respuesta:
         "Invoice (factura), CreditNote (nota crédito), DebitNote (nota débito), ApplicationResponse (respuesta de la DIAN) y AttachedDocument (documentos anexos).",
     },
-    { pregunta: "¿Qué tecnologías se usan?", respuesta: "Node.js, React, PostgreSQL, Prisma y MongoDB." },
+    { pregunta: "¿Qué tecnologías se usan?", respuesta: "Node.js, React, PostgreSQL y Prisma." },
     {
       pregunta: "¿Qué funcionalidades principales tiene?",
       respuesta:
-        "Gestión completa de facturas electrónicas, recepción, validación, envío y almacenamiento seguro.",
+        "Gestión de facturas electrónicas, recepción, validación, envío y almacenamiento.",
     },
-    { pregunta: "¿Cómo se almacenan los documentos?", respuesta: "En bases de datos PostgreSQL con respaldo seguro." },
+    { pregunta: "¿Cómo se almacenan los documentos?", respuesta: "En bases de datos PostgreSQL." },
   ];
 
   return (

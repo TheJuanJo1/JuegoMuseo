@@ -3,7 +3,35 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, Legend,
   PieChart, Pie, Cell, ResponsiveContainer
 } from "recharts";
-
+function transformarDocumento(doc) {
+  if (!doc) return {};
+  const empresa = doc.Usuarios
+    ? {
+        id_empresa: doc.Usuarios.id_usuario,
+        nombre_empresa: doc.Usuarios.nombre_usuario,
+        rol_empresa: doc.Usuarios.rol_usuario,
+        nit_empresa: doc.Usuarios.nit_empresa,
+        correo_contacto: doc.Usuarios.correo_contacto,
+      }
+    : null;
+  const cliente = doc.Clientes || null;
+  const documentoLimpio = Object.fromEntries(
+    Object.entries(doc).filter(
+      ([k, v]) =>
+        v !== null &&
+        k !== "Usuarios" &&
+        k !== "Clientes" &&
+        k !== "Producto_Factura" &&
+        k !== "id_usuario" &&
+        k !== "id_cliente"
+    )
+  );
+  return {
+    Empresa: empresa,
+    Cliente: cliente,
+    Documento: documentoLimpio,
+  };
+}
 const Reportes = () => {
   const [documentos, setDocumentos] = useState([]);
   const [estadisticas, setEstadisticas] = useState({
@@ -11,7 +39,6 @@ const Reportes = () => {
     Rechazado: 0,
     Pendiente: 0,
   });
-
   const [filters, setFilters] = useState({
     desde: "",
     hasta: "",
@@ -19,19 +46,16 @@ const Reportes = () => {
     estado: "",
     cliente: "",
   });
-
   const [selectedDoc, setSelectedDoc] = useState(null);
-
   // Cargar documentos iniciales
   useEffect(() => {
     fetch("http://localhost:3000/ultimos", {
       credentials: "include",
     })
       .then((res) => res.json())
-      .then((data) => setDocumentos(Array.isArray(data) ? data : []))
+      .then((data) => setDocumentos(Array.isArray(data) ? data.map(transformarDocumento) : []))
       .catch((err) => console.error("Error cargando documentos:", err));
   }, []);
-
   // Cargar estadísticas iniciales
   useEffect(() => {
     fetch("http://localhost:3000/api/estadisticas", {
@@ -41,19 +65,14 @@ const Reportes = () => {
       .then((data) => setEstadisticas(data))
       .catch((err) => console.error("Error cargando estadísticas:", err));
   }, []);
-
-  // 🔹 Función para aplicar filtros manualmente
-  // dentro de Reportes.jsx
-
-const aplicarFiltros = async () => {
+  const aplicarFiltros = async () => {
   try {
-    // Preparamos los filtros que enviaremos al backend
     const filtrosAplicados = {
       desde: filters.desde || null,
       hasta: filters.hasta || null,
       tipo: filters.tipo || null,
       estado: filters.estado || null,
-      cliente: filters.cliente ? filters.cliente.trim() : null, // nombre o id
+      cliente: filters.cliente ? filters.cliente.trim() : null,
     };
 
     const res = await fetch("http://localhost:3000/api/filtrar", {
@@ -64,28 +83,33 @@ const aplicarFiltros = async () => {
     });
 
     const data = await res.json();
+    const docs = Array.isArray(data) ? data.map(transformarDocumento) : [];
 
-    // Guardamos los documentos filtrados
-    setDocumentos(Array.isArray(data) ? data : []);
+    //Actualiza documentos
+    setDocumentos(docs);
+
+    //Recalcula estadísticas en base a los documentos filtrados
+    const nuevasEstadisticas = {
+      Aceptado: docs.filter((d) => d.Documento.estado_dian === "Aceptado").length,
+      Rechazado: docs.filter((d) => d.Documento.estado_dian === "Rechazado").length,
+      Pendiente: docs.filter((d) => d.Documento.estado_dian === "Pendiente").length,
+    };
+    setEstadisticas(nuevasEstadisticas);
   } catch (err) {
     console.error("Error aplicando filtros:", err);
   }
 };
-
-  // 🔹 Si quieres que cargue todos los documentos al inicio (sin filtros)
   useEffect(() => {
     fetch("http://localhost:3000/api/filtrar", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({}), // 👈 sin filtros
+      body: JSON.stringify({}), //sin filtros
     })
       .then((res) => res.json())
-      .then((data) => setDocumentos(Array.isArray(data) ? data : []))
+      .then((data) => setDocumentos(Array.isArray(data) ? data.map(transformarDocumento) : []))
       .catch((err) => console.error(err));
   }, []);
-
-
   // Exportar CSV
   const exportarCSV = () => {
     const encabezados = ["Tipo", "Número", "CUFE/CUDE", "Valor total", "Fecha", "Estado"];
@@ -97,11 +121,9 @@ const aplicarFiltros = async () => {
       new Date(doc.fecha_emision).toLocaleDateString(),
       doc.estado_dian,
     ]);
-
     const csvContent =
       "data:text/csv;charset=utf-8," +
       [encabezados, ...filas].map((e) => e.join(",")).join("\n");
-
     const link = document.createElement("a");
     link.href = encodeURI(csvContent);
     link.download = "reportes.csv";
@@ -109,33 +131,28 @@ const aplicarFiltros = async () => {
     link.click();
     document.body.removeChild(link);
   };
-
   // Datos para gráficas
   const dataDocs = [
-    { tipo: "Factura", cantidad: documentos.filter((d) => d.tipo_documento?.toLowerCase().includes("factura")).length },
-    { tipo: "Nota Crédito", cantidad: documentos.filter((d) => d.tipo_documento?.toLowerCase().includes("crédito")).length },
-    { tipo: "Nota Débito", cantidad: documentos.filter((d) => d.tipo_documento?.toLowerCase().includes("débito")).length },
+    { tipo: "Factura", cantidad: documentos.filter((d) => d.Documento.tipo_documento?.toLowerCase().includes("factura")).length },
+    { tipo: "Nota Crédito", cantidad: documentos.filter((d) => d.Documento.tipo_documento?.toLowerCase().includes("crédito")).length },
+    { tipo: "Nota Débito", cantidad: documentos.filter((d) => d.Documento.tipo_documento?.toLowerCase().includes("débito")).length },
   ];
-
   const dataEstados = [
     { estado: "Aceptados", valor: estadisticas.Aceptado },
     { estado: "Rechazados", valor: estadisticas.Rechazado },
     { estado: "Pendientes", valor: estadisticas.Pendiente },
   ];
-
   const COLORS = ["#27374D", "#DDE6ED", "#526D82"];
   // Función para agrupar documentos por mes y tipo
 // 1) getMonthlyData mejorado: siempre devuelve los últimos 6 meses y suma con Number()
 function getMonthlyData(docs) {
   const monthNames = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
   const hoy = new Date();
-
   // crear keys para los últimos 6 meses (orden cronológico)
   const months = Array.from({ length: 6 }).map((_, i) => {
     const d = new Date(hoy.getFullYear(), hoy.getMonth() - (5 - i), 1);
     return `${monthNames[d.getMonth()]}-${d.getFullYear()}`;
   });
-
   // inicializar mapa con ceros
   const map = {};
   months.forEach((m) => {
@@ -160,7 +177,6 @@ function getMonthlyData(docs) {
       });
     }
     valor = Number(valor) || 0;
-
     if (doc.tipo_documento?.toLowerCase().includes("factura")) {
       map[key].Factura += valor;
     } else if (doc.tipo_documento?.toLowerCase().includes("crédito")) {
@@ -169,25 +185,18 @@ function getMonthlyData(docs) {
       map[key]["Nota Débito"] += valor;
     }
   });
-
   return Object.values(map);
 }
-
-// 2) justo antes de renderizar la gráfica mensual, calcula monthlyData y maxMonthly
 const monthlyData = getMonthlyData(documentos);
 const maxMonthly = monthlyData.reduce((m, e) => {
   return Math.max(m, e.Factura || 0, e["Nota Crédito"] || 0, e["Nota Débito"] || 0);
 }, 0);
-
-// generar ticks (0, mitad, max) evitando duplicados
 const midTick = Math.round(maxMonthly / 2);
 const ticks = Array.from(new Set([0, midTick, Math.round(maxMonthly)]));
 
   return (
-    <div className="p-6">
-      {/* Filtros */}
+  <div className="p-6">
 <div className="grid grid-cols-6 gap-4 mb-6 items-end">
-  {/* Fechas combinadas */}
   <div className="col-span-2 flex gap-2">
     <input
       type="date"
@@ -204,8 +213,6 @@ const ticks = Array.from(new Set([0, midTick, Math.round(maxMonthly)]));
       placeholder="Hasta"
     />
   </div>
-
-  {/* Tipo de documento */}
   <select
     className="border rounded px-2 py-2.5 w-full"
     value={filters.tipo}
@@ -216,20 +223,15 @@ const ticks = Array.from(new Set([0, midTick, Math.round(maxMonthly)]));
     <option value="Nota crédito">Nota crédito</option>
     <option value="Nota débito">Nota débito</option>
   </select>
-
-  {/* Estado DIAN */}
   <select
     className="border rounded px-2 py-2.5 w-full"
     value={filters.estado}
-    onChange={(e) => setFilters({ ...filters, estado: e.target.value })}
-  >
+    onChange={(e) => setFilters({ ...filters, estado: e.target.value })}>
     <option value="">Estado DIAN</option>
     <option value="Aceptado">Aceptado</option>
     <option value="Rechazado">Rechazado</option>
     <option value="Pendiente">Pendiente</option>
   </select>
-
-  {/* Cliente */}
   <input
     type="text"
     className="border rounded px-2 py-2 w-full"
@@ -237,8 +239,6 @@ const ticks = Array.from(new Set([0, midTick, Math.round(maxMonthly)]));
     value={filters.cliente}
     onChange={(e) => setFilters({ ...filters, cliente: e.target.value })}
   />
-
-  {/* Botón aplicar filtros */}
   <button
   onClick={aplicarFiltros}
   className="text-white px-4 py-2 rounded w-full"
@@ -247,10 +247,8 @@ const ticks = Array.from(new Set([0, midTick, Math.round(maxMonthly)]));
   </button>
 
 </div>
-      {/* Resumen */}
 <h2 className="text-lg font-semibold mb-4">Resumen de documentos emitidos</h2>
 <div className="grid grid-cols-2 gap-6 mb-10">
-  {/* Gráfica 1 */}
   <div className="bg-white p-4 rounded shadow-md">
     <ResponsiveContainer width="100%" height={300}>
      <BarChart
@@ -259,8 +257,7 @@ const ticks = Array.from(new Set([0, midTick, Math.round(maxMonthly)]));
     { categoria: "Aceptados", cantidad: estadisticas.Aceptado },
     { categoria: "Rechazados", cantidad: estadisticas.Rechazado },
     { categoria: "Pendientes", cantidad: estadisticas.Pendiente }, 
-  ]}
->
+  ]}>
   <XAxis dataKey="categoria" />
   <YAxis allowDecimals={false} />
   <Tooltip />
@@ -273,8 +270,6 @@ const ticks = Array.from(new Set([0, midTick, Math.round(maxMonthly)]));
 </BarChart>
     </ResponsiveContainer>
   </div>
-
-  {/* Gráfica 2 */}
   <div className="bg-white p-4 rounded shadow-md">
     <ResponsiveContainer width="100%" height={300}>
       <BarChart
@@ -282,25 +277,20 @@ const ticks = Array.from(new Set([0, midTick, Math.round(maxMonthly)]));
           {
             categoria: "Total facturado",
             cantidad: documentos
-              .filter(d => d.tipo_documento?.toLowerCase().includes("factura"))
-              .reduce((acc, d) => acc + Number(d.valor_total || 0), 0)
-,
-          },
+              .filter(d => d.Documento.tipo_documento?.toLowerCase().includes("factura"))
+              .reduce((acc, d) => acc + Number(d.Documento.valor_total || 0), 0),},
           {
             categoria: "Total en notas crédito",
             cantidad: documentos
-              .filter(d => d.tipo_documento?.toLowerCase().includes("crédito"))
-              .reduce((acc, d) => acc + Number(d.valor_total || 0), 0)
-,
-          },
+              .filter(d => d.Documento.tipo_documento?.toLowerCase().includes("crédito"))
+              .reduce((acc, d) => acc + Number(d.Documento.valor_total || 0), 0),},
           {
             categoria: "Total en notas débito",
             cantidad: documentos
-              .filter(d => d.tipo_documento?.toLowerCase().includes("débito"))
-              .reduce((acc, d) => acc + Number(d.valor_total || 0), 0),
+              .filter(d => d.Documento.tipo_documento?.toLowerCase().includes("débito"))
+              .reduce((acc, d) => acc + Number(d.Documento.valor_total || 0), 0),
           },
-        ]}
-      >
+        ]}>
         <XAxis dataKey="categoria" />
         <YAxis />
         <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
@@ -316,39 +306,35 @@ const ticks = Array.from(new Set([0, midTick, Math.round(maxMonthly)]));
 <div className="grid grid-cols-3 gap-6 mb-10">
 <div className="bg-white p-4 rounded shadow-md relative">
   <div className="flex">
-    {/* Leyenda lateral izquierda */}
     <div className="flex flex-col justify-center mr-6 w-44">
-      <h3 className="font-bold text-center mb-2">Cantidad de notas</h3>
+      <h3 className="font-bold text-center mb-2">Cantidad de facturas/notas</h3>
       <div className="flex flex-col gap-3">
         <div className="flex items-center gap-2">
           <span className="w-4 h-4 rounded-full" style={{ backgroundColor: "#27374D" }}></span>
-          <span>Factura: {documentos.filter(d => d.tipo_documento?.toLowerCase().includes("factura")).length}</span>
+          <span>Factura: {documentos.filter(d => d.Documento.tipo_documento?.toLowerCase().includes("factura")).length}</span>
         </div>
         <div className="flex items-center gap-2">
           <span className="w-4 h-4 rounded-full" style={{ backgroundColor: "#526D82" }}></span>
-          <span>Nota Crédito: {documentos.filter(d => d.tipo_documento?.toLowerCase().includes("crédito")).length}</span>
+          <span>Nota Crédito: {documentos.filter(d => d.Documento.tipo_documento?.toLowerCase().includes("crédito")).length}</span>
         </div>
         <div className="flex items-center gap-2">
           <span className="w-4 h-4 rounded-full" style={{ backgroundColor: "#DDE6ED" }}></span>
-          <span>Nota Débito: {documentos.filter(d => d.tipo_documento?.toLowerCase().includes("débito")).length}</span>
+          <span>Nota Débito: {documentos.filter(d => d.Documento.tipo_documento?.toLowerCase().includes("débito")).length}</span>
         </div>
       </div>
     </div>
-
-    {/* Gráfica de barras */}
     <div className="flex-1">
       <ResponsiveContainer width="100%" height={300}>
         <BarChart
           data={[
             {
               tipo: "Documentos",
-              Factura: documentos.filter(d => d.tipo_documento?.toLowerCase().includes("factura")).length,
-              "Nota Crédito": documentos.filter(d => d.tipo_documento?.toLowerCase().includes("crédito")).length,
-              "Nota Débito": documentos.filter(d => d.tipo_documento?.toLowerCase().includes("débito")).length,
+              Factura: documentos.filter(d => d.Documento.tipo_documento?.toLowerCase().includes("factura")).length,
+              "Nota Crédito": documentos.filter(d => d.Documento.tipo_documento?.toLowerCase().includes("crédito")).length,
+              "Nota Débito": documentos.filter(d => d.Documento.tipo_documento?.toLowerCase().includes("débito")).length,
             },
           ]}
-          margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
-        >
+          margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
           <XAxis dataKey="tipo" />
           <YAxis allowDecimals={false} />
           <Tooltip />
@@ -358,11 +344,9 @@ const ticks = Array.from(new Set([0, midTick, Math.round(maxMonthly)]));
           <Bar dataKey="Nota Débito" fill="#DDE6ED" />
         </BarChart>
       </ResponsiveContainer>
-    </div>
-  </div>
-</div>
-
-        {/* PieChart con leyenda personalizada */}
+      </div>
+      </div>
+      </div>
         <div className="relative flex flex-col items-center">
           <h3 className="absolute top-2 left-2 text-sm font-bold">Distribución de estados</h3>
           <ResponsiveContainer width="100%" height={300}>
@@ -374,8 +358,7 @@ const ticks = Array.from(new Set([0, midTick, Math.round(maxMonthly)]));
                 cx="50%"
                 cy="50%"
                 outerRadius={80}
-                label
-              >
+                label>
                 {dataEstados.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
@@ -395,68 +378,53 @@ const ticks = Array.from(new Set([0, midTick, Math.round(maxMonthly)]));
             ))}
           </div>
         </div>
-
-        {/* Gráfica: Total facturado por mes */}
 <div className="bg-white p-4 rounded shadow-md relative">
   <div className="flex">
-    {/* Leyenda lateral izquierda */}
     <div className="flex flex-col justify-center mr-6 w-44">
       <h3 className="font-bold text-center mb-2">Total facturado</h3>
       <div className="flex flex-col gap-3">
         <div className="flex items-center gap-2">
           <span className="w-4 h-4 rounded-full" style={{ backgroundColor: "#27374D" }}></span>
           <span>Factura: ${documentos
-            .filter(d => d.tipo_documento?.toLowerCase().includes("factura"))
-            .reduce((acc, d) => acc + Number(d.valor_total || 0), 0)
-}</span>
+            .filter(d => d.Documento.tipo_documento?.toLowerCase().includes("factura"))
+            .reduce((acc, d) => acc + Number(d.Documento.valor_total || 0), 0)}
+            </span>
         </div>
         <div className="flex items-center gap-2">
           <span className="w-4 h-4 rounded-full" style={{ backgroundColor: "#526D82" }}></span>
           <span>Nota Crédito: ${documentos
-            .filter(d => d.tipo_documento?.toLowerCase().includes("crédito"))
-            .reduce((acc, d) => acc + Number(d.valor_total || 0), 0)
-}</span>
+            .filter(d => d.Documento.tipo_documento?.toLowerCase().includes("crédito"))
+            .reduce((acc, d) => acc + Number(d.Documento.valor_total || 0), 0)
+            }</span>
         </div>
         <div className="flex items-center gap-2">
           <span className="w-4 h-4 rounded-full" style={{ backgroundColor: "#DDE6ED" }}></span>
           <span>Nota Débito: ${documentos
-            .filter(d => d.tipo_documento?.toLowerCase().includes("débito"))
-            .reduce((acc, d) => acc + Number(d.valor_total || 0), 0)}</span>
+            .filter(d => d.Documento.tipo_documento?.toLowerCase().includes("débito"))
+            .reduce((acc, d) => acc + Number(d.Documento.valor_total || 0), 0)}</span>
         </div>
       </div>
     </div>
-    {/* Gráfica de barras por mes */}
 <div className="flex-1">
   <ResponsiveContainer width="100%" height={300}>
   <BarChart
     data={getMonthlyData(documentos)}
-    margin={{ top: 20, right: 30, left: 1, bottom: 5 }}
-  >
-    <XAxis dataKey="mes" />
+    margin={{ top: 20, right: 30, left: 1, bottom: 5 }}>
+    <XAxis dataKey="mes"/>
     <YAxis
       tickFormatter={(value) => `$${Number(value).toLocaleString("es-CO")}`}
-      width={100} // 👈 espacio reservado para que no se corte
-    />
-    <Tooltip formatter={(value) => `$${Number(value).toLocaleString("es-CO")}`} />
-    <Legend />
-    
-    {/* Factura */}
-    <Bar dataKey="Factura" barSize={30} fill="#27374D" />
-    {/* Nota Crédito */}
-    <Bar dataKey="Nota Crédito" barSize={30} fill="#526D82" />
-    {/* Nota Débito */}
-    <Bar dataKey="Nota Débito" barSize={30} fill="#DDE6ED" />
+      width={100}/>
+    <Tooltip formatter={(value) => `$${Number(value).toLocaleString("es-CO")}`}/>
+    <Legend/>
+    <Bar dataKey="Factura" barSize={30} fill="#27374D"/>
+    <Bar dataKey="Nota Crédito" barSize={30} fill="#526D82"/>
+    <Bar dataKey="Nota Débito" barSize={30} fill="#DDE6ED"/>
   </BarChart>
 </ResponsiveContainer>
-
-</div>
-
+ </div>
   </div>
-</div>
-
+   </div>
       </div>
-
-      {/* Tabla */}
       <table className="w-full border">
         <thead className="bg-gray-100">
           <tr>
@@ -471,50 +439,41 @@ const ticks = Array.from(new Set([0, midTick, Math.round(maxMonthly)]));
         </thead>
         <tbody>
           {documentos.map((doc, i) => (
-            <React.Fragment key={doc.id_documento}>
-              <tr>
-                <td className="p-2 border">{doc.tipo_documento}</td>
-                <td className="p-2 border">{doc.numero || doc.numero_documento || "-"}</td>
-                <td className="p-2 border">{doc.cufe || doc.cude || "-"}</td>
-                <td className="p-2 border">${doc.valor_total || 0}</td>
-                <td className="p-2 border">
-                  {new Date(doc.fecha_emision).toLocaleDateString()}
-                </td>
-                <td className="p-2 border">{doc.estado_dian}</td>
-                <td className="p-2 border">
-                  <button
-                    onClick={() => setSelectedDoc(selectedDoc === i ? null : i)}
-                    className="text-blue-600"
-                  >
-                    Ver
-                  </button>
-                </td>
+  <React.Fragment key={doc.Documento.id_documento}>
+    <tr>
+      <td className="p-2 border">{doc.Documento.tipo_documento}</td>
+      <td className="p-2 border">{doc.Documento.numero_documento || "-"}</td>
+      <td className="p-2 border">{doc.Documento.cufe || doc.Documento.cude || "-"}</td>
+      <td className="p-2 border">${doc.Documento.valor_total || 0}</td>
+      <td className="p-2 border">
+        {new Date(doc.Documento.fecha_emision).toLocaleDateString()}
+      </td>
+      <td className="p-2 border">{doc.Documento.estado_dian}</td>
+      <td className="p-2 border">
+        <button
+          onClick={() => setSelectedDoc(selectedDoc === i ? null : i)}
+          className="text-blue-600"
+        >
+          Ver
+          </button>
+          </td>
+          </tr>
+          {selectedDoc === i && (
+            <tr>
+              <td colSpan="7" className="p-4 bg-gray-50"><strong>Detalles del documento:</strong>
+              <pre className="text-sm">{JSON.stringify(doc, null, 2)}</pre></td>
               </tr>
-              {selectedDoc === i && (
-                <tr>
-                  <td colSpan="7" className="p-4 bg-gray-50">
-                    <strong>Detalles del documento:</strong>
-                    <pre className="text-sm">{JSON.stringify(doc, null, 2)}</pre>
-                  </td>
-                </tr>
-              )}
+            )}
             </React.Fragment>
           ))}
-        </tbody>
-      </table>
-
-      {/* Botón exportar */}
-      <div className="flex justify-end mt-4">
-        <button
-  onClick={exportarCSV}
-  className="text-white px-4 py-2 rounded"
-  style={{ backgroundColor: "#27374D" }}
->
-  Exportar como CSV
-</button>
-      </div>
-    </div>
-  );
-};
-
+          </tbody>
+          </table>
+          <div className="flex justify-end mt-4"><button onClick={exportarCSV}
+          className="text-white px-4 py-2 rounded"style={{ backgroundColor: "#27374D" }}>
+            Exportar como CSV
+            </button>
+           </div>
+          </div>
+          );
+        };
 export default Reportes;

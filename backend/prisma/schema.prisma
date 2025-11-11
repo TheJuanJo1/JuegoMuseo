@@ -37,6 +37,7 @@ model Documentos_XML {
   id_documento         Int                @id @default(autoincrement())
   tipo_documento       String
   numero_documento     String
+  prefijo              String? 
   fecha_emision        DateTime           @db.Timestamp(6)
   valor_total          Decimal            @db.Decimal(15, 2)
   impuestos            Decimal            @db.Decimal(15, 2)
@@ -94,6 +95,7 @@ model Usuarios {
   contrasena_certificado       String?
   token_api                    String?
   fecha_expiracion_certificado DateTime?
+  Registros_Sistema            Registros_Sistema[] 
   Clientes                     Clientes[]
   Configuraciones_Firmas       Configuraciones_Firmas[]
   Documentos_XML               Documentos_XML[]
@@ -133,3 +135,20 @@ model Configuracion_Tecnica {
   usuario             Usuarios @relation("UsuarioConfiguracion", fields: [id_usuario], references: [id_usuario])
    numeraciones        Json     @default("[]")
 }
+
+model Registros_Sistema {
+  id_registro       Int       @id @default(autoincrement())
+  fecha_hora        DateTime  @default(now())
+  id_usuario        Int
+  nombre_usuario    String?
+  empresa           String?
+  tipo_documento    String?
+  numero_documento  String?
+  accion            String
+  resultado         String
+  mensaje           String?
+  Usuarios          Usuarios  @relation(fields: [id_usuario], references: [id_usuario])
+
+  @@map("Registros_Sistema")
+}
+

@@ -1,5 +1,6 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import TopBarAdmin from "./TopBarAdmin";
 import Logo from "../assets/Logo.png";
 import B from "../assets/B.png";
 import D1 from "../assets/D1.png";
@@ -145,6 +146,7 @@ export default function AdminLayout() {
           collapsed ? "ml-32" : "ml-80"
         }`}
       >
+        <TopBarAdmin/>
         <main className="flex-1 p-6">
           <Outlet />
         </main>

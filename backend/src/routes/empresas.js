@@ -8,18 +8,16 @@ const router = express.Router();
 
 // Configuración del transporte de correos
 const transporter = nodemailer.createTransport({
-  service: "gmail", // o tu servicio SMTP
+  service: "gmail",
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
   }
 });
 
-/* ================================
-   Paso 1: Pre-registro con envío de código
-================================== */
 router.post("/pre-register", async (req, res) => {
   try {
+
     const { nombre_empresa, nit_empresa, correo_contacto, contrasena, confirmar_contrasena } = req.body;
 
     if (!nombre_empresa || !nit_empresa || !correo_contacto || !contrasena || !confirmar_contrasena) {
@@ -29,7 +27,6 @@ router.post("/pre-register", async (req, res) => {
     if (contrasena !== confirmar_contrasena) {
       return res.status(400).json({ error: "Las contraseñas no coinciden" });
     }
-
     //Hashear la contraseña ANTES de guardarla
     const hashedPass = await bcrypt.hash(contrasena, 10);
 

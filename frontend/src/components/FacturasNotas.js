@@ -83,7 +83,7 @@ export default function FacturasNotas() {
         <input type="number" name="id_cliente" placeholder="ID Cliente" value={form.id_cliente} onChange={handleChangeForm} className="w-full p-2 border rounded" />
 
         <input type="number" name="valor_total" placeholder="Total (opcional)" value={form.valor_total} onChange={handleChangeForm} className="w-full p-2 border rounded" />
-        <input type="number" name="impuestos" placeholder="Impuestos (opcional)" value={form.impuestos} onChange={handleChangeForm} className="w-full p-2 border rounded" />
+        <input type="number" name="impuestos" placeholder="Impuestos" value={form.impuestos} onChange={handleChangeForm} className="w-full p-2 border rounded" />
 
         {form.tipo_documento !== "Factura" && <input type="text" name="factura_relacionada" placeholder="Factura relacionada" value={form.factura_relacionada} onChange={handleChangeForm} className="w-full p-2 border rounded" />}
 

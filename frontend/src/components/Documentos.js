@@ -26,7 +26,7 @@ export default function Documentos() {
     if (!d || !d.fecha_emision) return null;
     const dt = new Date(d.fecha_emision);
     if (isNaN(dt)) return null;
-    return dt.toISOString().split("T")[0]; // YYYY-MM-DD
+    return dt.toISOString().split("T")[0]; 
   };
 
   const matchTipo = (d) => {
@@ -198,7 +198,16 @@ const descargarArchivo = async (id, tipo) => {
                             </button>
                           </div>
                           <p><strong>Estado DIAN:</strong> {d.estado_dian}</p>
-                          <p><strong>Acciones:</strong> {d.mensaje_dian || "-"}</p>
+                          <p className="mt-2"><strong>Acciones:</strong>{" "}<span className="text-gray-800">
+                            {d.mensaje_dian || (d.estado_dian === "Aceptado"
+                            ? "El documento fue aceptado por cumplir con todos los requisitos exigidos por la DIAN."
+                            : d.estado_dian === "Pendiente"
+                            ? "El documento está en proceso porque no se añadieron impuestos, los cuales son obligatorios."
+                            : d.estado_dian === "Rechazado"
+                            ? "El documento fue rechazado porque la fecha de emisión no puede ser mayor a la fecha actual."
+                            : "Sin información.")}
+                            </span>
+                            </p>
                           {Array.isArray(d.Producto_Factura) && d.Producto_Factura.length > 0 && (
                             <>
                               <h4 className="mt-2 font-semibold">Productos</h4>

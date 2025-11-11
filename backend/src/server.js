@@ -1,9 +1,9 @@
-import express from 'express'
-import cors from 'cors'
-import dotenv from 'dotenv'
-import authRoutes from './routes/auth.js'
-import clientesRoutes from './routes/clientes.js'
-import empresasRoutes from './routes/empresas.js'   //Importar empresas
+import express from "express"
+import cors from "cors"
+import dotenv from "dotenv"
+import authRoutes from "./routes/auth.js"
+import clientesRoutes from "./routes/clientes.js"
+import empresasRoutes from "./routes/empresas.js"
 import loginRoutes from "./routes/login.js"
 import forgotPasswordRoutes from "./routes/forgotPassword.js";
 import resetPasswordRoutes from "./routes/resetPassword.js";
@@ -17,6 +17,7 @@ import configurarRoutes from "./routes/configuracion.js";
 import tokenRoutes from "./routes/token.js";
 import pdfRoutes from "./routes/pdf.js";
 import xmlRoutes from "./routes/xml.js";
+import registrosRouter from "./routes/registros.js";
 const app = express()
 app.use(cors({
   origin: "http://localhost:5173",
@@ -25,14 +26,14 @@ app.use(cors({
 app.use(express.json())
 app.use(cookieParser());
 app.get('/', (req, res) => {
-  res.json({ ok: true, msg: 'API FluxData Auth funcionando' })
+  res.json({ ok: true, msg: 'API FluxData funcionando' })
 })
 
-// Rutas de autenticación
-app.use('/api/auth', authRoutes)
 
-// Rutas de clientes
-app.use('/api/clientes', clientesRoutes)
+// Ejemplo de ruta protegida
+app.get("/api/auth/me", authRequired, (req, res) => {
+  res.json({ user: req.user });
+});
 
 // Rutas de empresas
 app.use('/api/empresas', empresasRoutes)//Habilitar empresas
@@ -62,6 +63,10 @@ app.use("/api/pdf", pdfRoutes);
 
 app.use("/api/xml", xmlRoutes);
 
+app.use("/api/clientes", clientesRoutes)
+
+app.use("/api/registros", registrosRouter);
+
 
 app.get('/api/auth/me', authRequired, (req, res) => {
   res.json({ user: req.user })
@@ -69,3 +74,4 @@ app.get('/api/auth/me', authRequired, (req, res) => {
 
 const PORT = process.env.PORT || 3000
 app.listen(PORT, () => console.log(`Servidor en http://localhost:${PORT}`))
+

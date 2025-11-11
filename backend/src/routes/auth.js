@@ -5,21 +5,24 @@ import jwt from 'jsonwebtoken'
 import { prisma } from '../lib/prisma.js'
 
 const router = Router()
-
-// 📌 Registro de usuario
 router.post('/register', async (req, res) => {
   try {
     const { name, email, password } = req.body
     if (!name || !email || !password) {
       return res.status(400).json({ error: 'Todos los campos son requeridos' })
     }
-
+    if (password.length < 6) {
+      return res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres' })
+    }
+    if (!email.includes("@")) {
+      return res.status(400).json({ error: "El correo electrónico debe contener '@'" });
+    }
     // Validar si ya existe el usuario
     const exists = await prisma.usuarios.findUnique({
       where: { correo_contacto: email }
     })
     if (exists) return res.status(409).json({ error: 'Email ya registrado' })
-
+    
     // Encriptar contraseña
     const hash = await bcrypt.hash(password, 10)
 

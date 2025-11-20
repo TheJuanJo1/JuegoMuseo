@@ -37,8 +37,7 @@ export default function Ayuda() {
           <div key={index} className="border-b border-gray-200">
             <button
               onClick={() => toggleIndex(index)}
-              className="w-full text-left py-4 px-3 flex justify-between items-center hover:bg-gray-50 transition-colors rounded"
-            >
+              className="w-full text-left py-4 px-3 flex justify-between items-center hover:bg-gray-50 transition-colors rounded">
               <span className="font-semibold text-lg text-gray-800">
                 {item.pregunta}
               </span>

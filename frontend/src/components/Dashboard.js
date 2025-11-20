@@ -94,14 +94,10 @@ export default function Dashboard() {
 
   return (
     <div className="p-6">
-
-      {/* 4 gráficas horizontales */}
       <div className="flex space-x-4 mb-6">
-        {/* Facturas emitidas */}
         <div
           className="bg-white p-4 rounded shadow w-1/4 cursor-pointer"
-          onClick={() => setFilter({ tipo: "Factura" })}
-        >
+          onClick={() => setFilter({ tipo: "Factura" })}>
           <h3 className="text-lg font-semibold">Facturas emitidas</h3>
           <p className="text-2xl font-bold">{facturaDocs.length}</p>
           <p className="text-sm text-gray-500">Últimos 7 días</p>
@@ -113,18 +109,14 @@ export default function Dashboard() {
                   dataKey="Facturas"
                   stroke="#4F46E5"
                   strokeWidth={2}
-                  dot={false}
-                />
+                  dot={false}/>
               </LineChart>
             </ResponsiveContainer>
           </div>
         </div>
-
-        {/* Estado de facturas */}
         <div
           className="bg-white p-4 rounded shadow w-1/4 cursor-pointer"
-          onClick={() => setFilter({ tipo: "Factura" })}
-        >
+          onClick={() => setFilter({ tipo: "Factura" })}>
           <h3 className="text-lg font-semibold mb-2">Estado de facturas</h3>
           <div className="flex items-center space-x-4">
             <ResponsiveContainer width={80} height={80}>
@@ -146,8 +138,7 @@ export default function Dashboard() {
                   ]}
                   dataKey="value"
                   innerRadius={25}
-                  outerRadius={35}
-                >
+                  outerRadius={35}>
                   {["#27374D", "#DDE6ED"].map((c, i) => (
                     <Cell key={i} fill={c} />
                   ))}
@@ -167,12 +158,9 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
-
-        {/* Notas crédito */}
         <div
           className="bg-white p-4 rounded shadow w-1/4 cursor-pointer"
-          onClick={() => setFilter({ tipo: "Nota Crédito" })}
-        >
+          onClick={() => setFilter({ tipo: "Nota Crédito" })}>
           <h3 className="text-lg font-semibold">Notas crédito</h3>
           <p className="text-2xl font-bold">{notaCreditoDocs.length}</p>
           <div className="mt-2 text-sm">
@@ -186,12 +174,9 @@ export default function Dashboard() {
             </p>
           </div>
         </div>
-
-        {/* Notas débito */}
         <div
           className="bg-white p-4 rounded shadow w-1/4 cursor-pointer"
-          onClick={() => setFilter({ tipo: "Nota Débito" })}
-        >
+          onClick={() => setFilter({ tipo: "Nota Débito" })}>
           <h3 className="text-lg font-semibold">Notas débito</h3>
           <p className="text-2xl font-bold">{notaDebitoDocs.length}</p>
           <div className="mt-2 text-sm">
@@ -206,19 +191,12 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-
-      {/* Estado documentos con colores nuevos */}
       <div className="flex space-x-4 mb-6">
         <div className="bg-white p-4 rounded shadow w-1/3 relative">
           <h3 className="text-lg font-semibold mb-2">Estado documentos</h3>
-          <button
-  onClick={() => openModal("estado")} // o "total" para la otra gráfica
-  className="absolute top-2 right-2 text-blue-600 hover:underline"
->
-  Más detalles
-</button>
-
-
+          <button onClick={() => openModal("estado")} className="absolute top-2 right-2 text-blue-600 hover:underline">
+            Más detalles
+          </button>
           <div className="flex items-center">
             <div className="relative w-[120px] h-[120px]">
               <ResponsiveContainer>
@@ -228,13 +206,11 @@ export default function Dashboard() {
                     dataKey="value"
                     innerRadius={40}
                     outerRadius={55}
-                    paddingAngle={2}
-                  >
+                    paddingAngle={2}>
                     {estadoDocs.map((entry, index) => (
                       <Cell
                         key={`cell-${index}`}
-                        fill={estadoColors[index % estadoColors.length]}
-                      />
+                        fill={estadoColors[index % estadoColors.length]}/>
                     ))}
                   </Pie>
                 </PieChart>
@@ -244,7 +220,6 @@ export default function Dashboard() {
                 <p className="text-xs text-gray-500">Documentos</p>
               </div>
             </div>
-
             <div className="ml-6 space-y-2">
               {estadoDocs.map((doc, i) => (
                 <div key={i} className="flex items-center space-x-2">
@@ -259,8 +234,6 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
-
-        {/* Total por documento (barras verticales automáticas) */}
 <div className="bg-white p-4 rounded shadow w-1/3 relative">
   <h3 className="text-lg font-semibold mb-2">Total por documento</h3>
   <button
@@ -287,15 +260,11 @@ export default function Dashboard() {
     </BarChart>
   </ResponsiveContainer>
 </div>
-
-
-        {/* Última gráfica de barras (horizontal, solo total de documentos) */}
-        <div className="bg-white p-4 rounded shadow w-1/3 relative">
+<div className="bg-white p-4 rounded shadow w-1/3 relative">
   <h3 className="text-lg font-semibold mb-2">Total de documentos</h3>
   <button
-  onClick={() => openModal("total")} // o "total" para la otra gráfica
-  className="absolute top-2 right-2 text-blue-600 hover:underline"
->
+  onClick={() => openModal("total")} 
+  className="absolute top-2 right-2 text-blue-600 hover:underline">
   Más detalles
 </button>
 
@@ -310,7 +279,6 @@ export default function Dashboard() {
   </ResponsiveContainer>
 </div>
 </div>
-      {/* Tabla filtrada (sin cambios) */}
       <div className="mt-6 bg-white rounded shadow-md p-4">
         <h2 className="text-lg font-semibold mb-3">
           Últimos documentos enviados
@@ -340,46 +308,32 @@ export default function Dashboard() {
               className="text-blue-600 hover:underline"
               onClick={() =>
                 setSelectedDoc(selectedDoc === i ? null : i)
-              }
-            >
+              }>
               Ver detalle
             </button>
           </td>
         </tr>
-
         {selectedDoc === i && (
-  <tr>
-    <td colSpan="5" className="p-4 bg-gray-50">
-      <strong>Detalles del documento:</strong>
-
-      {d.Producto_Factura?.length > 0 ? (
-        <>
-          <p className="mt-2 font-semibold">Productos:</p>
-          <ul className="list-disc ml-5">
-            {d.Producto_Factura.map((p, idx) => (
-              <li key={idx}>
-                {p.nombre_producto} - Cantidad: {p.cantidad} - Valor: ${p.valor}
-              </li>
-            ))}
-          </ul>
-        </>
-      ) : (
-        <p>Total facturado: ${d.valor_total}</p>
-      )}
-
-      <p className="mt-2 text-sm text-gray-500">
-  Hora: {new Date(d.fecha_emision).toLocaleTimeString("es-CO", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false
-  })}
-</p>
-    </td>
-  </tr>
-)}
-
-      </React.Fragment>
-    ))}
+          <tr><td colSpan="5" className="p-4 bg-gray-50">
+            <strong>Detalles del documento:</strong>
+            {d.Producto_Factura?.length > 0 ? (<>
+            <p className="mt-2 font-semibold">Productos:</p>
+            <ul className="list-disc ml-5">
+              {d.Producto_Factura.map((p, idx) => (
+                <li key={idx}>
+                  {p.nombre_producto} - Cantidad: {p.cantidad} - Valor: ${p.valor}
+                  </li>
+                ))}
+                </ul>
+                </>) : (<p>Total facturado: ${d.valor_total}</p>)}
+                <p className="mt-2 text-sm text-gray-500">
+                  Hora: {new Date(d.fecha_emision).toLocaleTimeString("es-CO", {
+                    hour: "2-digit", minute: "2-digit", hour12: false })}</p>
+                    </td>
+                  </tr>
+                )}
+                </React.Fragment>
+              ))}
             </tbody>
           </table>
         </div>
@@ -395,15 +349,13 @@ export default function Dashboard() {
         </div>
         <button
           onClick={() => navigate("/historial")}
-          className="text-blue-600 hover:underline"
-        >
+          className="text-blue-600 hover:underline">
           Ver historial completo
         </button>
         {modalOpen && (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div className="bg-white rounded-lg p-6 w-96 h-96 relative flex flex-col items-center justify-center">
-
-      <button
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-96 h-96 relative flex flex-col items-center justify-center">
+              <button
         onClick={() => setModalOpen(false)}
         className="absolute top-2 right-2 text-gray-500 hover:text-gray-800 text-xl font-bold"
       >
@@ -420,17 +372,13 @@ export default function Dashboard() {
           ))}
         </>
       )}
-
-      {modalContent === "total" && (
-        <>
-          <h2 className="text-xl font-semibold mb-4">Total de documentos</h2>
-          <p className="text-xl font-bold">{totalDocs}</p>
-        </>
-      )}
-
-    </div>
-  </div>
-)}
+      {modalContent === "total" && (<> <h2 className="text-xl font-semibold mb-4">Total de documentos</h2>
+      <p className="text-xl font-bold">{totalDocs}</p>
+         </>
+         )} 
+        </div>
+       </div>
+       )}
       </div>
     </div>
   );

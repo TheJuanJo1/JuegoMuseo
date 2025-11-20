@@ -27,6 +27,20 @@ router.post("/pre-register", async (req, res) => {
     if (contrasena !== confirmar_contrasena) {
       return res.status(400).json({ error: "Las contraseñas no coinciden" });
     }
+    const empresaExistente = await prisma.usuarios.findFirst({
+      where: {
+        OR: [
+          { nit_empresa },
+          { nombre_usuario: nombre_empresa }
+        ]
+      }
+    });
+
+    if (empresaExistente) {
+      return res.status(409).json({
+        error: "Ya existe una empresa registrada con ese nombre o NIT."
+      });
+    }
     //Hashear la contraseña ANTES de guardarla
     const hashedPass = await bcrypt.hash(contrasena, 10);
 
@@ -62,7 +76,7 @@ router.post("/pre-register", async (req, res) => {
 });
 router.post("/verify-code", async (req, res) => {
   try {
-    const { correo, codigo } = req.body;
+    const { correo_contacto: correo, codigo } = req.body;
 
     const registro = await prisma.codigos_verificacion.findFirst({
       where: { correo, codigo }
@@ -76,7 +90,6 @@ router.post("/verify-code", async (req, res) => {
       return res.status(400).json({ error: "El código ha expirado" });
     }
 
-    // Crear empresa en Usuarios
     const empresa = await prisma.usuarios.create({
       data: {
         nombre_usuario: registro.nombre_empresa,
@@ -87,7 +100,6 @@ router.post("/verify-code", async (req, res) => {
       }
     });
 
-    // Eliminar el registro temporal
     await prisma.codigos_verificacion.delete({
       where: { id: registro.id }
     });
@@ -112,6 +124,7 @@ router.post("/verify-code", async (req, res) => {
     res.status(500).json({ error: "Error en verificación" });
   }
 });
+
 // Reenviar código
 router.post("/resend-code", async (req, res) => {
   try {

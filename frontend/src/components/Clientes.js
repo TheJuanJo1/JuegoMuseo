@@ -50,7 +50,6 @@ export default function ClientesForm() {
     <div className="flex justify-center p-6">
       <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow-md w-[500px] space-y-3">
         <h2 className="text-2xl font-bold mb-4 text-center">Registrar Cliente</h2>
-
         <input type="text" name="nombre_cliente" placeholder="Nombre" value={form.nombre_cliente} onChange={handleChange} className="w-full p-2 border rounded"/>
         <input type="text" name="apellido_cliente" placeholder="Apellido" value={form.apellido_cliente} onChange={handleChange} className="w-full p-2 border rounded"/>
         <select name="tipo_documento" value={form.tipo_documento} onChange={handleChange} className="w-full p-2 border rounded">
@@ -63,7 +62,6 @@ export default function ClientesForm() {
         <input type="text" name="numero_documento" placeholder="Número de documento" value={form.numero_documento} onChange={handleChange} className="w-full p-2 border rounded"/>
         <input type="text" name="direccion_cliente" placeholder="Dirección" value={form.direccion_cliente} onChange={handleChange} className="w-full p-2 border rounded"/>
         <input type="email" name="correo_cliente" placeholder="Correo electrónico" value={form.correo_cliente} onChange={handleChange} className="w-full p-2 border rounded"/>
-
         <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Registrar</button>
         {msg && <p className="text-sm mt-2 text-center">{msg}</p>}
       </form>

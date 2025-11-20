@@ -30,26 +30,23 @@ export default function LoginForm() {
       return;
     }
      if (data.user.role === "admin") {
-        navigate("/admin/dashboard"); // el admin va directo al dashboard
+        navigate("/admin/dashboard"); 
       } else {
     const usuarioId = data.user.id;
-    localStorage.setItem("usuarioId", usuarioId); // ID del usuario
-
-    //Verificar si completó el formulario
+    localStorage.setItem("usuarioId", usuarioId);
     const estadoRes = await fetch(`http://localhost:3000/api/configuracion/estado/${usuarioId}`);
     const estadoData = await estadoRes.json();
 
     if (estadoData.completado) {
-      navigate("/dashboard"); // ya completó → dashboard
+      navigate("/dashboard"); 
     } else {
-      navigate(`/empresa/${usuarioId}`); // no completó → formulario empresa
+      navigate(`/empresa/${usuarioId}`); 
     }
   }
   } catch (err) {
     setError("No se pudo conectar con el servidor");
   }
 };
-
   return (
     <div className="flex items-center justify-center min-h-screen bg-[#EAF0F6] font-[Work Sans]"
       style={{
@@ -64,24 +61,21 @@ export default function LoginForm() {
         <img
           src={laptopImage}
           alt="Laptop con dashboard"
-          className="object-contain w-[98%] h-[98%] rounded-lg"
-        />
+          className="object-contain w-[98%] h-[98%] rounded-lg"/>
       </div>
         <div
           className="w-1/2 flex flex-col justify-between px-12 py-8 rounded-r-2xl"
           style={{
             backgroundColor: "#FFFFFF",
             clipPath: "polygon(6% 0, 100% 0, 100% 100%, 0% 100%)",
-          }}
-        >
+          }}>
           <div className="flex justify-between items-center mb-6">
             <img src={fluxLogo} alt="FluxData" className="h-4" />
             <img
               src={backArrow}
               alt="Volver"
               className="h-6 cursor-pointer"
-              onClick={() => navigate("/")}
-            />
+              onClick={() => navigate("/")}/>
           </div>
           <div className="flex flex-col justify-center flex-grow">
             <div className="text-center mb-14">
@@ -101,24 +95,20 @@ export default function LoginForm() {
                 placeholder="Nombre de Usuario o Correo"
                 value={emailOrName}
                 onChange={(e) => setEmailOrName(e.target.value)}
-                className="w-full p-3 mb-5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-              />
+                className="w-full p-3 mb-5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"/>
               <input
                 type="password"
                 placeholder="Contraseña"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full p-3 mb-6 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-              />
+                className="w-full p-3 mb-6 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"/>
               <div className="flex justify-end mb-8">
                 <Link
                   to="/forgot-password"
-                  className="text-sm text-gray-500 hover:text-blue-600"
-                >
+                  className="text-sm text-gray-500 hover:text-blue-600">
                   ¿Olvidaste tu contraseña?
                 </Link>
               </div>
-
               <button type="submit" className="w-full bg-[#2E3A59] text-white py-3 rounded-full font-semibold hover:bg-[#1f2a40] transition mt-10 mb-2">
                 Iniciar Sesión
               </button>

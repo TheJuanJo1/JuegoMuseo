@@ -37,6 +37,7 @@ model Documentos_XML {
   id_documento         Int                @id @default(autoincrement())
   tipo_documento       String
   numero_documento     String
+  numero_serie         String?
   prefijo              String? 
   fecha_emision        DateTime           @db.Timestamp(6)
   valor_total          Decimal            @db.Decimal(15, 2)
@@ -83,10 +84,10 @@ model Producto_Factura {
 
 model Usuarios {
   id_usuario                   Int                      @id @default(autoincrement())
-  nombre_usuario               String
+  nombre_usuario               String                   @unique
   rol_usuario                  String?
   contrasena_usuario           String
-  nit_empresa                  String
+  nit_empresa                  String                   @unique
   correo_contacto              String                   @unique
   prefijo_numeracion           Int?
   num_inicial                  Int?
@@ -101,6 +102,7 @@ model Usuarios {
   Documentos_XML               Documentos_XML[]
   Eventos                      Eventos[]
   PasswordResetToken           PasswordResetToken[]
+  Rangos     Rangos[]
   configuracionTecnica         Configuracion_Tecnica?   @relation("UsuarioConfiguracion")
 }
 
@@ -144,6 +146,7 @@ model Registros_Sistema {
   empresa           String?
   tipo_documento    String?
   numero_documento  String?
+  numero_serie      String?
   accion            String
   resultado         String
   mensaje           String?
@@ -152,3 +155,11 @@ model Registros_Sistema {
   @@map("Registros_Sistema")
 }
 
+model Rangos {
+  id      Int    @id @default(autoincrement())
+  tipo    String   // "FACTURA", "NC", "ND"
+  inicio  Int
+  fin     Int
+  id_usuario Int
+  Usuarios Usuarios @relation(fields: [id_usuario], references: [id_usuario])
+}

@@ -1,4 +1,3 @@
-// src/components/RegisterForm.jsx
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import fluxLogo from "../assets/fluxdata.png";
@@ -18,32 +17,73 @@ export default function RegisterForm() {
   });
 
   const [msg, setMsg] = useState("");
+  const [msgCodigo, setMsgCodigo] = useState("");
   const [step, setStep] = useState(1);
   const [codigo, setCodigo] = useState(Array(6).fill(""));
   const navigate = useNavigate();
   const location = useLocation(); 
-
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
-
   const handleCodigoChange = async (e, index) => {
     const value = e.target.value.slice(-1);
     const newCodigo = [...codigo];
     newCodigo[index] = value;
     setCodigo(newCodigo);
 
-    if (value && index < 5) document.getElementById(`codigo-${index + 1}`).focus();
-    if (newCodigo.join("").length === 6) await handleVerify(newCodigo.join(""));
+    if (value && index < 5){document.getElementById(`codigo-${index + 1}`).focus();
+  }
+    if (newCodigo.join("").length === 6) {await handleVerify(newCodigo.join(""));
+}
   };
-
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setMsg("");
-     if (form.contrasena.length < 6) {
+  e.preventDefault();
+  setMsg("");
+  setMsgCodigo("");
+
+  const { nombre_empresa, nit_empresa, correo_contacto, contrasena, confirmar_contrasena } = form;
+
+  // Verificamos si todos están vacíos
+  if (!nombre_empresa && !nit_empresa && !correo_contacto && !contrasena && !confirmar_contrasena) {
+    setMsg("Todos los campos son requeridos");
+    return;
+  }
+
+  // Validación específica
+  if (!nombre_empresa.trim()) {
+    setMsg("El nombre de la empresa es obligatorio");
+    return;
+  }
+
+  if (!nit_empresa.trim()) {
+    setMsg("El NIT es obligatorio");
+    return;
+  }
+
+  if (!/^\d{10}$/.test(nit_empresa)) {
+    setMsg("El NIT debe tener 10 dígitos numéricos");
+    return;
+  }
+
+  if (!correo_contacto.trim()) {
+    setMsg("El correo de contacto es obligatorio");
+    return;
+  }
+
+  if (!contrasena.trim()) {
+    setMsg("La contraseña es obligatoria");
+    return;
+  }
+
+  if (contrasena.length < 6) {
     setMsg("La contraseña debe tener al menos 6 caracteres");
     return;
   }
 
-  if (form.contrasena !== form.confirmar_contrasena) {
+  if (!confirmar_contrasena.trim()) {
+    setMsg("Debes confirmar la contraseña");
+    return;
+  }
+
+  if (contrasena !== confirmar_contrasena) {
     setMsg("Las contraseñas no coinciden");
     return;
   }
@@ -54,15 +94,16 @@ export default function RegisterForm() {
         body: JSON.stringify(form),
       });
       const data = await res.json();
-      if (!res.ok) setMsg(data.error || "Error en el registro");
-      else setStep(2);
+      if (!res.ok) {setMsg(data.error || "Error en el registro");
+      return;
+    }
+      setStep(2);
     } catch (error) {
       setMsg("Error de conexión con el servidor");
     }
   };
-
   const handleVerify = async (codigoCompleto) => {
-    setMsg("");
+    setMsgCodigo("");
     try {
       const res = await fetch("http://localhost:3000/api/empresas/verify-code", {
         method: "POST",
@@ -70,9 +111,16 @@ export default function RegisterForm() {
         body: JSON.stringify({ correo_contacto: form.correo_contacto, codigo: codigoCompleto }),
       });
       const data = await res.json();
-      if (!res.ok) setMsg(data.error || "Código inválido");
-      else {
-        setMsg("Empresa registrada exitosamente");
+      if (!res.ok) {setMsgCodigo(data.error || "Código inválido");
+      setCodigo(Array(6).fill(""));
+      setTimeout(() => {
+        const firstInput = document.getElementById("codigo-0");
+        if (firstInput) firstInput.focus();
+      }, 50);
+
+      return;
+    }
+        setMsgCodigo("Empresa registrada exitosamente");
         setTimeout(() => {
           if (location.state?.fromInicio) {
             navigate("/", { replace: true });
@@ -80,9 +128,8 @@ export default function RegisterForm() {
             navigate("/login");
           }
         }, 2000);
-      }
-    } catch (error) {
-      setMsg("Error de conexión con el servidor");
+      } catch (error) {
+      setMsgCodigo("Error de conexión con el servidor");
     }
   };
 
@@ -114,7 +161,11 @@ export default function RegisterForm() {
                   src={backArrow}
                   alt="Volver"
                   className="h-6 cursor-pointer"
-                  onClick={() => setStep(1)}
+                  onClick={() => {setMsg("");
+                    setMsgCodigo("");
+                    setCodigo(Array(6).fill(""));
+                    setStep(1);
+                  }}
                 />
               </div>
             </div>
@@ -123,6 +174,9 @@ export default function RegisterForm() {
               <img src={fluxLogo} alt="FluxData" className="h-4" />
               <img src={backArrow} alt="Volver" className="h-6 cursor-pointer"
               onClick={() => {
+                setMsg("");
+                setMsgCodigo("");
+                setCodigo(Array(6).fill(""));
                 if (location.state?.fromInicio) {
                   navigate("/", { replace: true });
                 } else {
@@ -150,12 +204,16 @@ export default function RegisterForm() {
           {step === 1 ? (
             <form onSubmit={handleSubmit} className="w-full max-w-sm mx-auto">
               <input type="text" name="nombre_empresa" placeholder="Nombre de Empresa" value={form.nombre_empresa} onChange={handleChange} className="w-full p-3 mb-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" />
-              <input type="text" name="nit_empresa" placeholder="NIT" value={form.nit_empresa} onChange={handleChange} className="w-full p-3 mb-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" />
+              <input type="text" name="nit_empresa" placeholder="NIT" value={form.nit_empresa} onChange={(e) => {
+                const value = e.target.value.replace(/\D/g, "");
+                setForm({ ...form, nit_empresa: value });
+              }}
+              maxLength="10" className="w-full p-3 mb-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" />
               <input type="email" name="correo_contacto" placeholder="Correo Electrónico" value={form.correo_contacto} onChange={handleChange} className="w-full p-3 mb-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" />
               <input type="password" name="contrasena" placeholder="Contraseña" value={form.contrasena} onChange={handleChange} className="w-full p-3 mb-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" />
               <input type="password" name="confirmar_contrasena" placeholder="Confirmar Contraseña" value={form.confirmar_contrasena} onChange={handleChange} className="w-full p-3 mb-6 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" />
               <button type="submit" className="w-full bg-[#2E3A59] text-white py-3 rounded-full font-semibold hover:bg-[#1f2a40] transition mb-4">Registrarse</button>
-              {msg && <p className="text-red-500 text-center mb-4">{msg}</p>}
+              {msg && <p className="text-red-500 text-xs text-center mb-4">{msg}</p>}
               <p className="text-center text-sm text-gray-600 mt-0">
                 ¿Ya tienes cuenta? <Link to="/login" className="text-blue-600 hover:underline">Inicia Sesión</Link>
               </p>
@@ -167,7 +225,7 @@ export default function RegisterForm() {
                   <input key={i} id={`codigo-${i}`} type="text" value={val} maxLength="1" onChange={(e) => handleCodigoChange(e, i)} className="w-12 h-12 text-center text-lg border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" />
                 ))}
               </div>
-              {msg && <p className="text-red-500 text-center mb-4">{msg}</p>}
+              {msgCodigo && <p className="text-red-500 text-center mb-4">{msgCodigo}</p>}
               <div className="flex justify-center">
                 <button type="button" onClick={async () => {
                   try {
@@ -177,9 +235,9 @@ export default function RegisterForm() {
                       body: JSON.stringify({ correo_contacto: form.correo_contacto }),
                     });
                     const data = await res.json();
-                    if (!res.ok) setMsg(data.error || "Error reenviando código");
+                    if (!res.ok) setMsgCodigo(data.error || "Error reenviando código");
                     else {
-                      setMsg("Se ha enviado un nuevo código a tu correo");
+                      setMsgCodigo("Se ha enviado un nuevo código a tu correo");
                       setCodigo(Array(6).fill(""));
                     }
                   } catch (error) {

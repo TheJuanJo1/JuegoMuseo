@@ -24,36 +24,26 @@ export default function Inicio() {
           />
         </div>
         <div className="flex items-center space-x-12"
-        style={{marginTop: "-1%",  
-    marginRight: "40px",}}
-         >
-          <button
-            className="text-black font-medium px-3 py-1 rounded transition-all duration-200 
-                       hover:border hover:border-black focus:border focus:border-black"
-            onClick={() => navigate("/faq")}
-          >
-            FAQ
-          </button>
-
-          <button
-            className="text-black font-medium px-3 py-1 rounded transition-all duration-200 
-                       hover:border hover:border-black focus:border focus:border-black"
-            onClick={() => navigate("/register", { state: { fromInicio: true } })}
-          >
-            Registrarse
-          </button>
-
-          <button
-            className="text-black font-medium px-4 py-1 rounded transition-all duration-200 
-                       hover:border hover:border-black focus:border focus:border-black"
-            onClick={() => navigate("/login")}
-          >
-            Iniciar Sesión
-          </button>
-        </div>
-      </nav>
-      <div className="flex flex-1 items-center justify-between px-12 relative z-20"
-       style={{
+        style={{marginTop: "-1%", marginRight: "40px",}}>
+          <button className="px-4 py-2 rounded-md text-black font-medium 
+             border border-transparent transition-all duration-200 
+             hover:border-black" onClick={() => navigate("/faq")}>
+              FAQ
+              </button>
+              <button className="px-4 py-2 rounded-md text-black font-medium 
+             border border-transparent transition-all duration-200 
+             hover:border-black" onClick={() => navigate("/register", { state: { fromInicio: true } })}>
+              Registrarse
+              </button>
+              <button className="px-4 py-2 rounded-md text-black font-medium 
+             border border-transparent transition-all duration-200 
+             hover:border-black" onClick={() => navigate("/login")}>
+              Iniciar Sesión
+              </button>
+            </div>
+          </nav>
+        <div className="flex flex-1 items-center justify-between px-12 relative z-20"
+        style={{
           marginTop: "-6%",              
         }}>
         <div className="max-w-lg space-y-12">
@@ -61,8 +51,7 @@ export default function Inicio() {
                 style={{
                   fontSize: "3rem",
                   marginBottom: "1.5rem", 
-                  }}
-                  >¿Quiénes Somos?</h1>
+                  }}>¿Quiénes Somos?</h1>
           <p className="text-gray-700 text-lg"
           style={{
             fontSize: "1.4rem",
@@ -73,34 +62,23 @@ export default function Inicio() {
             las empresas y la DIAN, simplificando el proceso de facturación
             electrónica con seguridad y eficiencia.
           </p>
-          <button
-            className="bg-[#27374D] text-white px-6 py-3 rounded-full shadow-md hover:bg-[#1f2a3b] hover:scale-105 transition-all duration-300"
-            onClick={() =>
-              window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" })
-            }
-          >
-            Más información
-          </button>
         </div>
       </div>
-
-      {/* IMAGEN PRINCIPAL */}
       <div
         aria-hidden="true"
         style={{
           position: "absolute",
           bottom: 0,
           right: 0,
-          width: "60%",        // ajusta ancho
-          height: "80%",       // ajusta altura
+          width: "60%",        
+          height: "80%",      
           backgroundImage: `url(${MainImage})`,
           backgroundRepeat: "no-repeat",
           backgroundPosition: "right bottom",
           backgroundSize: "contain",
           zIndex: 0,       
           pointerEvents: "none"
-        }}
-      />
+        }}/>
     </div>
   );
 }

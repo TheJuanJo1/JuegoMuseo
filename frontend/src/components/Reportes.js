@@ -16,16 +16,13 @@ function transformarDocumento(doc) {
     : null;
   const cliente = doc.Clientes || null;
   const documentoLimpio = Object.fromEntries(
-    Object.entries(doc).filter(
-      ([k, v]) =>
-        v !== null &&
-        k !== "Usuarios" &&
-        k !== "Clientes" &&
-        k !== "Producto_Factura" &&
-        k !== "id_usuario" &&
-        k !== "id_cliente"
-    )
-  );
+  Object.entries(doc).filter(
+    ([k, v]) =>
+      v !== null &&
+      !["Usuarios", "Clientes", "id_usuario", "id_cliente"].includes(k)
+  )
+);
+
   return {
     Empresa: empresa,
     Cliente: cliente,
@@ -112,25 +109,51 @@ const Reportes = () => {
   }, []);
   // Exportar CSV
   const exportarCSV = () => {
-    const encabezados = ["Tipo", "Número", "CUFE/CUDE", "Valor total", "Fecha", "Estado"];
-    const filas = documentos.map((doc) => [
-      doc.tipo_documento,
-      doc.numero || doc.numero_documento || "-",
-      doc.cufe || doc.cude || "-",
-      doc.valor_total || 0,
-      new Date(doc.fecha_emision).toLocaleDateString(),
-      doc.estado_dian,
-    ]);
-    const csvContent =
-      "data:text/csv;charset=utf-8," +
-      [encabezados, ...filas].map((e) => e.join(",")).join("\n");
-    const link = document.createElement("a");
-    link.href = encodeURI(csvContent);
-    link.download = "reportes.csv";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
+  if (!documentos || documentos.length === 0) {
+    alert("No hay documentos para exportar");
+    return;
+  }
+
+  // Cabecera del CSV
+  const encabezado = [
+    "Tipo",
+    "Número",
+    "CUFE/CUDE",
+    "Valor total",
+    "Fecha",
+    "Estado"
+  ];
+
+  // Convertir los documentos a filas CSV
+  const filas = documentos.map(d => [
+    d.Documento.tipo_documento || "-",
+    d.Documento.numero_documento || "-",
+    d.Documento.cufe || d.Documento.cude || "-",
+    d.Documento.valor_total || 0,
+    new Date(d.Documento.fecha_emision).toLocaleDateString("es-CO"),
+    d.Documento.estado_dian || "-"
+  ]);
+
+  // Unir encabezado y filas, separadas por comas
+  const contenidoCSV = [encabezado, ...filas]
+    .map(fila => fila.map(valor => `"${valor}"`).join(",")) // comillas para proteger valores con comas
+    .join("\n");
+
+  // Crear archivo con BOM para que Excel lo reconozca en UTF-8
+  const blob = new Blob(["\uFEFF" + contenidoCSV], {
+    type: "text/csv;charset=utf-8;"
+  });
+
+  // Descargar el archivo
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "documentos.csv";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
+ 
   // Datos para gráficas
   const dataDocs = [
     { tipo: "Factura", cantidad: documentos.filter((d) => d.Documento.tipo_documento?.toLowerCase().includes("factura")).length },
@@ -442,7 +465,7 @@ const ticks = Array.from(new Set([0, midTick, Math.round(maxMonthly)]));
   <React.Fragment key={doc.Documento.id_documento}>
     <tr>
       <td className="p-2 border">{doc.Documento.tipo_documento}</td>
-      <td className="p-2 border">{doc.Documento.numero_documento || "-"}</td>
+      <td className="p-2 border">{doc.Documento.numero_serie || "-"}</td>
       <td className="p-2 border">{doc.Documento.cufe || doc.Documento.cude || "-"}</td>
       <td className="p-2 border">${doc.Documento.valor_total || 0}</td>
       <td className="p-2 border">

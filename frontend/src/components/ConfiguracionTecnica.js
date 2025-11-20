@@ -7,7 +7,7 @@ export default function ConfiguracionTecnica({ usuarioId }) {
   const [mostrarCampos, setMostrarCampos] = useState(false);
   const [mostrarModalCert, setMostrarModalCert] = useState(false);
   const [nuevoCert, setNuevoCert] = useState({ archivo: null, fecha_expedicion: "" });
-  const [nuevoRango, setNuevoRango] = useState({ numero_inicial: "", numero_final: "" });
+  const [nuevoRango, setNuevoRango] = useState({ tipo_documento: "Factura", numero_inicial: "", numero_final: "" });
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -47,7 +47,7 @@ export default function ConfiguracionTecnica({ usuarioId }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          tipo_documento: "Factura",
+          tipo_documento: nuevoRango.tipo_documento,
           numero_inicial: nuevoRango.numero_inicial,
           numero_final: nuevoRango.numero_final,
           resolucion: "Resolución automática",
@@ -60,7 +60,7 @@ export default function ConfiguracionTecnica({ usuarioId }) {
 
       setNumeraciones(data.numeraciones);
       setMostrarCampos(false);
-      setNuevoRango({ numero_inicial: "", numero_final: "" });
+      setNuevoRango({ tipo_documento: "Factura", numero_inicial: "", numero_final: "" });
     } catch (error) {
       console.error("Error al guardar numeración:", error);
     }
@@ -109,11 +109,9 @@ export default function ConfiguracionTecnica({ usuarioId }) {
     <div className="p-6 font-sans">
       <div className="mb-6">
         <p><strong>Nombre de empresa:</strong> {config.usuario?.nombre_usuario || "Sin nombre"}</p>
-        <p><strong>NIT:</strong> {config.id_usuario}</p>
+        <p><strong>NIT:</strong> {config.usuario?.nit_empresa}</p>
         <p><strong>Régimen fiscal:</strong> {config.regimen_tributario}</p>
       </div>
-
-      {/* Numeraciones */}
       <h3 className="font-semibold mb-2">Numeraciones autorizadas</h3>
       <table className="table-auto border-collapse border border-gray-300 w-full mb-4">
         <thead>
@@ -147,6 +145,18 @@ export default function ConfiguracionTecnica({ usuarioId }) {
         <div className="mb-6 bg-gray-100 p-4 rounded-lg border border-gray-300">
           <div className="flex gap-4 mb-4">
             <div>
+              <label className="block text-sm font-medium text-gray-700">Tipo de documento:</label>
+              <select
+                value={nuevoRango.tipo_documento}
+                onChange={(e) => setNuevoRango({ ...nuevoRango, tipo_documento: e.target.value })}
+                className="border border-gray-300 rounded px-2 py-1 w-48"
+              >
+                <option value="Factura">Factura</option>
+                <option value="Nota Crédito">Nota Crédito</option>
+                <option value="Nota Débito">Nota Débito</option>
+              </select>
+            </div>
+            <div>
               <label className="block text-sm font-medium text-gray-700">Número inicial:</label>
               <input
                 type="number"
@@ -168,8 +178,7 @@ export default function ConfiguracionTecnica({ usuarioId }) {
           <button
             onClick={handleGuardarNumeracion}
             className="text-white px-4 py-2 rounded hover:opacity-90"
-            style={{ backgroundColor: "#1B263B" }}
-          >
+            style={{ backgroundColor: "#1B263B" }}>
             Guardar numeración
           </button>
         </div>
@@ -178,13 +187,11 @@ export default function ConfiguracionTecnica({ usuarioId }) {
       <p><strong>Certificado:</strong> {config.certificado_firma}</p>
       <p><strong>Fecha de expiración:</strong> {new Date(config.fecha_expiracion).toLocaleDateString()}</p>
       <p><strong>Estado:</strong> {estado}</p>
-
       {(estado === "Expirado" || estado === "Próximo a vencer") && (
         <button
           className="text-white px-4 py-2 rounded mt-2 hover:opacity-90 transition-all duration-300"
           onClick={() => setMostrarModalCert(true)}
-          style={{ backgroundColor: "#8B0000" }}
-        >
+          style={{ backgroundColor: "#8B0000" }}>
           Regenerar certificado
         </button>
       )}
@@ -192,14 +199,12 @@ export default function ConfiguracionTecnica({ usuarioId }) {
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40">
           <div className="bg-white p-6 rounded-lg shadow-lg w-96">
             <h2 className="text-lg font-semibold mb-4">Regenerar certificado</h2>
-
             <label className="block mb-2 text-sm font-medium">Archivo de certificado (.p12):</label>
             <input
               type="file"
               accept=".p12"
               onChange={(e) => setNuevoCert({ ...nuevoCert, archivo: e.target.files[0] })}
-              className="border border-gray-300 rounded w-full px-2 py-1 mb-3"
-            />
+              className="border border-gray-300 rounded w-full px-2 py-1 mb-3"/>
             <label className="block mb-2 text-sm font-medium">Fecha de expedición:</label>
             <input
               type="date"
@@ -210,15 +215,13 @@ export default function ConfiguracionTecnica({ usuarioId }) {
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setMostrarModalCert(false)}
-                className="px-4 py-2 rounded text-gray-700 border border-gray-400 hover:bg-gray-200"
-              >
+                className="px-4 py-2 rounded text-gray-700 border border-gray-400 hover:bg-gray-200">
                 Cancelar
               </button>
               <button
                 onClick={handleGuardarCertificado}
                 className="text-white px-4 py-2 rounded hover:opacity-90"
-                style={{ backgroundColor: "#27374D" }}
-              >
+                style={{ backgroundColor: "#27374D" }}>
                 Guardar
               </button>
             </div>
@@ -230,8 +233,7 @@ export default function ConfiguracionTecnica({ usuarioId }) {
       <button
         className="text-white px-4 py-2 rounded mt-2 hover:opacity-90 transition-all duration-300"
         onClick={handleRegenerarToken}
-        style={{ backgroundColor: "#27374D" }}
-      >
+        style={{ backgroundColor: "#27374D" }}>
         Regenerar token
       </button>
     </div>

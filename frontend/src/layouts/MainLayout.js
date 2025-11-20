@@ -14,12 +14,16 @@ export default function MainLayout() {
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
 
+  // 🚀 NUEVA constante: backend desde Vercel .env
+  const API = import.meta.env.VITE_BACKEND_URL;
+
   const handleLogout = async () => {
     try {
-      await fetch("http://localhost:3000/api/logout", {
+      await fetch(`${API}/api/logout`, {
         method: "POST",
         credentials: "include",
       });
+
       localStorage.removeItem("token");
       navigate("/login");
     } catch (err) {

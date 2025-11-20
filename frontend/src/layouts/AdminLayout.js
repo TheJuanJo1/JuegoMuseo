@@ -15,9 +15,12 @@ export default function AdminLayout() {
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
 
+  // 🚀 Backend desde .env
+  const API = import.meta.env.VITE_BACKEND_URL;
+
   const handleLogout = async () => {
     try {
-      await fetch("http://localhost:3000/api/logout", {
+      await fetch(`${API}/api/logout`, {
         method: "POST",
         credentials: "include",
       });
@@ -141,12 +144,13 @@ export default function AdminLayout() {
           </button>
         </div>
       </aside>
+
       <div
         className={`flex-1 flex flex-col transition-all duration-300 ${
           collapsed ? "ml-32" : "ml-80"
         }`}
       >
-        <TopBarAdmin/>
+        <TopBarAdmin />
         <main className="flex-1 p-6">
           <Outlet />
         </main>
@@ -154,4 +158,3 @@ export default function AdminLayout() {
     </div>
   );
 }
-

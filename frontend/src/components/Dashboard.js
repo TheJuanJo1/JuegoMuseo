@@ -21,23 +21,24 @@ export default function Dashboard() {
 
   // Cargar últimos documentos
   useEffect(() => {
-    fetch("http://localhost:3000/api/ultimos", {
-      credentials: "include",
-    })
-      .then((res) => res.json())
-      .then((data) => setDocs(Array.isArray(data) ? data : []))
-      .catch((err) => console.error(err));
-  }, []);
+  fetch(`${import.meta.env.VITE_BACKEND_URL}/api/ultimos`, {
+    credentials: "include",
+  })
+    .then((res) => res.json())
+    .then((data) => setDocs(Array.isArray(data) ? data : []))
+    .catch((err) => console.error(err));
+}, []);
 
   // Cargar estadísticas globales
   useEffect(() => {
-    fetch("http://localhost:3000/api/estadisticas", {
-      credentials: "include",
-    })
-      .then((res) => res.json())
-      .then((data) => setEstadisticas(data))
-      .catch((err) => console.error(err));
-  }, []);
+  fetch(`${import.meta.env.VITE_BACKEND_URL}/api/estadisticas`, {
+    credentials: "include",
+  })
+    .then((res) => res.json())
+    .then((data) => setEstadisticas(data))
+    .catch((err) => console.error(err));
+}, []);
+
 
   const filteredDocs = filter
     ? docs.filter((d) => {

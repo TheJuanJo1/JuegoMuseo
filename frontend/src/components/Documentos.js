@@ -23,91 +23,68 @@ export default function Documentos() {
   }, [filter, search]);
 
   const getDocDate = (d) => {
-    if (!d || !d.fecha_emision) return null;
+    if (!d || !d.fecha_emision) return "-";
     const dt = new Date(d.fecha_emision);
-    if (isNaN(dt)) return null;
-    return dt.toISOString().split("T")[0]; 
+    return isNaN(dt) ? "-" : dt.toISOString().split("T")[0];
   };
 
   const matchTipo = (d) => {
     if (!filter.tipo) return true;
     const tipoDoc = (d.tipo_documento || "").toLowerCase();
-
     if (filter.tipo === "Factura") return tipoDoc.includes("factura");
-    if (filter.tipo === "Nota Crédito" || filter.tipo === "Nota crédito")
-      return tipoDoc.includes("crédito") || tipoDoc.includes("credito");
-    if (filter.tipo === "Nota Débito" || filter.tipo === "Nota débito")
-      return tipoDoc.includes("débito") || tipoDoc.includes("debito");
-
-    // fallback: contains
+    if (filter.tipo === "Nota Crédito") return tipoDoc.includes("crédito") || tipoDoc.includes("credito");
+    if (filter.tipo === "Nota Débito") return tipoDoc.includes("débito") || tipoDoc.includes("debito");
     return tipoDoc.includes(filter.tipo.toLowerCase());
   };
 
   const filteredDocs = docs
-    .filter((d) => {
-      // filtro tipo
-      if (!matchTipo(d)) return false;
-
-      // filtro estado
-      if (filter.estado && (d.estado_dian || "").toLowerCase() !== filter.estado.toLowerCase())
-        return false;
-
-      // filtro fecha (compara YYYY-MM-DD)
-      if (filter.fecha) {
-        const docDate = getDocDate(d);
-        if (!docDate || !docDate.startsWith(filter.fecha)) return false;
-      }
-
-      return true;
-    })
+    .filter((d) => matchTipo(d))
+    .filter((d) => !filter.estado || (d.estado_dian || "").toLowerCase() === filter.estado.toLowerCase())
+    .filter((d) => !filter.fecha || getDocDate(d).startsWith(filter.fecha))
     .filter((d) => {
       if (!search) return true;
       const s = search.trim().toLowerCase();
-      const num = (d.numero_documento || "").toString().toLowerCase();
+      const num = (d.numero_documento || "").toLowerCase();
+      const numSerie = (d.numero_serie || "").toLowerCase();
       const cufe = (d.cufe || d.cude || "").toLowerCase();
-
-      // intentar distintos campos posibles para cliente (según lo que devuelva tu backend)
       const cliente =
         (d.Clientes && (d.Clientes.nombre_cliente || d.Clientes.nombre)) ||
         d.cliente ||
         d.cliente_nombre ||
         "";
-      const clienteStr = String(cliente).toLowerCase();
-
-      return num.includes(s) || cufe.includes(s) || clienteStr.includes(s);
+      return num.includes(s) || numSerie.includes(s) || cufe.includes(s) || cliente.toLowerCase().includes(s);
     });
 
   const totalPages = Math.max(1, Math.ceil(filteredDocs.length / itemsPerPage));
   const paginatedDocs = filteredDocs.slice((page - 1) * itemsPerPage, page * itemsPerPage);
 
-  const toggleExpand = (id) => {
-    setExpandedDocId(expandedDocId === id ? null : id);
+  const toggleExpand = (id) => setExpandedDocId(expandedDocId === id ? null : id);
+
+  const descargarArchivo = async (id, tipo) => {
+    try {
+      const res = await fetch(`http://localhost:3000/api/${tipo}/${id}`, { credentials: "include" });
+      if (!res.ok) throw new Error("Error descargando archivo");
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      const doc = docs.find((d) => d.id_documento === id) || {};
+      link.download = `${doc.numero_serie || "documento"}.${tipo}`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error(err);
+      alert("No se pudo descargar el archivo");
+    }
   };
-const descargarArchivo = async (id, tipo) => {
-  try {
-    const res = await fetch(`http://localhost:3000/api/${tipo}/${id}`, {
-      credentials: "include",
-    });
-    if (!res.ok) throw new Error("Error descargando archivo");
-    const blob = await res.blob();
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    const doc = docs.find((d) => d.id_documento === id) || {};
-    link.download = `${doc.numero_documento || "documento"}.${tipo}`;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    window.URL.revokeObjectURL(url);
-  } catch (err) {
-    console.error(err);
-    alert("No se pudo descargar el archivo");
-  }
-};
+
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Visor de documentos enviados</h1>
       <div className="bg-white shadow-lg rounded-lg p-4 space-y-4">
+        {/* Filtros y búsqueda */}
         <div className="flex items-center justify-between">
           <div className="flex space-x-2">
             <input
@@ -145,6 +122,8 @@ const descargarArchivo = async (id, tipo) => {
             className="border p-1 rounded w-40"
           />
         </div>
+
+        {/* Tabla */}
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
@@ -164,9 +143,9 @@ const descargarArchivo = async (id, tipo) => {
                 <React.Fragment key={d.id_documento}>
                   <tr className="hover:bg-gray-50">
                     <td className="p-2 border">{d.tipo_documento}</td>
-                    <td className="p-2 border">{d.numero_documento}</td>
+                    <td className="p-2 border">{d.numero_serie}</td>
                     <td className="p-2 border">{d.cufe || d.cude || "-"}</td>
-                    <td className="p-2 border">{getDocDate(d) || "-"}</td>
+                    <td className="p-2 border">{getDocDate(d)}</td>
                     <td className="p-2 border">{d.estado_dian}</td>
                     <td className="p-2 border">{d.estado_dian !== "Pendiente" ? "Sí" : "No"}</td>
                     <td className="p-2 border">{d.factura_relacionada || "-"}</td>
@@ -181,7 +160,6 @@ const descargarArchivo = async (id, tipo) => {
                       <td colSpan="8" className="bg-gray-50 p-4 border">
                         <div className="space-y-2">
                           <p><strong>CUFE completo:</strong> {d.cufe || d.cude || "-"}</p>
-
                           <div className="flex space-x-2">
                             <button
                               onClick={() => descargarArchivo(d.id_documento, "xml")}
@@ -189,7 +167,6 @@ const descargarArchivo = async (id, tipo) => {
                             >
                               Descargar XML
                             </button>
-
                             <button
                               onClick={() => descargarArchivo(d.id_documento, "pdf")}
                               className="bg-blue-900 text-white px-3 py-1 rounded hover:bg-blue-700 transition"
@@ -198,16 +175,11 @@ const descargarArchivo = async (id, tipo) => {
                             </button>
                           </div>
                           <p><strong>Estado DIAN:</strong> {d.estado_dian}</p>
-                          <p className="mt-2"><strong>Acciones:</strong>{" "}<span className="text-gray-800">
-                            {d.mensaje_dian || (d.estado_dian === "Aceptado"
-                            ? "El documento fue aceptado por cumplir con todos los requisitos exigidos por la DIAN."
-                            : d.estado_dian === "Pendiente"
-                            ? "El documento está en proceso porque no se añadieron impuestos, los cuales son obligatorios."
-                            : d.estado_dian === "Rechazado"
-                            ? "El documento fue rechazado porque la fecha de emisión no puede ser mayor a la fecha actual."
-                            : "Sin información.")}
+                          <p className="mt-2"><strong>Acciones:</strong>{" "}
+                            <span className="text-gray-800">
+                              {d.mensaje_dian || "-"}
                             </span>
-                            </p>
+                          </p>
                           {Array.isArray(d.Producto_Factura) && d.Producto_Factura.length > 0 && (
                             <>
                               <h4 className="mt-2 font-semibold">Productos</h4>
@@ -227,17 +199,19 @@ const descargarArchivo = async (id, tipo) => {
             </tbody>
           </table>
         </div>
+
+        {/* Paginación */}
         <div className="flex justify-between items-center mt-2 px-2">
           <button onClick={() => setPage((p) => Math.max(1, p - 1))}
-          className="bg-white bg-opacity-30 text-black px-3 py-1 rounded hover:bg-opacity-50 transition">
+            className="bg-white bg-opacity-30 text-black px-3 py-1 rounded hover:bg-opacity-50 transition">
             Anterior
           </button>
           <span className="text-black font-semibold">{page} / {totalPages}</span>
           <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-          className="bg-white bg-opacity-30 text-black px-3 py-1 rounded hover:bg-opacity-50 transition">
+            className="bg-white bg-opacity-30 text-black px-3 py-1 rounded hover:bg-opacity-50 transition">
             Siguiente
           </button>
-          </div>
+        </div>
       </div>
     </div>
   );

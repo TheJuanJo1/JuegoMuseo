@@ -5,14 +5,16 @@ import fs from "fs";
 import path from "path";
 
 const router = Router();
+
+// Configuración de carpeta para firmas
 const firmasDir = path.join(process.cwd(), "uploads", "firmas");
-if (!fs.existsSync(firmasDir)) {
-  fs.mkdirSync(firmasDir, { recursive: true });
-}
+if (!fs.existsSync(firmasDir)) fs.mkdirSync(firmasDir, { recursive: true });
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, firmasDir),
   filename: (req, file, cb) => cb(null, Date.now() + "_" + file.originalname),
 });
+
 const fileFilter = (req, file, cb) => {
   const allowed = [".p12", ".cer"];
   const ext = path.extname(file.originalname).toLowerCase();
@@ -21,6 +23,8 @@ const fileFilter = (req, file, cb) => {
 };
 
 const upload = multer({ storage, fileFilter });
+
+// === Guardar o actualizar configuración ===
 router.post("/", upload.single("certificado_firma"), async (req, res) => {
   try {
     const {
@@ -31,26 +35,31 @@ router.post("/", upload.single("certificado_firma"), async (req, res) => {
       fecha_expiracion,
       id_usuario,
       numeraciones,
-      // datos opcionales del formulario
-      prefijo_numeracion,
       numero_inicial,
       numero_final,
+      prefijo_numeracion,
     } = req.body;
-
-    const expDate = new Date(fecha_expiracion);
-    if (expDate <= new Date()) {
+    const direccionExiste = await prisma.Configuracion_Tecnica.findFirst({
+      where: {
+        direccion_empresa, NOT: { id_usuario: parseInt(id_usuario) }
+      }
+    });
+    if (direccionExiste) {
       return res.status(400).json({
-        error: "La fecha de expiración de la firma debe ser mayor a la fecha actual",
+        error: "La dirección ingresada ya está registrada por otra empresa."
       });
     }
+    const expDate = new Date(fecha_expiracion);
+    if (expDate <= new Date())
+      return res.status(400).json({ error: "La fecha de expiración debe ser futura" });
 
     const certificadoPath = req.file ? req.file.path : null;
 
-    const existing = await prisma.Configuracion_Tecnica.findUnique({
+    let config = await prisma.Configuracion_Tecnica.findUnique({
       where: { id_usuario: parseInt(id_usuario) },
     });
 
-    // Parsear numeraciones si vienen en JSON
+    // Parsear numeraciones si vienen
     let numeracionesParseadas = [];
     try {
       numeracionesParseadas = numeraciones ? JSON.parse(numeraciones) : [];
@@ -58,46 +67,67 @@ router.post("/", upload.single("certificado_firma"), async (req, res) => {
       numeracionesParseadas = [];
     }
 
-    // Si no hay numeraciones, se genera un rango global por defecto
-    if (!existing && numeracionesParseadas.length === 0) {
-      const inicial = numero_inicial ? parseInt(numero_inicial) : 1;
-      numeracionesParseadas.push({
-        id: Date.now(),
-        tipo_documento: "Global",
-        prefijo: prefijo_numeracion || "GEN",
-        numero_inicial: inicial,
-        numero_final: numero_final ? parseInt(numero_final) : inicial + 9999,
-        resolucion: null,
-        fecha_resolucion: new Date(),
-        estado: "Activo",
-        numero_actual: inicial - 1,
-      });
-    }
+    // Si no hay configuración y no vienen numeraciones, crear solo rango Factura
+    if (!config && numeracionesParseadas.length === 0) {
+  
+  const inicial = parseInt(numero_inicial) || 1;
+  const final = parseInt(numero_final) || inicial + 9999;
 
-    // Asegurar número actual
-    numeracionesParseadas = numeracionesParseadas.map((n) => ({
+  numeracionesParseadas = [
+    {
+      id: Date.now() + 1,
+      tipo_documento: "Factura",
+      prefijo: "FE",
+      numero_inicial: inicial,
+      numero_final: final,
+      numero_actual: inicial - 1,
+      resolucion: "Automática",
+      fecha_resolucion: new Date(),
+      estado: "Activo",
+    },
+    {
+      id: Date.now() + 2,
+      tipo_documento: "Nota Crédito",
+      prefijo: "NC",
+      numero_inicial: inicial,
+      numero_final: final,
+      numero_actual: inicial - 1,
+      resolucion: "Automática",
+      fecha_resolucion: new Date(),
+      estado: "Activo",
+    },
+    {
+      id: Date.now() + 3,
+      tipo_documento: "Nota Débito",
+      prefijo: "ND",
+      numero_inicial: inicial,
+      numero_final: final,
+      numero_actual: inicial - 1,
+      resolucion: "Automática",
+      fecha_resolucion: new Date(),
+      estado: "Activo",
+    },
+  ];
+}
+
+    // Asegurar numero_actual consistente
+    numeracionesParseadas = numeracionesParseadas.map(n => ({
       ...n,
-      numero_actual:
-        n.numero_actual !== undefined && n.numero_actual !== null
-          ? n.numero_actual
-          : (n.numero_inicial || 1) - 1,
+      numero_actual: n.numero_actual !== undefined && n.numero_actual !== null
+        ? n.numero_actual
+        : (n.numero_inicial || 1) - 1,
     }));
 
-    let config;
+    if (config) {
+      // Actualizar configuración existente: solo actualizar Factura
+      let numeracionesFinales = config.numeraciones || [];
+      const indexFactura = numeracionesFinales.findIndex(n => n.tipo_documento === "Factura");
 
-    if (existing) {
-      const numeracionesFinales =
-        numeracionesParseadas.length > 0
-          ? numeracionesParseadas
-          : existing.numeraciones || [];
-
-      const numeracionesAseguradas = numeracionesFinales.map((n) => ({
-        ...n,
-        numero_actual:
-          n.numero_actual !== undefined && n.numero_actual !== null
-            ? n.numero_actual
-            : (n.numero_inicial || 1) - 1,
-      }));
+      if (indexFactura >= 0) {
+        numeracionesFinales[indexFactura] = numeracionesParseadas[0];
+      } else {
+        numeracionesFinales.push(numeracionesParseadas[0]);
+      }
 
       config = await prisma.Configuracion_Tecnica.update({
         where: { id_usuario: parseInt(id_usuario) },
@@ -107,11 +137,12 @@ router.post("/", upload.single("certificado_firma"), async (req, res) => {
           contrasena_cert,
           token_api,
           fecha_expiracion: expDate,
-          certificado_firma: certificadoPath || existing.certificado_firma,
-          numeraciones: numeracionesAseguradas,
+          certificado_firma: certificadoPath || config.certificado_firma,
+          numeraciones: numeracionesFinales,
         },
       });
     } else {
+      // Crear nueva configuración
       config = await prisma.Configuracion_Tecnica.create({
         data: {
           direccion_empresa,
@@ -133,13 +164,11 @@ router.post("/", upload.single("certificado_firma"), async (req, res) => {
   }
 });
 
-// === Verificar estado de configuración ===
+// === Estado de configuración ===
 router.get("/estado/:id_usuario", async (req, res) => {
   try {
     const { id_usuario } = req.params;
-    const config = await prisma.Configuracion_Tecnica.findUnique({
-      where: { id_usuario: parseInt(id_usuario) },
-    });
+    const config = await prisma.Configuracion_Tecnica.findUnique({ where: { id_usuario: parseInt(id_usuario) } });
     res.json({ completado: !!config });
   } catch (error) {
     console.error("Error al verificar estado:", error);
@@ -151,149 +180,72 @@ router.get("/estado/:id_usuario", async (req, res) => {
 router.get("/:id_usuario", async (req, res) => {
   try {
     const { id_usuario } = req.params;
-
     const config = await prisma.Configuracion_Tecnica.findUnique({
       where: { id_usuario: parseInt(id_usuario) },
-      include: {
-        usuario: {
-          select: {
-            nombre_usuario: true,
-            correo_contacto: true,
-          },
-        },
-      },
+      include: { usuario: { select: { nombre_usuario: true, correo_contacto: true, nit_empresa: true } } },
     });
 
-    if (!config) {
-      return res.status(404).json({ error: "Configuración no encontrada" });
-    }
+    if (!config) return res.status(404).json({ error: "Configuración no encontrada" });
 
     const numeraciones = (config.numeraciones || []).map((n) => ({
       ...n,
-      numero_actual:
-        n.numero_actual !== undefined && n.numero_actual !== null
-          ? n.numero_actual
-          : (n.numero_inicial || 1) - 1,
+      numero_actual: n.numero_actual !== undefined && n.numero_actual !== null ? n.numero_actual : (n.numero_inicial || 1) - 1,
     }));
 
-    res.json({
-      configuracion: config,
-      numeraciones,
-      usuario: config.usuario,
-    });
+    res.json({ configuracion: config, numeraciones, usuario: config.usuario });
   } catch (error) {
     console.error("Error al obtener configuración completa:", error);
     res.status(500).json({ error: error.message });
   }
 });
 
-
-// === Añadir o actualizar rango de numeración (global) ===
+// === Crear o actualizar numeración ===
 router.post("/numeracion/:id_usuario", async (req, res) => {
   try {
     const { id_usuario } = req.params;
     const { tipo_documento, numero_inicial, numero_final, resolucion, fecha_resolucion } = req.body;
 
-    // Prefijo automático según tipo de documento
-    const prefijo =
-      tipo_documento === "Factura"
-        ? "FE"
-        : tipo_documento === "Nota Crédito"
-        ? "NC"
-        : tipo_documento === "Nota Débito"
-        ? "ND"
-        : "GEN";
+    if (parseInt(numero_inicial) > parseInt(numero_final))
+      return res.status(400).json({ error: "El número inicial no puede ser mayor al número final" });
 
-    const config = await prisma.Configuracion_Tecnica.findUnique({
-      where: { id_usuario: parseInt(id_usuario) },
-    });
+    const prefijo = tipo_documento === "Factura" ? "FE"
+      : tipo_documento === "Nota Crédito" ? "NC"
+      : tipo_documento === "Nota Débito" ? "ND"
+      : "GEN";
 
+    const config = await prisma.Configuracion_Tecnica.findUnique({ where: { id_usuario: parseInt(id_usuario) } });
     if (!config) return res.status(404).json({ error: "Configuración no encontrada" });
 
-    let numeraciones = Array.isArray(config.numeraciones)
-      ? [...config.numeraciones]
-      : [];
+    let numeraciones = Array.isArray(config.numeraciones) ? [...config.numeraciones] : [];
+    let numeracionExistente = numeraciones.find(n => n.tipo_documento === tipo_documento);
 
-    // El rango es global, se actualiza el único rango existente
-    let numeracionGlobal = numeraciones[0] || {
-      id: Date.now(),
-      tipo_documento: "Global",
-      prefijo: "GEN",
-      numero_inicial: 1,
-      numero_final: 9999,
-      resolucion: null,
-      fecha_resolucion: new Date(),
-      estado: "Activo",
-      numero_actual: 0,
-    };
+if (numeracionExistente) {
+  // No resetear numero_actual si ya está dentro del nuevo rango
+  let numeroActual = numeracionExistente.numero_actual;
+  if (numeroActual < parseInt(numero_inicial) - 1) numeroActual = parseInt(numero_inicial) - 1;
+  if (numeroActual > parseInt(numero_final)) numeroActual = parseInt(numero_final); // En caso de reducir rango
 
-    numeracionGlobal = {
-      ...numeracionGlobal,
-      tipo_documento,
-      prefijo,
-      numero_inicial: parseInt(numero_inicial),
-      numero_final: parseInt(numero_final),
-      resolucion,
-      fecha_resolucion,
-      estado: "Activo",
-      numero_actual:
-        numeracionGlobal.numero_actual || parseInt(numero_inicial) - 1,
-    };
-
-    numeraciones = [numeracionGlobal];
-
-    const updated = await prisma.Configuracion_Tecnica.update({
-      where: { id_usuario: parseInt(id_usuario) },
-      data: { numeraciones },
-    });
-
-    res.json({
-      mensaje: "Rango global actualizado correctamente",
-      numeraciones: updated.numeraciones,
-    });
-  } catch (error) {
-    console.error("Error al actualizar rango global:", error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
-router.post("/rango-global/:id_usuario", async (req, res) => {
-  try {
-    const { id_usuario } = req.params;
-    const { numero_inicial, numero_final } = req.body;
-
-    const config = await prisma.Configuracion_Tecnica.findUnique({
-      where: { id_usuario: parseInt(id_usuario) },
-    });
-
-    if (!config)
-      return res.status(404).json({ error: "Configuración no encontrada" });
-
-    let numeraciones = Array.isArray(config.numeraciones)
-      ? [...config.numeraciones]
-      : [];
-
-    const fechaActual = new Date();
-
-    // Actualizar o crear rango global
-    numeraciones = numeraciones.map((n) => ({
-      ...n,
-      numero_inicial: parseInt(numero_inicial),
-      numero_final: parseInt(numero_final),
-      fecha_resolucion: fechaActual,
-      estado: "Activo",
-      numero_actual: n.numero_actual ?? parseInt(numero_inicial) - 1,
-    }));
-
-    if (numeraciones.length === 0) {
+  numeracionExistente = {
+    ...numeracionExistente,
+    numero_inicial: parseInt(numero_inicial),
+    numero_final: parseInt(numero_final),
+    resolucion,
+    fecha_resolucion,
+    prefijo,
+    estado: numeroActual >= parseInt(numero_final) ? "Inactivo" : "Activo",
+    numero_actual: numeroActual,
+  };
+  numeraciones = numeraciones.map(n => n.tipo_documento === tipo_documento ? numeracionExistente : n);
+}
+     else {
       numeraciones.push({
         id: Date.now(),
-        tipo_documento: "Global",
-        prefijo: "",
+        tipo_documento,
+        prefijo,
         numero_inicial: parseInt(numero_inicial),
         numero_final: parseInt(numero_final),
-        resolucion: null,
-        fecha_resolucion: fechaActual,
+        resolucion,
+        fecha_resolucion,
         estado: "Activo",
         numero_actual: parseInt(numero_inicial) - 1,
       });
@@ -304,16 +256,14 @@ router.post("/rango-global/:id_usuario", async (req, res) => {
       data: { numeraciones },
     });
 
-    res.json({
-      mensaje: "Rango global actualizado correctamente",
-      numeraciones: updated.numeraciones,
-    });
+    res.json({ mensaje: `Rango de ${tipo_documento} actualizado correctamente`, numeraciones: updated.numeraciones });
   } catch (error) {
-    console.error("Error al actualizar rango global:", error);
+    console.error("Error al actualizar numeración:", error);
     res.status(500).json({ error: error.message });
   }
 });
 
+// === Regenerar certificado ===
 router.post("/regenerar-certificado/:id_usuario", upload.single("certificado_firma"), async (req, res) => {
   try {
     const { id_usuario } = req.params;
@@ -326,17 +276,10 @@ router.post("/regenerar-certificado/:id_usuario", upload.single("certificado_fir
 
     const config = await prisma.Configuracion_Tecnica.update({
       where: { id_usuario: parseInt(id_usuario) },
-      data: {
-        certificado_firma: certificadoPath,
-        fecha_expiracion: new Date(fecha_expiracion),
-      },
+      data: { certificado_firma: certificadoPath, fecha_expiracion: new Date(fecha_expiracion) },
     });
 
-    res.json({
-  mensaje: "Certificado actualizado correctamente",
-  certificado: config.certificado_firma,
-  fecha_expiracion: config.fecha_expiracion,
-});
+    res.json({ mensaje: "Certificado actualizado correctamente", certificado: config.certificado_firma, fecha_expiracion: config.fecha_expiracion });
   } catch (error) {
     console.error("Error al regenerar certificado:", error);
     res.status(500).json({ error: error.message });

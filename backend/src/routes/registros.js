@@ -2,20 +2,33 @@ import { Router } from "express";
 import { prisma } from "../lib/prisma.js";
 
 const router = Router();
+
 router.get("/", async (req, res) => {
   try {
-    const { page = 1, limit = 10, empresa, tipo, resultado } = req.query;
+    const { page = 1, limit = 10, nombre_usuario, tipo, resultado } = req.query;
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const take = parseInt(limit);
-
-    //Filtros dinámicos
     const where = {};
-    if (empresa) where.empresa = { contains: empresa, mode: "insensitive" };
-    if (tipo) where.tipo_documento = { equals: tipo };
-    if (resultado) where.resultado = { equals: resultado };
 
-    //Consultar registros con paginación
+    // Filtrar por nombre de empresa (usuario)
+    if (nombre_usuario) {
+      where.nombre_usuario = { contains: nombre_usuario, mode: "insensitive" };
+      }
+    
+
+    // Filtrar por tipo de documento (Factura, Nota Crédito, Nota Débito)
+    if (tipo) {
+      where.tipo_documento = {
+        contains: tipo,
+        mode: "insensitive",
+      };
+    }
+
+    // Filtrar por resultado (Aceptado, Pendiente, Rechazado)
+    if (resultado) {
+      where.resultado = { contains: resultado, mode: "insensitive" };
+    }
     const registros = await prisma.Registros_Sistema.findMany({
       where,
       orderBy: { fecha_hora: "desc" },
@@ -27,8 +40,6 @@ router.get("/", async (req, res) => {
         },
       },
     });
-
-    //Total de registros para calcular páginas
     const total = await prisma.Registros_Sistema.count({ where });
     const totalPages = Math.ceil(total / take);
 

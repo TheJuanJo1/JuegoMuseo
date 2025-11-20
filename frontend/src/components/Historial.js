@@ -1,4 +1,3 @@
-// frontend/src/pages/Historial.js
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -42,8 +41,6 @@ export default function Historial() {
             ))}
           </tbody>
         </table>
-
-        {/* Botón debajo de la tabla, alineado a la derecha */}
         <div className="flex justify-end mt-4">
           <button
             onClick={() => navigate("/Dashboard")}

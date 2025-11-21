@@ -58,10 +58,10 @@ export default function RegisterForm() {
     } = form;
 
     if (
-      !nombre_empresa &&
-      !nit_empresa &&
-      !correo_contacto &&
-      !contrasena &&
+      !nombre_empresa ||
+      !nit_empresa ||
+      !correo_contacto ||
+      !contrasena ||
       !confirmar_contrasena
     ) {
       setMsg("Todos los campos son requeridos");
@@ -189,4 +189,126 @@ export default function RegisterForm() {
       setMsg("Error de conexión con el servidor");
     }
   };
+  
+// ------------------------------------------------------------------
+// ✅ CORRECCIÓN CLAVE: SE AGREGÓ LA SENTENCIA RETURN CON EL JSX
+// ------------------------------------------------------------------
+
+  return (
+    <div className="flex min-h-screen">
+      {/* Columna de la Imagen */}
+      <div className="hidden lg:block w-1/2 bg-gray-100 relative">
+        <img
+          src={step === 1 ? registerImage : verifyImage}
+          alt="Registro"
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute top-8 left-8">
+          <img src={fluxLogo} alt="FluxData Logo" className="h-10" />
+        </div>
+      </div>
+
+      {/* Columna del Formulario */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-white">
+        <div className="max-w-md w-full">
+          <Link to="/login" className="flex items-center text-sm text-gray-600 hover:text-gray-800 mb-4">
+            <img src={backArrow} alt="Atrás" className="h-4 w-4 mr-2" />
+            Volver a Iniciar Sesión
+          </Link>
+
+          <h2 className="text-3xl font-bold mb-6 text-[#27374D]">
+            {step === 1 ? "Crea tu Cuenta Empresarial" : "Verificación de Correo"}
+          </h2>
+          
+          {step === 1 ? (
+            // --- Paso 1: Formulario de Registro ---
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {msg && <p className="text-red-600 bg-red-100 p-2 rounded text-sm">{msg}</p>}
+
+              <input
+                type="text"
+                name="nombre_empresa"
+                placeholder="Nombre de la Empresa"
+                value={form.nombre_empresa}
+                onChange={handleChange}
+                className="w-full border p-3 rounded-lg"
+              />
+              <input
+                type="text"
+                name="nit_empresa"
+                placeholder="NIT de la Empresa (10 dígitos)"
+                value={form.nit_empresa}
+                onChange={handleChange}
+                className="w-full border p-3 rounded-lg"
+              />
+              <input
+                type="email"
+                name="correo_contacto"
+                placeholder="Correo de Contacto"
+                value={form.correo_contacto}
+                onChange={handleChange}
+                className="w-full border p-3 rounded-lg"
+              />
+              <input
+                type="password"
+                name="contrasena"
+                placeholder="Contraseña"
+                value={form.contrasena}
+                onChange={handleChange}
+                className="w-full border p-3 rounded-lg"
+              />
+              <input
+                type="password"
+                name="confirmar_contrasena"
+                placeholder="Confirmar Contraseña"
+                value={form.confirmar_contrasena}
+                onChange={handleChange}
+                className="w-full border p-3 rounded-lg"
+              />
+              
+              <button
+                type="submit"
+                className="w-full bg-[#27374D] text-white p-3 rounded-lg font-semibold hover:bg-[#1f2937] transition duration-200"
+              >
+                Registrar y Enviar Código
+              </button>
+            </form>
+          ) : (
+            // --- Paso 2: Verificación de Código ---
+            <div className="space-y-6">
+              <p className="text-gray-600">
+                Hemos enviado un código de 6 dígitos a **{form.correo_contacto}**. Por favor, revísalo para verificar tu cuenta.
+              </p>
+              
+              {msgCodigo && <p className={`p-2 rounded text-sm ${msgCodigo.includes("exitosamente") ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}`}>{msgCodigo}</p>}
+
+              <div className="flex justify-between gap-2">
+                {codigo.map((digit, index) => (
+                  <input
+                    key={index}
+                    id={`codigo-${index}`}
+                    type="text"
+                    maxLength="1"
+                    value={digit}
+                    onChange={(e) => handleCodigoChange(e, index)}
+                    className="w-12 h-12 text-center text-xl border-2 border-gray-300 rounded-lg focus:border-[#27374D] focus:ring-0 transition"
+                  />
+                ))}
+              </div>
+
+              <div className="text-sm text-gray-600">
+                ¿No recibiste el código?
+                <button
+                  onClick={resendCode}
+                  className="text-[#27374D] hover:underline ml-1 font-medium"
+                >
+                  Reenviar Código
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }

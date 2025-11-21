@@ -58,10 +58,10 @@ export default function RegisterForm() {
     } = form;
 
     if (
-      !nombre_empresa ||
-      !nit_empresa ||
-      !correo_contacto ||
-      !contrasena ||
+      !nombre_empresa &&
+      !nit_empresa &&
+      !correo_contacto &&
+      !contrasena &&
       !confirmar_contrasena
     ) {
       setMsg("Todos los campos son requeridos");
@@ -189,10 +189,10 @@ export default function RegisterForm() {
       setMsg("Error de conexión con el servidor");
     }
   };
-  
-// ------------------------------------------------------------------
-// ✅ CORRECCIÓN CLAVE: SE AGREGÓ LA SENTENCIA RETURN CON EL JSX
-// ------------------------------------------------------------------
+
+  // ------------------------------------------------------------------
+  // ✅ CORRECCIÓN CLAVE: SE AGREGÓ LA SENTENCIA RETURN CON EL JSX
+  // ------------------------------------------------------------------
 
   return (
     <div className="flex min-h-screen">

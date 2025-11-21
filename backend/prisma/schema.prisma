@@ -48,6 +48,7 @@ model Documentos_XML {
   fecha_respuesta_dian DateTime           @db.Timestamp(6)
   cufe                 String?
   cude                 String?
+  detalle_nota         String? 
   xml_archivo          String
   pdf_archivo          Bytes
   id_cliente           Int?
@@ -96,6 +97,9 @@ model Usuarios {
   contrasena_certificado       String?
   token_api                    String?
   fecha_expiracion_certificado DateTime?
+  estado                       String    @default("activo") 
+  createdAt                    DateTime @default(now())
+  fecha_registro               DateTime @default(now())
   Registros_Sistema            Registros_Sistema[] 
   Clientes                     Clientes[]
   Configuraciones_Firmas       Configuraciones_Firmas[]
@@ -127,7 +131,7 @@ model codigos_verificacion {
 
 model Configuracion_Tecnica {
   id_configuracion    Int      @id @default(autoincrement())
-  direccion_empresa   String
+  direccion_empresa   String?
   regimen_tributario  String
   certificado_firma   String
   contrasena_cert     String

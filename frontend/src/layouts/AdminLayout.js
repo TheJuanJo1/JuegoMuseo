@@ -31,17 +31,13 @@ export default function AdminLayout() {
 
   return (
     <div className="flex bg-gray-100 font-worksans min-h-screen">
-      {/* Barra lateral */}
       <aside
         className={`fixed top-0 left-0 flex flex-col bg-[#1f2937] text-white transition-all duration-300
-        ${collapsed ? "w-32" : "w-80"} h-screen`}
-      >
-        {/* Encabezado con logo */}
+        ${collapsed ? "w-32" : "w-80"} h-screen`}>
         <div
           className={`flex items-center p-4 border-b border-gray-700 ${
             collapsed ? "justify-center" : "justify-between"
-          }`}
-        >
+          }`}>
           {!collapsed && (
             <img src={Logo} alt="Logo" className="h-14 w-auto object-contain" />
           )}
@@ -49,13 +45,10 @@ export default function AdminLayout() {
             src={B}
             alt="Colapsar barra"
             className="h-7 w-7 cursor-pointer"
-            onClick={() => setCollapsed(!collapsed)}
-          />
+            onClick={() => setCollapsed(!collapsed)}/>
         </div>
-
-        {/* Navegación */}
         <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
-          <nav className="flex flex-col space-y-3 p-4">
+          <nav className="flex flex-col space-y-6 p-4 mt-8">
             <NavLink
               to="/admin/dashboard"
               className={({ isActive }) =>
@@ -64,8 +57,7 @@ export default function AdminLayout() {
                 } px-3 py-3 rounded-md transition ${
                   isActive ? "bg-gray-700 text-white" : "hover:bg-gray-700/60"
                 }`
-              }
-            >
+              }>
               <img src={D1} alt="Dashboard" className="h-7 w-7" />
               {!collapsed && <span>Dashboard</span>}
             </NavLink>
@@ -78,8 +70,7 @@ export default function AdminLayout() {
                 } px-3 py-3 rounded-md transition ${
                   isActive ? "bg-gray-700 text-white" : "hover:bg-gray-700/60"
                 }`
-              }
-            >
+              }>
               <img src={E} alt="Empresas" className="h-7 w-7" />
               {!collapsed && <span>Empresas</span>}
             </NavLink>
@@ -97,38 +88,8 @@ export default function AdminLayout() {
               <img src={R1} alt="Registros" className="h-7 w-7" />
               {!collapsed && <span>Registros</span>}
             </NavLink>
-
-            <NavLink
-              to="/admin/tokens"
-              className={({ isActive }) =>
-                `flex items-center ${
-                  collapsed ? "justify-center" : "gap-6 pl-6 justify-start"
-                } px-3 py-3 rounded-md transition ${
-                  isActive ? "bg-gray-700 text-white" : "hover:bg-gray-700/60"
-                }`
-              }
-            >
-              <img src={T} alt="Tokens API" className="h-7 w-7" />
-              {!collapsed && <span>Tokens API</span>}
-            </NavLink>
-
-            <NavLink
-              to="/admin/configuracion"
-              className={({ isActive }) =>
-                `flex items-center ${
-                  collapsed ? "justify-center" : "gap-6 pl-6 justify-start"
-                } px-3 py-3 rounded-md transition ${
-                  isActive ? "bg-gray-700 text-white" : "hover:bg-gray-700/60"
-                }`
-              }
-            >
-              <img src={C} alt="Configuración" className="h-7 w-7" />
-              {!collapsed && <span>Configuración Técnica</span>}
-            </NavLink>
           </nav>
         </div>
-
-        {/* Botón salir */}
         <div className="p-4 border-t border-gray-700">
           <button
             onClick={handleLogout}

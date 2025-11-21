@@ -90,7 +90,7 @@ export default function RegisterForm() {
     return;
   }
     try {
-      const res = await await fetch(`${API_URL}/api/empresas/pre-register`, {
+      const res = await fetch(`${API_URL}/api/empresas/pre-register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -107,7 +107,7 @@ export default function RegisterForm() {
   const handleVerify = async (codigoCompleto) => {
     setMsgCodigo("");
     try {
-      const res = await await fetch(`${API_URL}/api/empresas/verify-code`, {
+      const res = await fetch(`${API_URL}/api/empresas/verify-code`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ correo_contacto: form.correo_contacto, codigo: codigoCompleto }),

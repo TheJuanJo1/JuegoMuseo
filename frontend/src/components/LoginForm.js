@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { BASE_API_URL } from "../config/api";
 
 import fluxLogo from "../assets/fluxdata.png";
 import backArrow from "../assets/back-arrow.png";
@@ -17,7 +18,7 @@ export default function LoginForm() {
   setError("");
 
   try {
-    const res = await fetch("http://localhost:3000/api/login", {
+    const res = await fetch(`${BASE_API_URL}/api/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ emailOrName, password }),
@@ -34,7 +35,7 @@ export default function LoginForm() {
       } else {
     const usuarioId = data.user.id;
     localStorage.setItem("usuarioId", usuarioId);
-    const estadoRes = await fetch(`http://localhost:3000/api/configuracion/estado/${usuarioId}`);
+    const estadoRes = await fetch(`${BASE_API_URL}/api/configuracion/estado/${usuarioId}`);
     const estadoData = await estadoRes.json();
 
     if (estadoData.completado) {

@@ -9,6 +9,7 @@ import R from "../assets/R.png";
 import C from "../assets/C.png";
 import A from "../assets/A.png";
 import C2 from "../assets/C2.png";
+import { BASE_API_URL } from "../config/api";
 
 export default function MainLayout() {
   const navigate = useNavigate();
@@ -16,7 +17,7 @@ export default function MainLayout() {
 
   const handleLogout = async () => {
     try {
-      await fetch("http://localhost:3000/api/logout", {
+      await fetch(`${BASE_API_URL}//api/logout`, {
         method: "POST",
         credentials: "include",
       });

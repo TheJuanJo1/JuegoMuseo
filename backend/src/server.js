@@ -18,13 +18,18 @@ import tokenRoutes from "./routes/token.js";
 import pdfRoutes from "./routes/pdf.js";
 import xmlRoutes from "./routes/xml.js";
 import registrosRouter from "./routes/registros.js";
+
 import dashboardAdmin from "./routes/dashboardAdmin.js";
 
+
 const app = express()
+const FRONTEND_ORIGIN = process.env.FRONTEND_URL || "http://localhost:5173";
+
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin: FRONTEND_ORIGIN,
   credentials: true,
 }));
+
 app.use(express.json())
 app.use(cookieParser());
 app.get('/', (req, res) => {

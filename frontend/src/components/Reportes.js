@@ -3,6 +3,8 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, Legend,
   PieChart, Pie, Cell, ResponsiveContainer
 } from "recharts";
+import { BASE_API_URL } from "../config/api";
+
 function transformarDocumento(doc) {
   if (!doc) return {};
   const empresa = doc.Usuarios
@@ -46,7 +48,7 @@ const Reportes = () => {
   const [selectedDoc, setSelectedDoc] = useState(null);
   // Cargar documentos iniciales
   useEffect(() => {
-    fetch("http://localhost:3000/ultimos", {
+    fetch(`${BASE_API_URL}/ultimos`, {
       credentials: "include",
     })
       .then((res) => res.json())
@@ -55,7 +57,7 @@ const Reportes = () => {
   }, []);
   // Cargar estadísticas iniciales
   useEffect(() => {
-    fetch("http://localhost:3000/api/estadisticas", {
+    fetch(`${BASE_API_URL}/api/estadisticas`, {
       credentials: "include",
     })
       .then((res) => res.json())
@@ -72,7 +74,7 @@ const Reportes = () => {
       cliente: filters.cliente ? filters.cliente.trim() : null,
     };
 
-    const res = await fetch("http://localhost:3000/api/filtrar", {
+    const res = await fetch(`${BASE_API_URL}/api/filtrar`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -97,7 +99,7 @@ const Reportes = () => {
   }
 };
   useEffect(() => {
-    fetch("http://localhost:3000/api/filtrar", {
+    fetch(`${BASE_API_URL}/api/filtrar`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",

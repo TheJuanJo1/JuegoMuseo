@@ -8,7 +8,9 @@
     "prisma:init": "prisma init --datasource-provider postgresql",
     "prisma:pull": "prisma db pull",
     "prisma:push": "prisma db push",
-    "prisma:studio": "prisma studio"
+    "prisma:studio": "prisma studio",
+    "start": "node src/server.js",
+    "postinstall": "prisma migrate deploy && prisma generate"
   },
   "keywords": [],
   "author": "",
@@ -28,6 +30,7 @@
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.2",
     "nodemailer": "^7.0.6",
+    "pdfkit": "^0.17.2",
     "pg": "^8.16.3",
     "qrcode": "^1.5.4",
     "tailwind-scrollbar": "^4.0.2",

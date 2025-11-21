@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { API_URL } from "../config";
 
 import fluxLogo from "../assets/fluxdata.png";
 import backArrow from "../assets/back-arrow.png";
@@ -11,8 +12,6 @@ export default function LoginForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
-
-  const API_URL = import.meta.env.VITE_BACKEND_URL;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -32,11 +31,9 @@ export default function LoginForm() {
         return;
       }
 
-      // Si es admin → dashboard admin
       if (data.user.role === "admin") {
         navigate("/admin/dashboard");
       } else {
-        // Si es usuario normal
         const usuarioId = data.user.id;
         localStorage.setItem("usuarioId", usuarioId);
 

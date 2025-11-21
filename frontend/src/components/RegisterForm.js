@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { API_URL } from "../config";
+import { API_URL } from "../config"; // <--- IMPORTANTE
 
 import fluxLogo from "../assets/fluxdata.png";
 import backArrow from "../assets/back-arrow.png";
@@ -57,8 +57,24 @@ export default function RegisterForm() {
       confirmar_contrasena,
     } = form;
 
-    if (!nombre_empresa || !nit_empresa || !correo_contacto || !contrasena) {
+    if (
+      !nombre_empresa &&
+      !nit_empresa &&
+      !correo_contacto &&
+      !contrasena &&
+      !confirmar_contrasena
+    ) {
       setMsg("Todos los campos son requeridos");
+      return;
+    }
+
+    if (!nombre_empresa.trim()) {
+      setMsg("El nombre de la empresa es obligatorio");
+      return;
+    }
+
+    if (!nit_empresa.trim()) {
+      setMsg("El NIT es obligatorio");
       return;
     }
 
@@ -67,8 +83,23 @@ export default function RegisterForm() {
       return;
     }
 
+    if (!correo_contacto.trim()) {
+      setMsg("El correo de contacto es obligatorio");
+      return;
+    }
+
+    if (!contrasena.trim()) {
+      setMsg("La contraseña es obligatoria");
+      return;
+    }
+
     if (contrasena.length < 6) {
       setMsg("La contraseña debe tener al menos 6 caracteres");
+      return;
+    }
+
+    if (!confirmar_contrasena.trim()) {
+      setMsg("Debes confirmar la contraseña");
       return;
     }
 
@@ -115,6 +146,12 @@ export default function RegisterForm() {
       if (!res.ok) {
         setMsgCodigo(data.error || "Código inválido");
         setCodigo(Array(6).fill(""));
+
+        setTimeout(() => {
+          const firstInput = document.getElementById("codigo-0");
+          if (firstInput) firstInput.focus();
+        }, 50);
+
         return;
       }
 
@@ -152,85 +189,4 @@ export default function RegisterForm() {
       setMsg("Error de conexión con el servidor");
     }
   };
-
-  // ⬇️⬇️⬇️ FALTA EL RETURN → LO AGREGO AHORA ⬇️⬇️⬇️
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      {step === 1 ? (
-        <div className="bg-white shadow-xl p-10 rounded-xl w-[500px]">
-          <h2 className="text-2xl font-bold mb-4">Registro</h2>
-
-          {msg && <p className="text-red-600 mb-3">{msg}</p>}
-
-          <form onSubmit={handleSubmit}>
-            <input
-              type="text"
-              name="nombre_empresa"
-              placeholder="Nombre de la empresa"
-              className="w-full p-3 border rounded mb-3"
-              onChange={handleChange}
-            />
-            <input
-              type="text"
-              name="nit_empresa"
-              placeholder="NIT (10 dígitos)"
-              className="w-full p-3 border rounded mb-3"
-              onChange={handleChange}
-            />
-            <input
-              type="email"
-              name="correo_contacto"
-              placeholder="Correo"
-              className="w-full p-3 border rounded mb-3"
-              onChange={handleChange}
-            />
-            <input
-              type="password"
-              name="contrasena"
-              placeholder="Contraseña"
-              className="w-full p-3 border rounded mb-3"
-              onChange={handleChange}
-            />
-            <input
-              type="password"
-              name="confirmar_contrasena"
-              placeholder="Confirmar Contraseña"
-              className="w-full p-3 border rounded mb-3"
-              onChange={handleChange}
-            />
-
-            <button className="w-full bg-blue-600 text-white p-3 rounded">
-              Registrar
-            </button>
-          </form>
-        </div>
-      ) : (
-        <div className="bg-white shadow-xl p-10 rounded-xl w-[500px]">
-          <h2 className="text-2xl font-bold mb-4">Verificación</h2>
-
-          {msgCodigo && <p className="text-red-600 mb-3">{msgCodigo}</p>}
-
-          <div className="flex gap-2 justify-center">
-            {codigo.map((c, i) => (
-              <input
-                key={i}
-                id={`codigo-${i}`}
-                maxLength={1}
-                value={c}
-                onChange={(e) => handleCodigoChange(e, i)}
-                className="w-12 h-12 border text-center text-xl rounded"
-              />
-            ))}
-          </div>
-
-          <button
-            onClick={resendCode}
-            className="mt-4 text-blue-600 underline text-sm"
-          >
-            Reenviar código
-          </button>
-        </div>
-      )}
-    </div>
-  );
 }

@@ -4,6 +4,8 @@ import EX from "../assets/EX.png";
 import V1 from "../assets/V1.png";
 import V3 from "../assets/V3.png";
 
+import { API_URL } from "../config"; // ⬅️ IMPORTANTE
+
 export default function RegistrosAdmin() {
   const [animando, setAnimando] = useState(false);
   const [registros, setRegistros] = useState([]);
@@ -16,7 +18,8 @@ export default function RegistrosAdmin() {
   });
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
 
-  const API = import.meta.env.VITE_BACKEND_URL;
+  // ❌ Eliminado: const API = import.meta.env.VITE_BACKEND_URL;
+  // ✔️ Ahora todo usa API_URL del config.js
 
   const fetchRegistros = async (page = 1) => {
     try {
@@ -34,7 +37,7 @@ export default function RegistrosAdmin() {
         params.append("resultado", filtros.resultado);
       }
 
-      const res = await fetch(`${API}/api/registros?${params}`, {
+      const res = await fetch(`${API_URL}/api/registros?${params}`, {
         credentials: "include",
       });
 
@@ -201,6 +204,7 @@ export default function RegistrosAdmin() {
           </div>
         )}
 
+        {/* TABLA */}
         <div
           className={`overflow-x-auto border border-gray-300 rounded-md transition-all duration-500 ease-in-out ${
             animando

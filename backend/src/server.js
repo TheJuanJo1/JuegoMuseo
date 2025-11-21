@@ -19,6 +19,9 @@ import pdfRoutes from "./routes/pdf.js";
 import xmlRoutes from "./routes/xml.js";
 import registrosRouter from "./routes/registros.js";
 
+import dashboardAdmin from "./routes/dashboardAdmin.js";
+
+
 const app = express()
 const FRONTEND_ORIGIN = process.env.FRONTEND_URL || "http://localhost:5173";
 
@@ -70,6 +73,8 @@ app.use("/api/xml", xmlRoutes);
 app.use("/api/clientes", clientesRoutes)
 
 app.use("/api/registros", registrosRouter);
+
+app.use("/api/admin/dashboard", dashboardAdmin);
 
 
 app.get('/api/auth/me', authRequired, (req, res) => {

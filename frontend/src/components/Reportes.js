@@ -11,7 +11,7 @@ function transformarDocumento(doc) {
     ? {
         id_empresa: doc.Usuarios.id_usuario,
         nombre_empresa: doc.Usuarios.nombre_usuario,
-        rol_empresa: doc.Usuarios.rol_usuario,
+        rol_empresa: "Intermediaria",
         nit_empresa: doc.Usuarios.nit_empresa,
         correo_contacto: doc.Usuarios.correo_contacto,
       }

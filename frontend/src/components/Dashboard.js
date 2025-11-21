@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   LineChart,Line,ResponsiveContainer,PieChart,Pie,Cell,Tooltip,BarChart,Bar,XAxis,YAxis,CartesianGrid,
 } from "recharts";
+import { BASE_API_URL } from "../config/api";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -21,7 +22,7 @@ export default function Dashboard() {
 
   // Cargar últimos documentos
   useEffect(() => {
-    fetch("http://localhost:3000/api/ultimos", {
+    fetch(`${BASE_API_URL}/api/ultimos`, {
       credentials: "include",
     })
       .then((res) => res.json())
@@ -31,7 +32,7 @@ export default function Dashboard() {
 
   // Cargar estadísticas globales
   useEffect(() => {
-    fetch("http://localhost:3000/api/estadisticas", {
+    fetch(`${BASE_API_URL}//api/estadisticas`, {
       credentials: "include",
     })
       .then((res) => res.json())

@@ -18,7 +18,7 @@ export default function RegistrosAdmin() {
   });
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
 
-  // ❌ Eliminado: const API = import.meta.env.VITE_BACKEND_URL;
+  // ❌ Eliminado: const API = ;
   // ✔️ Ahora todo usa API_URL del config.js
 
   const fetchRegistros = async (page = 1) => {

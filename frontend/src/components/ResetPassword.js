@@ -4,6 +4,8 @@ import fluxLogo from "../assets/fluxdata.png";
 import backArrow from "../assets/back-arrow.png";
 import laptopImage from "../assets/laptop2.jpg";
 import laptop1 from "../assets/im1.png";
+import { API_URL } from "../config";
+
 
 export default function ResetPassword() {
   const { token } = useParams();
@@ -12,9 +14,9 @@ export default function ResetPassword() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  
 
   // 🔥 NUEVA constante para usar tu backend en Render
-  const API = import.meta.env.VITE_BACKEND_URL;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -31,7 +33,7 @@ export default function ResetPassword() {
     }
 
     try {
-      const res = await fetch(`${API}/api/reset-password`, {
+      const res = await fetch(`${API_URL}/api/reset-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token, password, confirmPassword }),

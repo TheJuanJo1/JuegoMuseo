@@ -9,17 +9,18 @@ import R from "../assets/R.png";
 import C from "../assets/C.png";
 import A from "../assets/A.png";
 import C2 from "../assets/C2.png";
+import { API_URL } from "../config";
+
 
 export default function MainLayout() {
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
 
   // 🚀 NUEVA constante: backend desde Vercel .env
-  const API = import.meta.env.VITE_BACKEND_URL;
 
   const handleLogout = async () => {
     try {
-      await fetch(`${API}/api/logout`, {
+      await fetch(`${API_URL}/api/logout`, {
         method: "POST",
         credentials: "include",
       });

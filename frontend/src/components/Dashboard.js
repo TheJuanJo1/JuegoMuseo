@@ -1,4 +1,5 @@
 import React,{ useEffect, useState } from "react";
+import { API_URL } from "../config";
 import { useNavigate } from "react-router-dom";
 import {
   LineChart,Line,ResponsiveContainer,PieChart,Pie,Cell,Tooltip,BarChart,Bar,XAxis,YAxis,CartesianGrid,
@@ -21,7 +22,7 @@ export default function Dashboard() {
 
   // Cargar últimos documentos
   useEffect(() => {
-  fetch(`${import.meta.env.VITE_BACKEND_URL}/api/ultimos`, {
+  fetch(`${API_URL}/api/ultimos`, {
     credentials: "include",
   })
     .then((res) => res.json())
@@ -31,7 +32,7 @@ export default function Dashboard() {
 
   // Cargar estadísticas globales
   useEffect(() => {
-  fetch(`${import.meta.env.VITE_BACKEND_URL}/api/estadisticas`, {
+  fetch(`${API_URL}/api/estadisticas`, {
     credentials: "include",
   })
     .then((res) => res.json())

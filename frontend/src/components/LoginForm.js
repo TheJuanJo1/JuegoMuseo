@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-
+import { API_URL } from "../config";
 import fluxLogo from "../assets/fluxdata.png";
 import backArrow from "../assets/back-arrow.png";
 import laptopImage from "../assets/laptop.jpg";
@@ -12,15 +12,11 @@ export default function LoginForm() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const estadoRes = await fetch(
-        ${API_URL}/api/configuracion/estado/${usuarioId}
-    );
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
-     try {
+    try {
       const res = await fetch(`${API_URL}/api/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -34,9 +30,11 @@ export default function LoginForm() {
         return;
       }
 
+      // Si es admin → dashboard admin
       if (data.user.role === "admin") {
         navigate("/admin/dashboard");
       } else {
+        // Si es usuario normal
         const usuarioId = data.user.id;
         localStorage.setItem("usuarioId", usuarioId);
 

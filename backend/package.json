@@ -9,7 +9,8 @@
     "prisma:pull": "prisma db pull",
     "prisma:push": "prisma db push",
     "prisma:studio": "prisma studio",
-    "start": "node src/server.js"
+    "start": "node src/server.js",
+    "postinstall": "prisma migrate deploy && prisma generate"
   },
   "keywords": [],
   "author": "",

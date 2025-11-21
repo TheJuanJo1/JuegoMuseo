@@ -18,7 +18,7 @@ export default function LoginForm() {
     e.preventDefault();
     setError("");
 
-     try {
+    try {
       const res = await fetch(`${API_URL}/api/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -32,9 +32,11 @@ export default function LoginForm() {
         return;
       }
 
+      // Si es admin → dashboard admin
       if (data.user.role === "admin") {
         navigate("/admin/dashboard");
       } else {
+        // Si es usuario normal
         const usuarioId = data.user.id;
         localStorage.setItem("usuarioId", usuarioId);
 

@@ -230,7 +230,7 @@ export default function RegisterForm() {
               <div className="flex justify-center">
                 <button type="button" onClick={async () => {
                   try {
-                    const res = await fetch("http://localhost:3000/api/empresas/resend-code", {
+                    const res = await fetch(`${BASE_API_URL}//api/empresas/resend-code`, {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },
                       body: JSON.stringify({ correo_contacto: form.correo_contacto }),

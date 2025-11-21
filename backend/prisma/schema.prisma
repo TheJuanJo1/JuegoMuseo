@@ -37,15 +37,15 @@ model Documentos_XML {
   id_documento         Int                @id @default(autoincrement())
   tipo_documento       String
   numero_documento     String
-  numero_serie         String?
-  prefijo              String? 
+  numero_serie         String? // nuevo, opcional
+  prefijo              String? // nuevo, opcional
   fecha_emision        DateTime           @db.Timestamp(6)
   valor_total          Decimal            @db.Decimal(15, 2)
   impuestos            Decimal            @db.Decimal(15, 2)
   estado_dian          String
   codigo_dian          String
   mensaje_dian         String
-  fecha_respuesta_dian DateTime           @db.Timestamp(6)
+  fecha_respuesta_dian DateTime?          @db.Timestamp(6)
   cufe                 String?
   cude                 String?
   xml_archivo          String
@@ -54,7 +54,7 @@ model Documentos_XML {
   factura_relacionada  String?
   id_usuario           Int
   Clientes             Clientes?          @relation(fields: [id_cliente], references: [id_cliente])
-  Usuarios             Usuarios           @relation(fields: [id_usuario], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction, map: "id_usuario")
+  Usuarios             Usuarios           @relation(fields: [id_usuario], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
   Eventos              Eventos[]
   Producto_Factura     Producto_Factura[]
 }
@@ -96,13 +96,13 @@ model Usuarios {
   contrasena_certificado       String?
   token_api                    String?
   fecha_expiracion_certificado DateTime?
-  Registros_Sistema            Registros_Sistema[] 
+  Registros_Sistema            Registros_Sistema[]
   Clientes                     Clientes[]
   Configuraciones_Firmas       Configuraciones_Firmas[]
   Documentos_XML               Documentos_XML[]
   Eventos                      Eventos[]
   PasswordResetToken           PasswordResetToken[]
-  Rangos     Rangos[]
+  Rangos                       Rangos[]
   configuracionTecnica         Configuracion_Tecnica?   @relation("UsuarioConfiguracion")
 }
 
@@ -126,40 +126,40 @@ model codigos_verificacion {
 }
 
 model Configuracion_Tecnica {
-  id_configuracion    Int      @id @default(autoincrement())
-  direccion_empresa   String
-  regimen_tributario  String
-  certificado_firma   String
-  contrasena_cert     String
-  token_api           String
-  fecha_expiracion    DateTime
-  id_usuario          Int      @unique
-  usuario             Usuarios @relation("UsuarioConfiguracion", fields: [id_usuario], references: [id_usuario])
-   numeraciones        Json     @default("[]")
+  id_configuracion   Int      @id @default(autoincrement())
+  direccion_empresa  String
+  regimen_tributario String
+  certificado_firma  String
+  contrasena_cert    String
+  token_api          String
+  fecha_expiracion   DateTime
+  id_usuario         Int      @unique
+  usuario            Usuarios @relation("UsuarioConfiguracion", fields: [id_usuario], references: [id_usuario])
+  numeraciones       Json     @default("[]")
 }
 
 model Registros_Sistema {
-  id_registro       Int       @id @default(autoincrement())
-  fecha_hora        DateTime  @default(now())
-  id_usuario        Int
-  nombre_usuario    String?
-  empresa           String?
-  tipo_documento    String?
-  numero_documento  String?
-  numero_serie      String?
-  accion            String
-  resultado         String
-  mensaje           String?
-  Usuarios          Usuarios  @relation(fields: [id_usuario], references: [id_usuario])
+  id_registro      Int      @id @default(autoincrement())
+  fecha_hora       DateTime @default(now())
+  id_usuario       Int
+  nombre_usuario   String?
+  empresa          String?
+  tipo_documento   String?
+  numero_documento String?
+  numero_serie     String?
+  accion           String
+  resultado        String
+  mensaje          String?
+  Usuarios         Usuarios @relation(fields: [id_usuario], references: [id_usuario])
 
   @@map("Registros_Sistema")
 }
 
 model Rangos {
-  id      Int    @id @default(autoincrement())
-  tipo    String   // "FACTURA", "NC", "ND"
-  inicio  Int
-  fin     Int
+  id         Int      @id @default(autoincrement())
+  tipo       String // "FACTURA", "NC", "ND"
+  inicio     Int
+  fin        Int
   id_usuario Int
-  Usuarios Usuarios @relation(fields: [id_usuario], references: [id_usuario])
+  Usuarios   Usuarios @relation(fields: [id_usuario], references: [id_usuario])
 }

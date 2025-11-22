@@ -5,7 +5,7 @@ import Fluxdata from "../assets/fluxdata2.png";
 
 export default function FormularioEmpresa({ usuarioId }) {
   const navigate = useNavigate();
-  const API_URL = import.meta.env.VITE_API_URL || "https://fluxdata3.onrender.com"; 
+  const API_URL = import.meta.env.VITE_API_URL; 
   // Dentro del useState inicial, agregamos los campos para NC y ND
   const [form, setForm] = useState({
   direccion_empresa: "",

@@ -11,7 +11,7 @@ export default function RegistrosAdmin() {
   const [totalPaginas, setTotalPaginas] = useState(1);
   const [filtros, setFiltros] = useState({ nombre_usuario: "", tipo: "", resultado: "" });
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
-  const API_URL = import.meta.env.VITE_API_URL || "https://fluxdata3.onrender.com"; 
+  const API_URL = import.meta.env.VITE_API_URL; 
 
   const fetchRegistros = async (page = 1) => {
     try {

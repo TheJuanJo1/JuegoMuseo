@@ -44,7 +44,7 @@ const Reportes = () => {
     cliente: "",
   });
   const [selectedDoc, setSelectedDoc] = useState(null);
-  const API_URL = import.meta.env.VITE_API_URL || "https://fluxdata3.onrender.com"; 
+  const API_URL = import.meta.env.VITE_API_URL; 
   // Cargar documentos iniciales
   useEffect(() => {
     fetch(`${API_URL}/ultimos`, {

@@ -9,7 +9,7 @@ export default function ClientesForm() {
     correo_cliente: "",
   });
   const [msg, setMsg] = useState("");
-  const API_URL = import.meta.env.VITE_API_URL || "https://fluxdata3.onrender.com"; 
+  const API_URL = import.meta.env.VITE_API_URL; 
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });

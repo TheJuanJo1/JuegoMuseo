@@ -1,5 +1,6 @@
 import express from "express"
 import cors from "cors"
+import dotenv from "dotenv";
 import clientesRoutes from "./routes/clientes.js"
 import empresasRoutes from "./routes/empresas.js"
 import loginRoutes from "./routes/login.js"
@@ -18,6 +19,7 @@ import xmlRoutes from "./routes/xml.js";
 import registrosRouter from "./routes/registros.js";
 import dashboardAdmin from "./routes/dashboardAdmin.js";
 
+dotenv.config();
 const app = express();
 app.use(cors({
   origin: [

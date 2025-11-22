@@ -12,7 +12,7 @@ export default function ResetPassword() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-  const API_URL = import.meta.env.VITE_API_URL || "https://fluxdata3.onrender.com"; 
+  const API_URL = import.meta.env.VITE_API_URL; 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage("");

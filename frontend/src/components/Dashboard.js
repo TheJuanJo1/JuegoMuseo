@@ -17,7 +17,7 @@ export default function Dashboard() {
   const [modalOpen, setModalOpen] = useState(false); // Controla si el modal se muestra
   const [modalContent, setModalContent] = useState(null); // Controla qué datos mostrar
   const [selectedDoc, setSelectedDoc] = useState(null);
-  const API_URL = import.meta.env.VITE_API_URL || "https://fluxdata3.onrender.com"; 
+  const API_URL = import.meta.env.VITE_API_URL; 
 
   // Cargar últimos documentos
   useEffect(() => {

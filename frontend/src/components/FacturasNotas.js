@@ -29,7 +29,7 @@ export default function FacturasNotas() {
   const [msg, setMsg] = useState("");
   const [facturaValida, setFacturaValida] = useState(null); // objeto factura validada
   const [mostarCamposNota, setMostarCamposNota] = useState(false); // controla visibilidad de campos extra
-  const API_URL = import.meta.env.VITE_API_URL || "https://fluxdata3.onrender.com"; 
+  const API_URL = import.meta.env.VITE_API_URL; 
   const formatCOP = (valor) =>
     new Intl.NumberFormat("es-CO", {
       style: "currency",

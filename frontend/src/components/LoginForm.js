@@ -10,7 +10,7 @@ export default function LoginForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
-  const API_URL = import.meta.env.VITE_API_URL || "https://fluxdata3.onrender.com"; 
+  const API_URL = import.meta.env.VITE_API_URL; 
   const handleSubmit = async (e) => {
   e.preventDefault();
   setError("");

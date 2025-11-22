@@ -22,7 +22,7 @@ export default function RegisterForm() {
   const [codigo, setCodigo] = useState(Array(6).fill(""));
   const navigate = useNavigate();
   const location = useLocation(); 
-  const API_URL = import.meta.env.VITE_API_URL || "https://fluxdata3.onrender.com"; 
+  const API_URL = import.meta.env.VITE_API_URL;
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
   const handleCodigoChange = async (e, index) => {
     const value = e.target.value.slice(-1);

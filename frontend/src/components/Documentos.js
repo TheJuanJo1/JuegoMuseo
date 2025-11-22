@@ -7,7 +7,7 @@ export default function Documentos() {
   const [page, setPage] = useState(1);
   const itemsPerPage = 10;
   const [expandedDocId, setExpandedDocId] = useState(null);
-  const API_URL = import.meta.env.VITE_API_URL || "https://fluxdata3.onrender.com"; 
+  const API_URL = import.meta.env.VITE_API_URL; 
 
   useEffect(() => {
 

@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { BASE_API_URL } from "../config/api";
 
 export default function Historial() {
   const [docs, setDocs] = useState([]);
   const navigate = useNavigate();
+  const API_URL = import.meta.env.VITE_API_URL || "https://fluxdata3.onrender.com"; 
 
   useEffect(() => {
-    fetch(`${BASE_API_URL}/api/facturas-notas/historial`, {
+    fetch(`${API_URL}/api/facturas-notas/historial`, {
       credentials: "include",
     })
       .then((res) => res.json())

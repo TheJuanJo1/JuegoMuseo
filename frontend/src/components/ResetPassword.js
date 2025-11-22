@@ -4,7 +4,6 @@ import fluxLogo from "../assets/fluxdata.png";
 import backArrow from "../assets/back-arrow.png";
 import laptopImage from "../assets/laptop2.jpg";
 import laptop1 from "../assets/im1.png";
-import { BASE_API_URL } from "../config/api";
 
 export default function ResetPassword() {
   const { token } = useParams();
@@ -13,6 +12,7 @@ export default function ResetPassword() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const API_URL = import.meta.env.VITE_API_URL || "https://fluxdata3.onrender.com"; 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage("");
@@ -27,7 +27,7 @@ export default function ResetPassword() {
       return;
     }
     try {
-      const res = await fetch(`${BASE_API_URL}/api/reset-password`, {
+      const res = await fetch(`${API_URL}/api/reset-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token, password, confirmPassword }),

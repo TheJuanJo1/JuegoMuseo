@@ -206,8 +206,6 @@ await prisma.Registros_Sistema.create({
   },
 });
 
-
-
     // Guardar productos si existen
     if (Array.isArray(productos) && productos.length > 0) {
       for (const p of productos) {

@@ -6,19 +6,16 @@ import B from "../assets/B.png";
 import D1 from "../assets/D1.png";
 import E from "../assets/E.png";
 import R1 from "../assets/R1.png";
-import T from "../assets/T.png";
-import A from "../assets/A.png"; 
-import C from "../assets/C.png";
 import C2 from "../assets/C2.png";
-import { BASE_API_URL } from "../config/api";
 
 export default function AdminLayout() {
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
+  const API_URL = import.meta.env.VITE_API_URL || "https://fluxdata3.onrender.com"; 
 
   const handleLogout = async () => {
     try {
-      await fetch(`${BASE_API_URL}/api/logout`, {
+      await fetch(`${API_URL}/api/logout`, {
         method: "POST",
         credentials: "include",
       });
@@ -96,8 +93,7 @@ export default function AdminLayout() {
             onClick={handleLogout}
             className={`flex items-center w-full px-3 py-3 rounded-md hover:bg-gray-700/60 transition ${
               collapsed ? "justify-center" : "gap-5 justify-start"
-            }`}
-          >
+            }`}>
             <img src={C2} alt="Cerrar sesión" className="h-7 w-7" />
             {!collapsed && <span>Cerrar sesión</span>}
           </button>
@@ -106,8 +102,7 @@ export default function AdminLayout() {
       <div
         className={`flex-1 flex flex-col transition-all duration-300 ${
           collapsed ? "ml-32" : "ml-80"
-        }`}
-      >
+        }`}>
         <TopBarAdmin/>
         <main className="flex-1 p-6">
           <Outlet />

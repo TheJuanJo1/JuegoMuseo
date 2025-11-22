@@ -27,7 +27,6 @@ import DashboardAdmin from "./components/DashboardAdmin";
 import EmpresasAdmin from "./components/EmpresasAdmin";
 import RegistrosAdmin from "./components/RegistrosAdmin";
 
-
 // Wrapper para pasar usuarioId desde params a FormularioEmpresa
 const FormularioEmpresaWrapper = () => {
   const { usuarioId } = useParams();
@@ -70,7 +69,6 @@ function App() {
         <Route path="/admin/empresas" element={<EmpresasAdmin />} />
         <Route path="/admin/registros" element={<RegistrosAdmin />} />
         </Route>
-
 
         <Route path="*" element={<Navigate to="/login" />} /> 
       </Routes>

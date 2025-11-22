@@ -1,7 +1,5 @@
 import express from "express"
 import cors from "cors"
-import dotenv from "dotenv"
-import authRoutes from "./routes/auth.js"
 import clientesRoutes from "./routes/clientes.js"
 import empresasRoutes from "./routes/empresas.js"
 import loginRoutes from "./routes/login.js"
@@ -18,69 +16,55 @@ import tokenRoutes from "./routes/token.js";
 import pdfRoutes from "./routes/pdf.js";
 import xmlRoutes from "./routes/xml.js";
 import registrosRouter from "./routes/registros.js";
-
 import dashboardAdmin from "./routes/dashboardAdmin.js";
 
-
-const app = express()
-const FRONTEND_ORIGIN = process.env.FRONTEND_URL || "http://localhost:5173";
-
 app.use(cors({
-  origin: FRONTEND_ORIGIN,
+  origin: [
+    "http://localhost:5173",
+    "https://fluxdata3.onrender.com" 
+  ],
   credentials: true,
+  methods: "GET,POST,PUT,DELETE",
+  allowedHeaders: "Content-Type,Authorization"
 }));
 
-app.use(express.json())
+app.use(express.json());
 app.use(cookieParser());
+
+// Ruta base
 app.get('/', (req, res) => {
   res.json({ ok: true, msg: 'API FluxData funcionando' })
-})
+});
 
-
-// Ejemplo de ruta protegida
+// Ruta protegida de prueba
 app.get("/api/auth/me", authRequired, (req, res) => {
   res.json({ user: req.user });
 });
 
-// Rutas de empresas
-app.use('/api/empresas', empresasRoutes)//Habilitar empresas
-
-app.use("/api/login", loginRoutes)
-
-// Proteger /api/auth/me con middleware
-app.use('/api/auth/me', authRequired)
-
+// Rutas
+app.use('/api/empresas', empresasRoutes);
+app.use("/api/login", loginRoutes);
 app.use("/api/forgot-password", forgotPasswordRoutes);
-
 app.use("/api/reset-password", resetPasswordRoutes);
-
 app.use("/api/facturas-notas", facturasNotasRoutes);
-
 app.use("/api/ultimos", ultimosRoutes);
-
 app.use("/api/estadisticas", estadisticasRoutes);
-
 app.use("/api/filtrar", filtrarRoutes);
-
-app.use("/api/configuracion", configurarRoutes)
-
+app.use("/api/configuracion", configurarRoutes);
 app.use("/api/token", tokenRoutes);
-
 app.use("/api/pdf", pdfRoutes);
-
 app.use("/api/xml", xmlRoutes);
-
-app.use("/api/clientes", clientesRoutes)
-
+app.use("/api/clientes", clientesRoutes);
 app.use("/api/registros", registrosRouter);
-
 app.use("/api/admin/dashboard", dashboardAdmin);
 
-
+// Doble ruta protegida (si quieres eliminar una me dices)
 app.get('/api/auth/me', authRequired, (req, res) => {
-  res.json({ user: req.user })
-})
+  res.json({ user: req.user });
+});
 
-const PORT = process.env.PORT || 3000
-app.listen(PORT, () => console.log(`Servidor en http://localhost:${PORT}`))
+const PORT = process.env.PORT || 10000;
 
+app.listen(PORT, () => {
+  console.log(`Servidor en http://localhost:${PORT}`);
+});

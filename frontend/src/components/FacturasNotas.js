@@ -1,6 +1,4 @@
 import { useState, useEffect } from "react";
-import { BASE_API_URL } from "../config/api";
-
 export default function FacturasNotas() {
   const [form, setForm] = useState({
     tipo_documento: "Factura",
@@ -31,7 +29,7 @@ export default function FacturasNotas() {
   const [msg, setMsg] = useState("");
   const [facturaValida, setFacturaValida] = useState(null); // objeto factura validada
   const [mostarCamposNota, setMostarCamposNota] = useState(false); // controla visibilidad de campos extra
-
+  const API_URL = import.meta.env.VITE_API_URL || "https://fluxdata3.onrender.com"; 
   const formatCOP = (valor) =>
     new Intl.NumberFormat("es-CO", {
       style: "currency",
@@ -261,7 +259,8 @@ const handleChangeForm = (e) => {
 
     try {
       const res = await fetch(
-        `${BASE_API_URL}/api/facturas-notas/validar-factura/${encodeURIComponent(form.numero_serie)}/${encodeURIComponent(form.id_usuario)}/${encodeURIComponent(form.id_cliente)}`
+
+        `${API_URL}/api/facturas-notas/validar-factura/${encodeURIComponent(form.numero_serie)}/${encodeURIComponent(form.id_usuario)}/${encodeURIComponent(form.id_cliente)}`
       );
       const data = await res.json();
 
@@ -365,7 +364,7 @@ const payload = {
 
 
     try {
-      const res = await fetch(`${BASE_API_URL}api/facturas-notas/enviar`, {
+      const res = await fetch(`${API_URL}api/facturas-notas/enviar`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -464,58 +463,36 @@ const payload = {
           {form.tipo_documento === "Nota Débito" && (
             <div className="flex items-center gap-2 mt-2">
               <label className="text-sm">Cantidad adicional:</label>
-              <input
-  type="number"
-  min="0"
-  max="1000000"
-  value={p.cantidad_extra === "" ? "" : p.cantidad_extra}
-  onChange={(e) => {
-    const valor = e.target.value;
-
-    // permitir vacío sin bloqueo
-    if (valor === "") {
-      const nuevo = [...productosFactura];
-      nuevo[index].cantidad_extra = "";
-      setProductosFactura(nuevo);
-      return;
-    }
-
-    const num = Number(valor);
-    if (num <= 1000000) {
-      const nuevo = [...productosFactura];
-      nuevo[index].cantidad_extra = num;
-      setProductosFactura(nuevo);
-    }
-  }}
-  className="w-24 p-1 border rounded"
-/>
-
-
+              <input type="number" min="0" max="1000000" value={p.cantidad_extra === "" ? "" : p.cantidad_extra}
+              onChange={(e) => { const valor = e.target.value;
+                if (valor === "") { const nuevo = [...productosFactura];
+                  nuevo[index].cantidad_extra = "";
+                  setProductosFactura(nuevo);
+                  return;
+                }
+                const num = Number(valor);
+                if (num <= 1000000) {
+                  const nuevo = [...productosFactura];
+                  nuevo[index].cantidad_extra = num;
+                  setProductosFactura(nuevo);
+                }
+              }}className="w-24 p-1 border rounded"/>
             </div>
           )}
 
         </div>
       ))}
-
-      {/* Total dinámico según el tipo */}
         <p className="mt-2 font-bold text-black">
-  Total de la nota: {formatCOP(Number(form.monto_nota || montoCalculado))}
-
+          Total de la nota: {formatCOP(Number(form.monto_nota || montoCalculado))}
       </p>
     </div>
 
     {/* Monto manual igual para ambas */}
     <div className="mt-3">
       <label className="block text-sm font-medium">Monto de la nota</label>
-      <input
-  name="monto_nota"
-  type="number"
-  step="0.01"
-  value={form.monto_nota === "" ? "" : form.monto_nota}
-  onChange={handleMontoNotaChange}
-  className="w-full p-2 border rounded mt-1"
-/>
-
+      <input name="monto_nota" type="number" step="0.01" value={form.monto_nota === "" ? "" : form.monto_nota}
+      onChange={handleMontoNotaChange}
+      className="w-full p-2 border rounded mt-1"/>
       <p className="text-xs text-gray-500 mt-1">
         Total calculado: {formatCOP(montoCalculado)}
       </p>
@@ -528,13 +505,10 @@ const payload = {
         onChange={handleChangeForm}
         value={form.detalle_nota || ""}
         className="w-full p-2 border rounded mt-1"
-        placeholder="Explica brevemente el motivo"
-      />
+        placeholder="Explica brevemente el motivo"/>
+        </div>
     </div>
-
-  </div>
-)}
-
+  )}
         <input type="datetime-local" name="fecha_emision" value={form.fecha_emision} onChange={handleChangeForm} className="w-full p-2 border rounded" />
 
         <input type="number" name="id_usuario" placeholder="ID Usuario" value={form.id_usuario} onChange={handleChangeForm} className="w-full p-2 border rounded" />

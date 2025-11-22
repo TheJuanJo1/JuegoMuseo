@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { BarChart, Bar, XAxis, YAxis, Tooltip,Cell, CartesianGrid, ResponsiveContainer, LabelList } from "recharts";
-import { BASE_API_URL } from "../config/api";
 
 export default function DashboardGlobal() {
   const [resumen, setResumen] = useState({
@@ -9,16 +8,17 @@ export default function DashboardGlobal() {
     totalDocumentos: 0,
     erroresDocumentos: 0
   });
+
   const [volumenDocs, setVolumenDocs] = useState([]);
   const [ultimosDocs, setUltimosDocs] = useState([]);
   const [validacionesSemana, setValidacionesSemana] = useState([]);
   const navigate = useNavigate();
-
+  const API_URL = import.meta.env.VITE_API_URL || "https://fluxdata3.onrender.com"; 
 
   useEffect(() => {
     const fetchDashboard = async () => {
       try {
-        const res = await fetch(`${BASE_API_URL}//api/admin/dashboard`, {
+        const res = await fetch(`${API_URL}/api/admin/dashboard`, {
           credentials: "include"
         });
         const data = await res.json();

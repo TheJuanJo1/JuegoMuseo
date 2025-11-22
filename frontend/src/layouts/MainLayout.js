@@ -9,15 +9,15 @@ import R from "../assets/R.png";
 import C from "../assets/C.png";
 import A from "../assets/A.png";
 import C2 from "../assets/C2.png";
-import { BASE_API_URL } from "../config/api";
 
 export default function MainLayout() {
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
+  const API_URL = import.meta.env.VITE_API_URL || "https://fluxdata3.onrender.com"; 
 
   const handleLogout = async () => {
     try {
-      await fetch(`${BASE_API_URL}//api/logout`, {
+      await fetch(`${API_URL}/api/logout`, {
         method: "POST",
         credentials: "include",
       });

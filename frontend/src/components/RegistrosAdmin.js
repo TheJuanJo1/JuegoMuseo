@@ -3,7 +3,6 @@ import FL from "../assets/FL.png";
 import EX from "../assets/EX.png";
 import V1 from "../assets/V1.png";
 import V3 from "../assets/V3.png";
-import { BASE_API_URL } from "../config/api";
 
 export default function RegistrosAdmin() {
   const [animando, setAnimando] = useState(false);
@@ -12,6 +11,7 @@ export default function RegistrosAdmin() {
   const [totalPaginas, setTotalPaginas] = useState(1);
   const [filtros, setFiltros] = useState({ nombre_usuario: "", tipo: "", resultado: "" });
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
+  const API_URL = import.meta.env.VITE_API_URL || "https://fluxdata3.onrender.com"; 
 
   const fetchRegistros = async (page = 1) => {
     try {
@@ -28,7 +28,7 @@ export default function RegistrosAdmin() {
     if (filtros.resultado.trim() !== "") {
       params.append("resultado", filtros.resultado);
     }
-      const res = await fetch(`${BASE_API_URL}api/registros?${params}`);
+      const res = await fetch(`${API_URL}/api/registros?${params}`);
       const data = await res.json();
       setRegistros(data.registros || []);
       setPagina(data.pagina_actual || 1);

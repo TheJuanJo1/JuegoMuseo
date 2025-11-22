@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { BASE_API_URL } from "../config/api";
-
 import fluxLogo from "../assets/fluxdata.png";
 import backArrow from "../assets/back-arrow.png";
 import laptopImage from "../assets/laptop.jpg";
@@ -12,13 +10,13 @@ export default function LoginForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
-
+  const API_URL = import.meta.env.VITE_API_URL || "https://fluxdata3.onrender.com"; 
   const handleSubmit = async (e) => {
   e.preventDefault();
   setError("");
 
   try {
-    const res = await fetch(`${BASE_API_URL}/api/login`, {
+    const res = await fetch(`${API_URL}/api/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ emailOrName, password }),
@@ -35,7 +33,7 @@ export default function LoginForm() {
       } else {
     const usuarioId = data.user.id;
     localStorage.setItem("usuarioId", usuarioId);
-    const estadoRes = await fetch(`${BASE_API_URL}/api/configuracion/estado/${usuarioId}`);
+    const estadoRes = await fetch(`${API_URL}/api/configuracion/estado/${usuarioId}`);
     const estadoData = await estadoRes.json();
 
     if (estadoData.completado) {

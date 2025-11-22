@@ -3,8 +3,6 @@ import { useNavigate } from "react-router-dom";
 import {
   LineChart,Line,ResponsiveContainer,PieChart,Pie,Cell,Tooltip,BarChart,Bar,XAxis,YAxis,CartesianGrid,
 } from "recharts";
-import { BASE_API_URL } from "../config/api";
-
 export default function Dashboard() {
   const navigate = useNavigate();
   const [docs, setDocs] = useState([]);
@@ -19,10 +17,11 @@ export default function Dashboard() {
   const [modalOpen, setModalOpen] = useState(false); // Controla si el modal se muestra
   const [modalContent, setModalContent] = useState(null); // Controla qué datos mostrar
   const [selectedDoc, setSelectedDoc] = useState(null);
+  const API_URL = import.meta.env.VITE_API_URL || "https://fluxdata3.onrender.com"; 
 
   // Cargar últimos documentos
   useEffect(() => {
-    fetch(`${BASE_API_URL}/api/ultimos`, {
+    fetch(`${API_URL}/api/ultimos`, {
       credentials: "include",
     })
       .then((res) => res.json())
@@ -32,7 +31,7 @@ export default function Dashboard() {
 
   // Cargar estadísticas globales
   useEffect(() => {
-    fetch(`${BASE_API_URL}//api/estadisticas`, {
+    fetch(`${API_URL}/api/estadisticas`, {
       credentials: "include",
     })
       .then((res) => res.json())

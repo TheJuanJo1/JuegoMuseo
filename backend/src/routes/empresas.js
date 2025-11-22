@@ -8,7 +8,7 @@ const router = express.Router();
 
 // Configuración del transporte de correos
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  service: "resend",
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS

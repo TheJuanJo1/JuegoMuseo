@@ -13,7 +13,8 @@ export default function DashboardGlobal() {
   const [ultimosDocs, setUltimosDocs] = useState([]);
   const [validacionesSemana, setValidacionesSemana] = useState([]);
   const navigate = useNavigate();
-  const API_URL = import.meta.env.VITE_API_URL; 
+  const API_URL = process.env.REACT_APP_API_URL || "https://fluxdata-1.onrender.com";
+ 
 
   useEffect(() => {
     const fetchDashboard = async () => {

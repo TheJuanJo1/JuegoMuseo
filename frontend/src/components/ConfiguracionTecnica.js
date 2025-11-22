@@ -8,7 +8,8 @@ export default function ConfiguracionTecnica({ usuarioId }) {
   const [mostrarModalCert, setMostrarModalCert] = useState(false);
   const [nuevoCert, setNuevoCert] = useState({ archivo: null, fecha_expedicion: "" });
   const [nuevoRango, setNuevoRango] = useState({ tipo_documento: "Factura", numero_inicial: "", numero_final: "" });
-  const API_URL = import.meta.env.VITE_API_URL; 
+  const API_URL = process.env.REACT_APP_API_URL || "https://fluxdata-1.onrender.com";
+
   useEffect(() => {
     const fetchConfig = async () => {
       try {

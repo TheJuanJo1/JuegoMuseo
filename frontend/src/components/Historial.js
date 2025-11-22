@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 export default function Historial() {
   const [docs, setDocs] = useState([]);
   const navigate = useNavigate();
-  const API_URL = import.meta.env.VITE_API_URL; 
+  const API_URL = process.env.REACT_APP_API_URL || "https://fluxdata-1.onrender.com";
 
   useEffect(() => {
     fetch(`${API_URL}/api/facturas-notas/historial`, {

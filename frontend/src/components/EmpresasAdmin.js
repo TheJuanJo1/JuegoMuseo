@@ -11,7 +11,7 @@ export default function EmpresasAdmin() {
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
   const [filtros, setFiltros] = useState({ nombre: "", nit: "", estado: "" });
   const [empresaSeleccionada, setEmpresaSeleccionada] = useState(null);
-  const API_URL = import.meta.env.VITE_API_URL; 
+  const API_URL = process.env.REACT_APP_API_URL || "https://fluxdata-1.onrender.com";
 
   // Obtener todas las empresas
   const obtenerEmpresas = async () => {

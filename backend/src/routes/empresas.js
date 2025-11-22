@@ -6,19 +6,21 @@ import { Resend } from "resend";
 
 const router = express.Router();
 
-// --- NUEVO: Resend API (NO SMTP) ---
+// --- Resend API KEY ---
 const resend = new Resend(process.env.EMAIL_PASS);
 
-// --- Función para enviar correo ---
+// --------------------------------------------------------
+// FUNCIÓN PARA ENVIAR CORREO
+// --------------------------------------------------------
 async function enviarCodigoCorreo(destino, codigo) {
   try {
     await resend.emails.send({
-      from: "FluxData <no-reply@tudominio.com>",
+      from: "FluxData <onboarding@resend.dev>",   // ← FUNCIONA GRATIS, NO NECESITA DOMINIO
       to: destino,
       subject: "Código de verificación",
       html: `
         <h2>Tu código de verificación</h2>
-        <p><b>${codigo}</b></p>
+        <p><b style="font-size:22px">${codigo}</b></p>
         <p>Este código expirará en 10 minutos.</p>
       `
     });
@@ -31,7 +33,7 @@ async function enviarCodigoCorreo(destino, codigo) {
 }
 
 // --------------------------------------------------------
-// PRE-REGISTER
+// PRE-REGISTER (Paso 1)
 // --------------------------------------------------------
 router.post("/pre-register", async (req, res) => {
   try {
@@ -45,25 +47,35 @@ router.post("/pre-register", async (req, res) => {
       return res.status(400).json({ error: "Las contraseñas no coinciden" });
     }
 
+    // Validar empresa existente
     const empresaExistente = await prisma.usuarios.findFirst({
       where: {
         OR: [
           { nit_empresa },
-          { nombre_usuario: nombre_empresa }
+          { nombre_usuario: nombre_empresa },
+          { correo_contacto }
         ]
       }
     });
 
     if (empresaExistente) {
       return res.status(409).json({
-        error: "Ya existe una empresa registrada con ese nombre o NIT."
+        error: "Ya existe una empresa registrada con ese nombre, NIT o correo."
       });
     }
 
+    // Hash contraseña
     const hashedPass = await bcrypt.hash(contrasena, 10);
 
+    // Generar código 6 dígitos
     const codigo = Math.floor(100000 + Math.random() * 900000).toString();
 
+    // Eliminar códigos previos del mismo correo
+    await prisma.codigos_verificacion.deleteMany({
+      where: { correo: correo_contacto }
+    });
+
+    // Guardar código
     await prisma.codigos_verificacion.create({
       data: {
         correo: correo_contacto,
@@ -75,6 +87,7 @@ router.post("/pre-register", async (req, res) => {
       }
     });
 
+    // Enviar correo
     const enviado = await enviarCodigoCorreo(correo_contacto, codigo);
 
     if (!enviado) {
@@ -90,7 +103,7 @@ router.post("/pre-register", async (req, res) => {
 });
 
 // --------------------------------------------------------
-// VERIFY CODE
+// VERIFY CODE (Paso 2)
 // --------------------------------------------------------
 router.post("/verify-code", async (req, res) => {
   try {
@@ -108,6 +121,7 @@ router.post("/verify-code", async (req, res) => {
       return res.status(400).json({ error: "El código ha expirado" });
     }
 
+    // Crear empresa
     const empresa = await prisma.usuarios.create({
       data: {
         nombre_usuario: registro.nombre_empresa,
@@ -118,6 +132,7 @@ router.post("/verify-code", async (req, res) => {
       }
     });
 
+    // Eliminar código usado
     await prisma.codigos_verificacion.delete({
       where: { id: registro.id }
     });
@@ -144,7 +159,7 @@ router.post("/verify-code", async (req, res) => {
 });
 
 // --------------------------------------------------------
-// RESEND CODE
+// RESEND CODE (Paso 3)
 // --------------------------------------------------------
 router.post("/resend-code", async (req, res) => {
   try {
@@ -163,6 +178,7 @@ router.post("/resend-code", async (req, res) => {
       return res.status(404).json({ error: "No se encontró un registro previo para este correo" });
     }
 
+    // Nuevo código
     const nuevoCodigo = Math.floor(100000 + Math.random() * 900000).toString();
 
     await prisma.codigos_verificacion.update({
@@ -173,6 +189,7 @@ router.post("/resend-code", async (req, res) => {
       }
     });
 
+    // Enviar correo
     await enviarCodigoCorreo(correo_contacto, nuevoCodigo);
 
     res.json({ msg: "Se ha enviado un nuevo código a tu correo" });

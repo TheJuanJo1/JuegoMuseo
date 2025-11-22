@@ -6,16 +6,18 @@ import { Resend } from "resend";
 
 const router = express.Router();
 
-// --- Resend API KEY ---
-const resend = new Resend(process.env.EMAIL_PASS);
+// --------------------------------------------------------
+// RESEND CONFIG (CORREGIDO)
+// --------------------------------------------------------
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 // --------------------------------------------------------
-// FUNCIÓN PARA ENVIAR CORREO
+// FUNCIÓN PARA ENVIAR CORREO (CORREGIDO)
 // --------------------------------------------------------
 async function enviarCodigoCorreo(destino, codigo) {
   try {
     await resend.emails.send({
-      from: "FluxData <onboarding@resend.dev>",   // ← FUNCIONA GRATIS, NO NECESITA DOMINIO
+      from: "FluxData <noreply@fluxdata.eu.org>",  // ← AHORA USANDO TU DOMINIO
       to: destino,
       subject: "Código de verificación",
       html: `

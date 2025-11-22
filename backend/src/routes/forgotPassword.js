@@ -5,6 +5,8 @@ import { Resend } from "resend";
 
 const router = express.Router();
 const prisma = new PrismaClient();
+
+// ✅ Asegurarse de cargar la API Key CORRECTA
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 router.post("/", async (req, res) => {
@@ -19,16 +21,23 @@ router.post("/", async (req, res) => {
       return res.status(404).json({ error: "Usuario no encontrado" });
     }
 
-    // Crear token que expira en 15 minutos
+    // 🔐 Crear token JWT válido por 15 min
     const token = jwt.sign({ id: user.id_usuario }, process.env.JWT_SECRET, {
       expiresIn: "15m",
     });
 
+    // URL del frontend
     const link = `${process.env.FRONTEND_URL}/reset-password/${token}`;
+
+    // 🟢 Validar que EMAIL_FROM exista
+    if (!process.env.EMAIL_FROM) {
+      console.error("❌ ERROR: Falta EMAIL_FROM en .env");
+      return res.status(500).json({ error: "Configuración faltante del servidor" });
+    }
 
     // ✉️ Enviar correo con Resend
     const response = await resend.emails.send({
-      from: process.env.EMAIL_FROM,
+      from: process.env.EMAIL_FROM, // ejemplo: "FluxData <soporte@tudominio.com>"
       to: email,
       subject: "Recuperación de contraseña",
       html: `
@@ -42,14 +51,14 @@ router.post("/", async (req, res) => {
     });
 
     if (response.error) {
-      console.error("Error enviando correo:", response.error);
+      console.error("❌ Error enviando correo:", response.error);
       return res.status(500).json({ error: "No se pudo enviar el correo" });
     }
 
     res.json({ msg: "Enlace enviado a tu correo" });
 
   } catch (err) {
-    console.error("Error en forgot-password:", err);
+    console.error("❌ Error en forgot-password:", err);
     res.status(500).json({ error: "Error interno del servidor" });
   }
 });

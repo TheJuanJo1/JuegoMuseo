@@ -6,16 +6,18 @@ import { Resend } from "resend";
 
 const router = express.Router();
 
-// --- Resend API KEY ---
-const resend = new Resend(process.env.EMAIL_PASS);
+// --------------------------------------------------------
+// RESEND CONFIG
+// --------------------------------------------------------
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 // --------------------------------------------------------
-// FUNCIÓN PARA ENVIAR CORREO
+// FUNCIÓN PARA ENVIAR CÓDIGO
 // --------------------------------------------------------
 async function enviarCodigoCorreo(destino, codigo) {
   try {
     await resend.emails.send({
-      from: "FluxData <onboarding@resend.dev>",   // ← FUNCIONA GRATIS, NO NECESITA DOMINIO
+      from: "FluxData <onboarding@resend.dev>",  // NO REQUIERE DOMINIO
       to: destino,
       subject: "Código de verificación",
       html: `
@@ -27,7 +29,7 @@ async function enviarCodigoCorreo(destino, codigo) {
 
     return true;
   } catch (err) {
-    console.error("ERROR enviando correo con Resend:", err.message);
+    console.error("ERROR enviando correo con Resend:", err);
     return false;
   }
 }
@@ -37,8 +39,15 @@ async function enviarCodigoCorreo(destino, codigo) {
 // --------------------------------------------------------
 router.post("/pre-register", async (req, res) => {
   try {
-    const { nombre_empresa, nit_empresa, correo_contacto, contrasena, confirmar_contrasena } = req.body;
+    const {
+      nombre_empresa,
+      nit_empresa,
+      correo_contacto,
+      contrasena,
+      confirmar_contrasena
+    } = req.body;
 
+    // Validación
     if (!nombre_empresa || !nit_empresa || !correo_contacto || !contrasena || !confirmar_contrasena) {
       return res.status(400).json({ error: "Todos los campos son requeridos" });
     }
@@ -47,7 +56,7 @@ router.post("/pre-register", async (req, res) => {
       return res.status(400).json({ error: "Las contraseñas no coinciden" });
     }
 
-    // Validar empresa existente
+    // Verificar empresa existente
     const empresaExistente = await prisma.usuarios.findFirst({
       where: {
         OR: [
@@ -64,18 +73,18 @@ router.post("/pre-register", async (req, res) => {
       });
     }
 
-    // Hash contraseña
+    // Hash de contraseña
     const hashedPass = await bcrypt.hash(contrasena, 10);
 
-    // Generar código 6 dígitos
+    // Código de verificación
     const codigo = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // Eliminar códigos previos del mismo correo
+    // Borrar códigos anteriores
     await prisma.codigos_verificacion.deleteMany({
       where: { correo: correo_contacto }
     });
 
-    // Guardar código
+    // Guardar datos y código
     await prisma.codigos_verificacion.create({
       data: {
         correo: correo_contacto,
@@ -94,7 +103,7 @@ router.post("/pre-register", async (req, res) => {
       return res.status(500).json({ error: "No se pudo enviar el correo de verificación" });
     }
 
-    res.json({ msg: "Se envió un código de verificación al correo." });
+    res.json({ msg: "Se envió un código de verificación a tu correo." });
 
   } catch (err) {
     console.error("Error en /pre-register:", err);
@@ -121,7 +130,7 @@ router.post("/verify-code", async (req, res) => {
       return res.status(400).json({ error: "El código ha expirado" });
     }
 
-    // Crear empresa
+    // Registrar empresa real
     const empresa = await prisma.usuarios.create({
       data: {
         nombre_usuario: registro.nombre_empresa,
@@ -132,7 +141,6 @@ router.post("/verify-code", async (req, res) => {
       }
     });
 
-    // Eliminar código usado
     await prisma.codigos_verificacion.delete({
       where: { id: registro.id }
     });
@@ -178,7 +186,6 @@ router.post("/resend-code", async (req, res) => {
       return res.status(404).json({ error: "No se encontró un registro previo para este correo" });
     }
 
-    // Nuevo código
     const nuevoCodigo = Math.floor(100000 + Math.random() * 900000).toString();
 
     await prisma.codigos_verificacion.update({
@@ -189,7 +196,6 @@ router.post("/resend-code", async (req, res) => {
       }
     });
 
-    // Enviar correo
     await enviarCodigoCorreo(correo_contacto, nuevoCodigo);
 
     res.json({ msg: "Se ha enviado un nuevo código a tu correo" });

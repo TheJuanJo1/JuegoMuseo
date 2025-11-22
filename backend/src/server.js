@@ -18,6 +18,7 @@ import xmlRoutes from "./routes/xml.js";
 import registrosRouter from "./routes/registros.js";
 import dashboardAdmin from "./routes/dashboardAdmin.js";
 
+const app = express();
 app.use(cors({
   origin: [
     "http://localhost:5173",

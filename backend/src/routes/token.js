@@ -1,53 +1,34 @@
-import { Router } from "express";
 import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
 
-const router = Router();
+dotenv.config();
 
-// Simulación de BD en memoria
-const tokensGuardados = {};
+// Clave secreta (desde .env)
+const JWT_SECRET = process.env.JWT_SECRET || "CLAVE_SUPER_SECRETA";
 
-// GET: obtener token existente o generar uno nuevo
-router.get("/:usuarioId", async (req, res) => {
+// Tiempo de expiración del token (opcional, configurable)
+const TOKEN_EXPIRES = "7d";
+
+// ---------------------------------------------
+// Generar un token
+// ---------------------------------------------
+export function generateToken(payload) {
   try {
-    const { usuarioId } = req.params;
-
-    if (tokensGuardados[usuarioId]) {
-      return res.json({ token: tokensGuardados[usuarioId] });
-    }
-
-    const token = jwt.sign(
-      { sub: usuarioId },
-      process.env.JWT_SECRET || "mi_secreto",
-      { expiresIn: "1h" }
-    );
-
-    tokensGuardados[usuarioId] = token;
-
-    return res.json({ token });
+    return jwt.sign(payload, JWT_SECRET, { expiresIn: TOKEN_EXPIRES });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Error al generar token" });
+    console.error("Error al generar token:", error);
+    return null;
   }
-});
+}
 
-// POST: regenerar token
-router.post("/regenerar/:usuarioId", async (req, res) => {
+// ---------------------------------------------
+// Verificar un token
+// ---------------------------------------------
+export function verifyToken(token) {
   try {
-    const { usuarioId } = req.params;
-
-    const token = jwt.sign(
-      { sub: usuarioId },
-      process.env.JWT_SECRET || "mi_secreto",
-      { expiresIn: "1h" }
-    );
-
-    tokensGuardados[usuarioId] = token;
-
-    return res.json({ token });
+    return jwt.verify(token, JWT_SECRET);
   } catch (error) {
-    console.error("Error al regenerar token:", error);
-    res.status(500).json({ error: "Error al regenerar token" });
+    console.error("Token inválido:", error);
+    return null;
   }
-});
-
-export default router;
+}

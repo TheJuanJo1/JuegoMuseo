@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { API_URL } from "../config";
 
 export default function ClientesForm() {
   const [form, setForm] = useState({
@@ -21,7 +22,7 @@ export default function ClientesForm() {
     setMsg("");
 
     try {
-      const res = await fetch("http://localhost:3000/api/clientes/register", {
+      const res = await fetch(`${API_URL}/api/clientes/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),

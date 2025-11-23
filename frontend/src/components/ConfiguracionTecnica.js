@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { API_URL } from "../config";
 
 export default function ConfiguracionTecnica({ usuarioId }) {
   const [config, setConfig] = useState(null);
@@ -12,7 +13,7 @@ export default function ConfiguracionTecnica({ usuarioId }) {
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        const res = await fetch(`http://localhost:3000/api/configuracion/${usuarioId}`);
+        const res = await fetch(`${API_URL}/api/configuracion/${usuarioId}`);
         if (!res.ok) throw new Error("Error al obtener configuración");
         const data = await res.json();
         setConfig(data.configuracion);
@@ -27,7 +28,7 @@ export default function ConfiguracionTecnica({ usuarioId }) {
 
   const handleRegenerarToken = async () => {
     try {
-      const res = await fetch(`http://localhost:3000/api/token/regenerar/${usuarioId}`, {
+      const res = await fetch(`${API_URL}/api/token/regenerar/${usuarioId}`, {
         method: "POST",
       });
       const data = await res.json();
@@ -43,7 +44,7 @@ export default function ConfiguracionTecnica({ usuarioId }) {
 
   const handleGuardarNumeracion = async () => {
     try {
-      const res = await fetch(`http://localhost:3000/api/configuracion/numeracion/${usuarioId}`, {
+      const res = await fetch(`${API_URL}/api/configuracion/numeracion/${usuarioId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -85,7 +86,7 @@ export default function ConfiguracionTecnica({ usuarioId }) {
       formData.append("certificado_firma", nuevoCert.archivo);
       formData.append("fecha_expiracion", nuevoCert.fecha_expedicion);
 
-      const res = await fetch(`http://localhost:3000/api/configuracion/regenerar-certificado/${usuarioId}`, {
+      const res = await fetch(`${API_URL}/api/configuracion/regenerar-certificado/${usuarioId}`, {
         method: "POST",
         body: formData,
       });

@@ -1,7 +1,7 @@
 // src/components/ForgotPassword.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import { API_URL } from "../config";
 import fluxLogo from "../assets/fluxdata.png";
 import backArrow from "../assets/back-arrow.png";
 import laptopImage from "../assets/laptop2.jpg";
@@ -19,7 +19,7 @@ export default function ForgotPassword() {
     setError("");
 
     try {
-      const res = await fetch("http://localhost:3000/api/forgot-password", {
+      const res = await fetch(`${API_URL}/api/forgot-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),

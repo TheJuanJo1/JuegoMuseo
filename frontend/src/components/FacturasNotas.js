@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-
+import { API_URL } from "../config";
 export default function FacturasNotas() {
   const [form, setForm] = useState({
     tipo_documento: "Factura",
@@ -149,7 +149,7 @@ useEffect(() => {
     if (!form.id_cliente) return setMsg("Ingresa el ID del cliente antes de validar"); 
     try {
       const res = await fetch(
-        `http://localhost:3000/api/facturas-notas/validar-factura/${encodeURIComponent(form.numero_serie)}/${encodeURIComponent(form.id_usuario)}/${encodeURIComponent(form.id_cliente)}`
+        `${API_URL}/api/facturas-notas/validar-factura/${encodeURIComponent(form.numero_serie)}/${encodeURIComponent(form.id_usuario)}/${encodeURIComponent(form.id_cliente)}`
       );
       const data = await res.json();
 
@@ -230,7 +230,7 @@ useEffect(() => {
     };
 
     try {
-      const res = await fetch("http://localhost:3000/api/facturas-notas/enviar", {
+      const res = await fetch(`${API_URL}/api/facturas-notas/enviar`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

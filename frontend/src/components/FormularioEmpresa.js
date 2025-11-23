@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Logo from "../assets/Logo.png";
 import Fluxdata from "../assets/fluxdata2.png";
+import { API_URL } from "../config";
 
 export default function FormularioEmpresa({ usuarioId }) {
   const navigate = useNavigate();
@@ -25,7 +26,7 @@ const [form, setForm] = useState({
   useEffect(() => {
     const verificarEstado = async () => {
       try {
-        const res = await fetch(`http://localhost:3000/api/configuracion/estado/${usuarioId}`);
+        const res = await fetch(`${API_URL}/api/configuracion/estado/${usuarioId}`);
         const data = await res.json();
         if (data.completado) {
           navigate("/dashboard"); 
@@ -39,7 +40,7 @@ const [form, setForm] = useState({
   useEffect(() => {
     const obtenerToken = async () => {
       try {
-        const res = await fetch(`http://localhost:3000/api/token/${usuarioId}`);
+        const res = await fetch(`${API_URL}/api/token/${usuarioId}`);
         const data = await res.json();
         if (res.ok && data.token) {
           setForm((prev) => ({ ...prev, token_api: data.token }));
@@ -67,7 +68,7 @@ const [form, setForm] = useState({
     data.append("tipo_documento", "Factura");
     data.append("id_usuario", usuarioId);
     try {
-      const res = await fetch("http://localhost:3000/api/configuracion", {
+      const res = await fetch(`${API_URL}/api/configuracion`, {
         method: "POST",
         body: data,
       });

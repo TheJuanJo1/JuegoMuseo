@@ -2,36 +2,21 @@
 import express from "express";
 import bcrypt from "bcryptjs";
 import { prisma } from "../lib/prisma.js";
-import { Resend } from "resend";
+import { sendEmail } from "../mailjet.js";   // ← NUEVO: usamos Mailjet
 
 const router = express.Router();
 
 // --------------------------------------------------------
-// RESEND CONFIG (CORREGIDO)
-// --------------------------------------------------------
-const resend = new Resend(process.env.RESEND_API_KEY);
-
-// --------------------------------------------------------
-// FUNCIÓN PARA ENVIAR CORREO (CORREGIDO)
+// FUNCIÓN PARA ENVIAR CÓDIGO DE VERIFICACIÓN
 // --------------------------------------------------------
 async function enviarCodigoCorreo(destino, codigo) {
-  try {
-    await resend.emails.send({
-      from: "FluxData <noreply@fluxdata.eu.org>",  // ← AHORA USANDO TU DOMINIO
-      to: destino,
-      subject: "Código de verificación",
-      html: `
-        <h2>Tu código de verificación</h2>
-        <p><b style="font-size:22px">${codigo}</b></p>
-        <p>Este código expirará en 10 minutos.</p>
-      `
-    });
+  const html = `
+    <h2>Tu código de verificación</h2>
+    <p><b style="font-size:26px">${codigo}</b></p>
+    <p>Este código expirará en 10 minutos.</p>
+  `;
 
-    return true;
-  } catch (err) {
-    console.error("ERROR enviando correo con Resend:", err.message);
-    return false;
-  }
+  return await sendEmail(destino, "Código de verificación", html);
 }
 
 // --------------------------------------------------------
@@ -39,9 +24,16 @@ async function enviarCodigoCorreo(destino, codigo) {
 // --------------------------------------------------------
 router.post("/pre-register", async (req, res) => {
   try {
-    const { nombre_empresa, nit_empresa, correo_contacto, contrasena, confirmar_contrasena } = req.body;
+    const {
+      nombre_empresa,
+      nit_empresa,
+      correo_contacto,
+      contrasena,
+      confirmar_contrasena
+    } = req.body;
 
-    if (!nombre_empresa || !nit_empresa || !correo_contacto || !contrasena || !confirmar_contrasena) {
+    if (!nombre_empresa || !nit_empresa || !correo_contacto ||
+        !contrasena || !confirmar_contrasena) {
       return res.status(400).json({ error: "Todos los campos son requeridos" });
     }
 
@@ -77,7 +69,7 @@ router.post("/pre-register", async (req, res) => {
       where: { correo: correo_contacto }
     });
 
-    // Guardar código
+    // Guardar código temporal
     await prisma.codigos_verificacion.create({
       data: {
         correo: correo_contacto,
@@ -123,7 +115,7 @@ router.post("/verify-code", async (req, res) => {
       return res.status(400).json({ error: "El código ha expirado" });
     }
 
-    // Crear empresa
+    // Crear empresa (usuario)
     const empresa = await prisma.usuarios.create({
       data: {
         nombre_usuario: registro.nombre_empresa,
@@ -134,7 +126,7 @@ router.post("/verify-code", async (req, res) => {
       }
     });
 
-    // Eliminar código usado
+    // Eliminar código
     await prisma.codigos_verificacion.delete({
       where: { id: registro.id }
     });
@@ -177,7 +169,9 @@ router.post("/resend-code", async (req, res) => {
     });
 
     if (!registro) {
-      return res.status(404).json({ error: "No se encontró un registro previo para este correo" });
+      return res.status(404).json({
+        error: "No se encontró un registro previo para este correo"
+      });
     }
 
     // Nuevo código

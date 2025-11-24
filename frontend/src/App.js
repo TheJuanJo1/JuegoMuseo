@@ -26,6 +26,8 @@ import ConfiguracionTecnica from "./components/ConfiguracionTecnica";
 import DashboardAdmin from "./components/DashboardAdmin";
 import EmpresasAdmin from "./components/EmpresasAdmin";
 import RegistrosAdmin from "./components/RegistrosAdmin";
+import TokensAdmin from "./components/TokensAdmin";
+import ConfiguracionTecnicaAdmin from "./components/ConfiguracionTecnicaAdmin";
 
 
 // Wrapper para pasar usuarioId desde params a FormularioEmpresa
@@ -69,6 +71,8 @@ function App() {
         <Route path="/admin/dashboard" element={<DashboardAdmin />} />
         <Route path="/admin/empresas" element={<EmpresasAdmin />} />
         <Route path="/admin/registros" element={<RegistrosAdmin />} />
+        <Route path="/admin/tokens" element={<TokensAdmin />} />
+        <Route path="/admin/configuracion" element={<ConfiguracionTecnicaAdmin />} />
         </Route>
 
 

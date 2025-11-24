@@ -1,21 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-<<<<<<< HEAD
 import { API_URL } from "../config";
-=======
-import { BASE_API_URL } from "../config/api";
-
->>>>>>> upstream/main
 export default function Historial() {
   const [docs, setDocs] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
-<<<<<<< HEAD
     fetch(`${API_URL}/api/facturas-notas/historial`, {
-=======
-    fetch(`${BASE_API_URL}/api/facturas-notas/historial`, {
->>>>>>> upstream/main
       credentials: "include",
     })
       .then((res) => res.json())

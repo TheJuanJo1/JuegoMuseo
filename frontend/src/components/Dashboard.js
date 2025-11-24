@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import {
   LineChart,Line,ResponsiveContainer,PieChart,Pie,Cell,Tooltip,BarChart,Bar,XAxis,YAxis,CartesianGrid,
 } from "recharts";
-import { BASE_API_URL } from "../config/api";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -23,7 +22,6 @@ export default function Dashboard() {
 
   // Cargar últimos documentos
   useEffect(() => {
-<<<<<<< HEAD
   fetch(`${API_URL}/api/ultimos`, {
     credentials: "include",
   })
@@ -42,25 +40,6 @@ export default function Dashboard() {
     .catch((err) => console.error(err));
 }, []);
 
-=======
-    fetch(`${BASE_API_URL}/api/ultimos`, {
-      credentials: "include",
-    })
-      .then((res) => res.json())
-      .then((data) => setDocs(Array.isArray(data) ? data : []))
-      .catch((err) => console.error(err));
-  }, []);
-
-  // Cargar estadísticas globales
-  useEffect(() => {
-    fetch(`${BASE_API_URL}//api/estadisticas`, {
-      credentials: "include",
-    })
-      .then((res) => res.json())
-      .then((data) => setEstadisticas(data))
-      .catch((err) => console.error(err));
-  }, []);
->>>>>>> upstream/main
 
   const filteredDocs = filter
     ? docs.filter((d) => {

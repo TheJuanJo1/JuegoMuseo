@@ -1,11 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-<<<<<<< HEAD
 import { API_URL } from "../config";
-=======
-import { BASE_API_URL } from "../config/api";
-
->>>>>>> upstream/main
 import fluxLogo from "../assets/fluxdata.png";
 import backArrow from "../assets/back-arrow.png";
 import laptopImage from "../assets/laptop.jpg";
@@ -21,7 +16,6 @@ export default function LoginForm() {
     e.preventDefault();
     setError("");
 
-<<<<<<< HEAD
     try {
       const res = await fetch(`${API_URL}/api/login`, {
         method: "POST",
@@ -29,15 +23,6 @@ export default function LoginForm() {
         body: JSON.stringify({ emailOrName, password }),
         credentials: "include",
       });
-=======
-  try {
-    const res = await fetch(`${BASE_API_URL}/api/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ emailOrName, password }),
-      credentials: "include",
-    });
->>>>>>> upstream/main
 
       const data = await res.json();
       if (!res.ok) {
@@ -49,16 +34,9 @@ export default function LoginForm() {
       if (data.user.role === "admin") {
         navigate("/admin/dashboard");
       } else {
-<<<<<<< HEAD
         // Si es usuario normal
         const usuarioId = data.user.id;
         localStorage.setItem("usuarioId", usuarioId);
-=======
-    const usuarioId = data.user.id;
-    localStorage.setItem("usuarioId", usuarioId);
-    const estadoRes = await fetch(`${BASE_API_URL}/api/configuracion/estado/${usuarioId}`);
-    const estadoData = await estadoRes.json();
->>>>>>> upstream/main
 
         const estadoRes = await fetch(
           `${API_URL}/api/configuracion/estado/${usuarioId}`

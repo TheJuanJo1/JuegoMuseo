@@ -3,7 +3,6 @@ import FL from "../assets/FL.png";
 import EX from "../assets/EX.png";
 import V1 from "../assets/V1.png";
 import V3 from "../assets/V3.png";
-import { BASE_API_URL } from "../config/api";
 
 import { API_URL } from "../config"; // ⬅️ IMPORTANTE
 
@@ -42,19 +41,6 @@ export default function RegistrosAdmin() {
         credentials: "include",
       });
 
-<<<<<<< HEAD
-=======
-    if (filtros.nombre_usuario.trim() !== "") {
-      params.append("nombre_usuario", filtros.nombre_usuario);
-    }
-    if (filtros.tipo.trim() !== "") {
-      params.append("tipo", filtros.tipo);
-    }
-    if (filtros.resultado.trim() !== "") {
-      params.append("resultado", filtros.resultado);
-    }
-      const res = await fetch(`${BASE_API_URL}api/registros?${params}`);
->>>>>>> upstream/main
       const data = await res.json();
 
       setRegistros(data.registros || []);
@@ -160,7 +146,6 @@ export default function RegistrosAdmin() {
       </div>
 
       <div className="bg-white p-6 rounded-2xl shadow-md">
-<<<<<<< HEAD
         {mostrarFiltros && (
           <div className="mb-6 p-4 border border-gray-300 rounded-md bg-gray-50">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -231,65 +216,6 @@ export default function RegistrosAdmin() {
             <thead className="bg-gray-100 text-black">
               <tr>
                 <th className="px-4 py-2 border">Fecha/Hora</th>
-=======
-        {/* CAMPOS DE FILTRO FUERA DEL CUADRO BLANCO */}
-{mostrarFiltros && (
-  <div className="mb-6 p-4 bg-gray-50 rounded-md shadow-sm flex flex-wrap gap-4">
-    
-    <input
-      type="text"
-      placeholder="Empresa..."
-      value={filtros.nombre_usuario}
-      onChange={(e) => setFiltros({ ...filtros, nombre_usuario: e.target.value })}
-      className="border rounded-md px-3 py-2 flex-1 min-w-[150px]"
-    />
-
-    <select
-      value={filtros.tipo}
-      onChange={(e) => setFiltros({ ...filtros, tipo: e.target.value })}
-      className="border rounded-md px-3 py-2 flex-1 min-w-[150px]"
-    >
-      <option value="">Tipo de Documento</option>
-      <option value="Factura">Factura</option>
-      <option value="Nota Crédito">Nota Crédito</option>
-      <option value="Nota Débito">Nota Débito</option>
-    </select>
-
-    <select
-      value={filtros.resultado}
-      onChange={(e) => setFiltros({ ...filtros, resultado: e.target.value })}
-      className="border rounded-md px-3 py-2 flex-1 min-w-[150px]"
-    >
-      <option value="">Resultado</option>
-      <option value="Aceptado">Aceptado</option>
-      <option value="Pendiente">Pendiente</option>
-      <option value="Rechazado">Rechazado</option>
-    </select>
-
-    <button
-      onClick={aplicarFiltro}
-      className="px-4 py-2 bg-[#27374D] text-white rounded-md hover:bg-[#1f2d3c]"
-    >
-      Validar
-    </button>
-
-    <button
-      onClick={limpiarFiltro}
-      className="px-4 py-2 border border-gray-400 rounded-md hover:bg-gray-200"
-    >
-      Limpiar
-    </button>
-
-  </div>
-)}
-
-
-        <div className={`overflow-x-auto border border-gray-300 rounded-md transition-all duration-500 ease-in-out ${
-          animando ? "opacity-0 translate-x-8" : "opacity-100 translate-x-0"}`}>
-            <table className="min-w-full text-sm text-left border-collapse">
-              <thead className="bg-gray-100 text-black">
-                <tr><th className="px-4 py-2 border">Fecha/Hora</th>
->>>>>>> upstream/main
                 <th className="px-4 py-2 border">Empresa</th>
                 <th className="px-4 py-2 border">Tipo Doc</th>
                 <th className="px-4 py-2 border">Número</th>

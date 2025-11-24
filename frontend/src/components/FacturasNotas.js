@@ -1,10 +1,5 @@
 import { useState, useEffect } from "react";
-<<<<<<< HEAD
 import { API_URL } from "../config";
-=======
-import { BASE_API_URL } from "../config/api";
-
->>>>>>> upstream/main
 export default function FacturasNotas() {
   const [form, setForm] = useState({
     tipo_documento: "Factura",
@@ -45,13 +40,13 @@ export default function FacturasNotas() {
 
   useEffect(() => {
   if (!productosFactura.length) return;
-  if (form.tipo_documento !== "Nota Crédito") return;
 
   let total = 0;
 
   productosFactura.forEach((p, index) => {
-    const cant = parseFloat(devoluciones[index]);
-    if (!isNaN(cant) && cant > 0) {
+    const cant = Number(devoluciones[index] || 0);
+
+    if (cant > 0) {
       const subtotal = cant * Number(p.precio_unitario);
       const iva = subtotal * (Number(p.iva) / 100);
       total += subtotal + iva;
@@ -60,39 +55,7 @@ export default function FacturasNotas() {
 
   setMontoCalculado(total);
   setForm((prev) => ({ ...prev, monto_nota: total }));
-}, [devoluciones, productosFactura, form.tipo_documento]);
-
-
-const handleMontoNotaChange = (e) => {
-  let valor = e.target.value;
-  if (valor === "") {
-    setForm((prev) => ({ ...prev, monto_nota: "" }));
-    return;
-  }
-
-  valor = Number(valor);
-
-  if (productos.length > 0) {
-    setMsg("No se puede cambiar manualmente el total, ya hay productos agregados");
-    return;
-  }
-  //Si es Nota Crédito, no puede superar el total de la factura original
-  if (form.tipo_documento === "Nota Crédito") {
-    const totalFactura = Number(facturaValida?.valor_total || 0);
-
-    if (valor > totalFactura) {
-      setMsg(`El monto no puede ser mayor al total de la factura (${formatCOP(totalFactura)})`);
-      return;
-    }
-  }
-  if (form.tipo_documento === "Nota Débito") {
-    if (valor > 1000000) {
-      setMsg("El monto máximo permitido es 1,000,000");
-      return;
-    }
-  }
-  setForm((prev) => ({ ...prev, monto_nota: valor }));
-};
+}, [devoluciones, productosFactura]);
 
 
 
@@ -107,53 +70,22 @@ useEffect(() => {
     // guardamos número (no string) para facilitar envíos
     setForm((prev) => ({ ...prev, valor_total: total }));
   }, [productos]);
-
-  useEffect(() => {
-  if (form.tipo_documento !== "Nota Débito") return;
-  if (!productosFactura.length) return;
-
-  let total = 0;
-
-  productosFactura.forEach((p) => {
-    if (p.cantidad_extra && Number(p.cantidad_extra) > 0) {
-      const subtotal = Number(p.cantidad_extra) * Number(p.precio_unitario);
-      const iva = subtotal * (Number(p.iva) / 100);
-      total += subtotal + iva;
-    }
-  });
-
-  // suma también productos nuevos agregados
-  productos.forEach((p) => {
-    const subtotal = Number(p.cantidad) * Number(p.precio_unitario);
-    const iva = subtotal * (Number(p.iva) / 100);
-    total += subtotal + iva;
-  });
-
-  setMontoCalculado(total);
-  setForm((prev) => ({ ...prev, monto_nota: total }));
-    if (!form.monto_nota) {
-    setForm((prev) => ({ ...prev, monto_nota: total }));
-  }
-}, [productosFactura, productos, form.tipo_documento]);
   
-const handleChangeForm = (e) => {
+  const handleChangeForm = (e) => {
   const { name, value } = e.target;
 
   if (name === "tipo_documento") {
-
-    // Reset general
+    // Limpiamos todo lo que sea específico de cada tipo
     setFacturaValida(null);
     setMostarCamposNota(false);
-    setProductos([]);
-    setProductoTemp({ descripcion: "", cantidad: 0, precio_unitario: 0, iva: 0 });
+    setBloquearProductos(false);
+    setProductos([]); // limpiamos productos agregados en la factura
+    setProductoTemp({ descripcion: "", cantidad: 1, precio_unitario: 0, iva: 0 });
     setDevoluciones({});
     setMontoCalculado(0);
-    setMsg("");
-
-    // Lógica por tipo
+    setBloquearProductos(value === "Nota Crédito");
+    // Reseteamos los campos específicos según tipo
     if (value === "Factura") {
-      // Factura normal
-      setBloquearProductos(false); // permite agregar productos
       setForm({
         tipo_documento: "Factura",
         numero_documento: "",
@@ -166,46 +98,26 @@ const handleChangeForm = (e) => {
         motivo_nota: "",
         monto_nota: "",
       });
-    }
-
-    if (value === "Nota Crédito") {
-      setBloquearProductos(true); // no se pueden agregar productos
+    } else {
+      // Para Nota Crédito o Nota Débito
       setForm({
-        tipo_documento: "Nota Crédito",
+        tipo_documento: value,
         numero_documento: "",
         fecha_emision: "",
         id_usuario: "",
         id_cliente: "",
         numero_serie: "",
-        valor_total: "", 
+        valor_total: "", // este se puede calcular con los productos si es Nota Débito
         impuestos: "",
         motivo_nota: "",
         monto_nota: 0,
       });
     }
-
-    if (value === "Nota Débito") {
-      setBloquearProductos(false); // sí permite agregar productos nuevos
-      setForm({
-        tipo_documento: "Nota Débito",
-        numero_documento: "",
-        fecha_emision: "",
-        id_usuario: "",
-        id_cliente: "",
-        numero_serie: "",
-        valor_total: "", // se calcula con productos nuevos
-        impuestos: "",
-        motivo_nota: "",
-        monto_nota: 0, // se calcula dinámicamente igual que NC
-      });
-    }
-
     return;
   }
-  // Cambio normal de cualquier otro campo
+
   setForm((prev) => ({ ...prev, [name]: value }));
 };
-
 
   const handleChangeProducto = (e) => {
     const { name, value } = e.target;
@@ -214,34 +126,14 @@ const handleChangeForm = (e) => {
       [name]: name === "descripcion" ? value : (value === "" ? "" : Number(value))
     });
   };
-  
+
   const agregarProducto = () => {
-  if (!productoTemp.descripcion) return setMsg("Completa la descripción del producto");
-  if (!productoTemp.cantidad || productoTemp.cantidad <= 0) return setMsg("La cantidad debe ser mayor a 0");
-  if (!productoTemp.precio_unitario || productoTemp.precio_unitario <= 0) return setMsg("El precio debe ser mayor a 0");
-
-  const total = productoTemp.cantidad * productoTemp.precio_unitario * (1 + productoTemp.iva / 100);
-
-  // Buscar si ya existe un producto con la misma descripción
-  const indexExistente = productos.findIndex(p => p.descripcion === productoTemp.descripcion);
-
-  if (indexExistente >= 0) {
-    // Si existe, sumamos cantidades y recalculamos el total
-    const nuevosProductos = [...productos];
-    nuevosProductos[indexExistente].cantidad += productoTemp.cantidad;
-    nuevosProductos[indexExistente].precio_unitario = productoTemp.precio_unitario; // opcional: actualizar precio
-    nuevosProductos[indexExistente].iva = productoTemp.iva; // opcional: actualizar IVA
-    nuevosProductos[indexExistente].total += total;
-    setProductos(nuevosProductos);
-  } else {
-    // Si no existe, lo agregamos normal
-    setProductos(prev => [...prev, { ...productoTemp, total }]);
-  }
-
-  setProductoTemp({ descripcion: "", cantidad: 0, precio_unitario: 0, iva: 0 });
-  setMsg("");
-};
-
+    if (!productoTemp.descripcion) return setMsg("Completa la descripción del producto");
+    const total = productoTemp.cantidad * productoTemp.precio_unitario * (1 + productoTemp.iva / 100);
+    setProductos([...productos, { ...productoTemp, total }]);
+    setProductoTemp({ descripcion: "", cantidad: 1, precio_unitario: 0, iva: 0 });
+    setMsg("");
+  };
 
   const eliminarProducto = (index) => setProductos(productos.filter((_, i) => i !== index));
   const validarNumeroSerie = async () => {
@@ -254,22 +146,10 @@ const handleChangeForm = (e) => {
   
     if (!form.numero_serie) return setMsg("Ingresa el número de serie a validar");
     if (!form.id_usuario) return setMsg("Ingresa el ID de usuario antes de validar");
-    if (!form.id_cliente) return setMsg("Ingresa el ID del cliente antes de validar");
-    if (form.tipo_documento === "Nota Crédito") {
-  const totalFactura = Number(facturaValida?.valor_total || 0);
-
-  if (Number(form.monto_nota) > totalFactura) {
-    return setMsg(`El monto de la nota no puede ser mayor al total de la factura (${formatCOP(totalFactura)})`);
-  }
-}
-
+    if (!form.id_cliente) return setMsg("Ingresa el ID del cliente antes de validar"); 
     try {
       const res = await fetch(
-<<<<<<< HEAD
         `${API_URL}/api/facturas-notas/validar-factura/${encodeURIComponent(form.numero_serie)}/${encodeURIComponent(form.id_usuario)}/${encodeURIComponent(form.id_cliente)}`
-=======
-        `${BASE_API_URL}/api/facturas-notas/validar-factura/${encodeURIComponent(form.numero_serie)}/${encodeURIComponent(form.id_usuario)}/${encodeURIComponent(form.id_cliente)}`
->>>>>>> upstream/main
       );
       const data = await res.json();
 
@@ -291,8 +171,8 @@ const handleChangeForm = (e) => {
       setMostarCamposNota(true);
       setProductosFactura(factura.Producto_Factura || []);
       const devolucionesIniciales = {};
-      (factura.Producto_Factura || []).forEach((p, index) => {
-        devolucionesIniciales[index] = 0;
+      (factura.Producto_Factura || []).forEach((p) => {
+        devolucionesIniciales[p.id] = 0;
       });
       setDevoluciones(devolucionesIniciales);
 
@@ -316,68 +196,41 @@ const handleChangeForm = (e) => {
     if (!form.id_cliente) {
     return setMsg("Debes ingresar el ID del cliente");
   }
-  // Para Factura usamos productos agregados
-if (form.tipo_documento === "Factura" && productos.length === 0) {
-  return setMsg("Debes agregar al menos un producto con precio mayor a 0");
+  if (
+  (form.tipo_documento === "Factura" || form.tipo_documento === "Nota Débito") &&
+  (!productos || productos.length === 0)
+) {
+  return setMsg("Debes agregar al menos un producto");
 }
-
-// Para Nota Débito usamos productos de factura + productos nuevos
-// Para Nota Débito, no es obligatorio agregar productos
-if (form.tipo_documento === "Nota Débito") {
-  // Calculamos el total de la nota si hay productos, pero no bloqueamos el envío
-  const totalNotaDebito = productosFactura.reduce((acc, p) => acc + (Number(p.cantidad_extra || 0) * (1 + Number(p.iva || 0)/100) * Number(p.precio_unitario || 0)), 0) +
-                         productos.reduce((acc, p) => acc + (Number(p.cantidad || 0) * (1 + Number(p.iva || 0)/100) * Number(p.precio_unitario || 0)), 0);
-  setMontoCalculado(totalNotaDebito); // opcional, para que el total dinámico se actualice si hay productos
-}
-
-
     if (form.tipo_documento !== "Factura") {
       if (!facturaValida) return setMsg("Debes validar el número de serie de la factura antes de enviar la nota.");
+      if (!form.motivo_nota) return setMsg("Selecciona el motivo de la nota.");
       // monto opcional: si es proporcionado, debe ser número positivo y no mayor al total de la factura original (lógica mínima)
+      if (form.monto_nota && Number(form.monto_nota) <= 0) return setMsg("El monto de la nota debe ser mayor a 0.");
+      // opcional: validar monto <= facturaValida.valor_total si quieres
+      if (form.monto_nota && facturaValida && Number(form.monto_nota) > Number(facturaValida.valor_total)) {
+        return setMsg("El monto de la nota no puede ser mayor al total de la factura original.");
+      }
     }
-    let productosPayload = [];
 
-if (form.tipo_documento === "Factura") {
-  productosPayload = productos; // productos agregados por el usuario
-} else if (form.tipo_documento === "Nota Crédito") {
-  productosPayload = productosFactura.map((p, index) => ({
-    ...p,
-    cantidad_devuelta: devoluciones[index] || 0
-  }));
-} else if (form.tipo_documento === "Nota Débito") {
-  // productos de la factura con cantidad_extra + productos nuevos agregados
-  productosPayload = [
-    ...productosFactura.map((p) => ({
-      ...p,
-      cantidad_extra: Number(p.cantidad_extra || 0)
-    })),
-    ...productos
-  ];
-}
-
-const payload = {
-  tipo_documento: form.tipo_documento,
-  numero_documento: form.numero_documento,
-  fecha_emision: form.fecha_emision,
-  id_usuario: form.id_usuario,
-  id_cliente: form.id_cliente || null,
-  productos: productosPayload,
-  valor_total: form.tipo_documento === "Factura" ? Number(form.valor_total || 0) : Number(form.monto_nota || 0),
-  impuestos: form.impuestos ? Number(form.impuestos) : 0,
-  factura_relacionada: form.tipo_documento !== "Factura" ? form.numero_serie : null,
-  numero_serie: form.numero_serie || null,
-  motivo_nota: form.tipo_documento !== "Factura" ? form.motivo_nota : null,
-  monto_nota: form.tipo_documento !== "Factura" && form.monto_nota ? Number(form.monto_nota) : null,
-  detalle_nota: form.tipo_documento !== "Factura" ? form.detalle_nota || "" : null,
-};
-
+    const payload = {
+      tipo_documento: form.tipo_documento,
+      numero_documento: form.numero_documento,
+      fecha_emision: form.fecha_emision,
+      id_usuario: form.id_usuario,
+      id_cliente: form.id_cliente || null,
+      productos,
+      valor_total: Number(form.valor_total || 0),
+      impuestos: form.impuestos ? Number(form.impuestos) : 0,
+      // para notas, enviamos numero_serie como factura_relacionada
+      factura_relacionada: form.tipo_documento !== "Factura" ? form.numero_serie : null,
+      numero_serie: form.numero_serie || null, // opcional para compatibilidad
+      motivo_nota: form.tipo_documento !== "Factura" ? form.motivo_nota : null,
+      monto_nota: form.tipo_documento !== "Factura" && form.monto_nota ? Number(form.monto_nota) : null,
+    };
 
     try {
-<<<<<<< HEAD
       const res = await fetch(`${API_URL}/api/facturas-notas/enviar`, {
-=======
-      const res = await fetch(`${BASE_API_URL}api/facturas-notas/enviar`, {
->>>>>>> upstream/main
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -387,6 +240,7 @@ const payload = {
       if (!res.ok) return setMsg(data.error || "Error enviando documento");
 
       setMsg(`Documento enviado: ${data.documento.estado_dian} - Total: ${formatCOP(data.documento.valor_total)}`);
+      // reset
       setForm({
         tipo_documento: "Factura",
         numero_documento: "",
@@ -407,6 +261,18 @@ const payload = {
       setMsg("Error de conexión");
     }
   };
+
+  // lista de motivos según tipo
+  const motivosCredito = [
+    "Devolución de productos",
+    "Descuentos y bonificaciones",
+    "Corrección de un cobro excesivo",
+  ];
+  const motivosDebito = [
+    "Cobro insuficiente o error en el precio",
+    "Cargos adicionales (intereses, envío, etc.)",
+  ];
+
   return (
     <div className="flex justify-center p-6">
       <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow-md w-[700px] space-y-4">
@@ -435,117 +301,49 @@ const payload = {
             </div>
           )}
 
-        {mostarCamposNota && facturaValida && 
- (form.tipo_documento === "Nota Crédito" || form.tipo_documento === "Nota Débito") && (
-  <div className="p-3 bg-blue-50 rounded border">
-
-    <p className="font-semibold">
-      Factura válida: {facturaValida.numero_serie} — Total: {formatCOP(Number(facturaValida.valor_total || 0))}
-    </p>
-
-    <div className="mt-3 bg-white p-3 rounded border">
-      <p className="font-semibold mb-2">Productos de la factura</p>
-
-      {productosFactura.map((p, index) => (
-        <div key={index} className="border p-2 rounded mb-2 bg-gray-50">
-
-          <p className="font-semibold">{p.descripcion}</p>
-          <p className="text-sm text-gray-600">
-            Cantidad facturada: {p.cantidad} — Precio: {formatCOP(p.precio_unitario)}
-          </p>
-
-          {form.tipo_documento === "Nota Crédito" && (
-            <div className="flex items-center gap-2 mt-2">
-              <label className="text-sm">Cantidad a devolver:</label>
-             <input type="number" min="0" max={p.cantidad}
-             value={devoluciones[index] === "" ? "" : devoluciones[index]}
-             onChange={(e) => {
-              const v = e.target.value;
-              if (v === "") {
-                setDevoluciones((prev) => ({ ...prev, [index]: "" }));
-                return;
-              }
-              const num = Number(v);
-              if (num <= p.cantidad) {
-                setDevoluciones((prev) => ({ ...prev, [index]: num }));
-              }
-            }}className="w-24 p-1 border rounded"/>
+        {mostarCamposNota && facturaValida && form.tipo_documento !== "Factura" && (
+          <div className="p-3 bg-blue-50 rounded border">
+            <p className="font-semibold">Factura válida: {facturaValida.numero_serie} — Total: {formatCOP(Number(facturaValida.valor_total || 0))}</p>
+            <div className="mt-3 bg-white p-3 rounded border">
+              <p className="font-semibold mb-2">Productos de la factura</p>
+              {productosFactura.map((p, index) => (
+                <div key={index} className="border p-2 rounded mb-2 bg-gray-50">
+                  <p className="font-semibold">{p.descripcion}</p>
+                  <p className="text-sm text-gray-600"> Cantidad facturada: {p.cantidad} — Precio: {formatCOP(p.precio_unitario)}</p>
+                  <div className="flex items-center gap-2 mt-2">
+                    <label className="text-sm">Cantidad a devolver:</label>
+                    <input type="number" min="0" max={p.cantidad} value={devoluciones[index] === 0 ? "" : devoluciones[index]}
+                    onChange={(e) => { const v = Number(e.target.value);
+                      if (v <= p.cantidad) {
+                        setDevoluciones((prev) => ({ ...prev, [index]: v }));
+                      }
+                    }}className="w-24 p-1 border rounded"/>
+                    </div>
+                    {devoluciones[index] > 0 && (
+                      <p className="text-black font-semibold mt-1">
+                        Descuento:{" "}
+                        {formatCOP(
+                          devoluciones[index] * p.precio_unitario +
+                          devoluciones[index] * p.precio_unitario * (p.iva / 100)
+                        )}</p>
+                      )}
+                  </div>
+               ))}
+               <p className="mt-2 font-bold text-black">
+                Total de la nota: {formatCOP(Number(montoCalculado))}</p>
             </div>
-          )}
-
-          {form.tipo_documento === "Nota Débito" && (
-            <div className="flex items-center gap-2 mt-2">
-              <label className="text-sm">Cantidad adicional:</label>
-              <input
-  type="number"
-  min="0"
-  max="1000000"
-  value={p.cantidad_extra === "" ? "" : p.cantidad_extra}
-  onChange={(e) => {
-    const valor = e.target.value;
-
-    // permitir vacío sin bloqueo
-    if (valor === "") {
-      const nuevo = [...productosFactura];
-      nuevo[index].cantidad_extra = "";
-      setProductosFactura(nuevo);
-      return;
-    }
-
-    const num = Number(valor);
-    if (num <= 1000000) {
-      const nuevo = [...productosFactura];
-      nuevo[index].cantidad_extra = num;
-      setProductosFactura(nuevo);
-    }
-  }}
-  className="w-24 p-1 border rounded"
-/>
-
-
+            <div className="mt-3">
+              <label className="block text-sm font-medium">Monto de la nota</label>
+              <input name="monto_nota" type="number" step="0.01" value={form.monto_nota} onChange={handleChangeForm} placeholder="0.00" className="w-full p-2 border rounded mt-1"/>
+              <p className="text-xs text-gray-500 mt-1"> Total calculado: {formatCOP(montoCalculado)}</p>
+              <p className="text-xs text-gray-500 mt-1">Si dejas vacío, se usará el total calculado del formulario. El monto no puede ser mayor al total de la factura original.</p>
             </div>
-          )}
-
-        </div>
-      ))}
-
-      {/* Total dinámico según el tipo */}
-        <p className="mt-2 font-bold text-black">
-  Total de la nota: {formatCOP(Number(form.monto_nota || montoCalculado))}
-
-      </p>
-    </div>
-
-    {/* Monto manual igual para ambas */}
-    <div className="mt-3">
-      <label className="block text-sm font-medium">Monto de la nota</label>
-      <input
-  name="monto_nota"
-  type="number"
-  step="0.01"
-  value={form.monto_nota === "" ? "" : form.monto_nota}
-  onChange={handleMontoNotaChange}
-  className="w-full p-2 border rounded mt-1"
-/>
-
-      <p className="text-xs text-gray-500 mt-1">
-        Total calculado: {formatCOP(montoCalculado)}
-      </p>
-    </div>
-
-    <div className="mt-3">
-      <label className="block text-sm font-medium">Descripción / detalle</label>
-      <textarea
-        name="detalle_nota"
-        onChange={handleChangeForm}
-        value={form.detalle_nota || ""}
-        className="w-full p-2 border rounded mt-1"
-        placeholder="Explica brevemente el motivo"
-      />
-    </div>
-
-  </div>
-)}
+            <div className="mt-3">
+              <label className="block text-sm font-medium">Descripción / detalle</label>
+              <textarea name="detalle_nota" onChange={handleChangeForm} value={form.detalle_nota || ""} className="w-full p-2 border rounded mt-1" placeholder="Explica brevemente el motivo o los productos involucrados" />
+            </div>
+          </div>
+        )}
 
         <input type="datetime-local" name="fecha_emision" value={form.fecha_emision} onChange={handleChangeForm} className="w-full p-2 border rounded" />
 

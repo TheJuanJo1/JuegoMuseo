@@ -5,7 +5,6 @@ import jwt from "jsonwebtoken";
 import { prisma } from "../lib/prisma.js";
 
 const router = Router();
-
 router.post("/", async (req, res) => {
   try {
     const { emailOrName, password } = req.body;
@@ -13,9 +12,10 @@ router.post("/", async (req, res) => {
     if (!emailOrName || !password) {
       return res.status(400).json({ error: "Usuario/email y password son requeridos" });
     }
-
-    // Login admin
-    if (emailOrName === process.env.ADMIN_USER && password === process.env.ADMIN_PASS) {
+    if (
+      emailOrName === process.env.ADMIN_USER &&
+      password === process.env.ADMIN_PASS
+    ) {
       const token = jwt.sign(
         {
           sub: "admin",
@@ -44,8 +44,6 @@ router.post("/", async (req, res) => {
         },
       });
     }
-
-    // Login usuario/empresa
     const user = await prisma.usuarios.findFirst({
       where: {
         OR: [
@@ -56,11 +54,6 @@ router.post("/", async (req, res) => {
     });
 
     if (!user) return res.status(401).json({ error: "Credenciales inválidas" });
-
-    // VALIDAR ESTADO
-    if (user.estado !== "activo") {
-      return res.status(403).json({ error: "Cuenta inactiva, contacte al administrador" });
-    }
 
     const validPassword = await bcrypt.compare(password, user.contrasena_usuario);
     if (!validPassword) return res.status(401).json({ error: "Credenciales inválidas" });
@@ -92,7 +85,6 @@ router.post("/", async (req, res) => {
         role: "user",
       },
     });
-
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: "Error interno en login" });

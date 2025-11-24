@@ -9,8 +9,7 @@
     "prisma:pull": "prisma db pull",
     "prisma:push": "prisma db push",
     "prisma:studio": "prisma studio",
-    "start": "node src/server.js",
-    "postinstall": "prisma migrate deploy && prisma generate"
+    "start": "node src/server.js"
   },
   "keywords": [],
   "author": "",
@@ -18,21 +17,23 @@
   "description": "",
   "dependencies": {
     "@material-tailwind/react": "^2.1.10",
-    "@prisma/client": "^6.15.0",
+    "@prisma/client": "^6.19.0",
     "bcryptjs": "^3.0.2",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
-    "dotenv": "^17.2.1",
-    "express": "^5.1.0",
+    "dotenv": "^17.2.3",
+    "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.2",
+    "node-mailjet": "^6.0.11",
     "nodemailer": "^7.0.6",
     "pdfkit": "^0.17.2",
     "pg": "^8.16.3",
     "qrcode": "^1.5.4",
+    "resend": "^6.5.2",
     "tailwind-scrollbar": "^4.0.2",
     "xml2js": "^0.6.2"
   },
@@ -40,7 +41,7 @@
     "autoprefixer": "^10.4.21",
     "nodemon": "^3.1.10",
     "postcss": "^8.5.6",
-    "prisma": "^6.15.0",
+    "prisma": "^6.19.0",
     "tailwindcss": "^4.1.12"
   }
 }

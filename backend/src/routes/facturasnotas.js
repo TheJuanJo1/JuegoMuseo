@@ -134,7 +134,7 @@ router.post("/enviar", async (req, res) => {
     }
 
     // Verificar límite
-
+    // === VALIDACIÓN DE LÍMITE ===
 if (numeracion.numero_actual + 1 > numeracion.numero_final) {
   numeracion.estado = "Inactivo";
 
@@ -150,6 +150,7 @@ if (numeracion.numero_actual + 1 > numeracion.numero_final) {
   });
 }
 
+// === AUMENTAR SOLO SI ESTÁ DENTRO DEL RANGO ===
 numeracion.numero_actual += 1;
     const numeroSerie = `${numeracion.prefijo}${String(numeracion.numero_actual).padStart(3, "0")}`;
 
@@ -182,7 +183,6 @@ numeracion.numero_actual += 1;
         id_cliente: id_cliente ? parseInt(id_cliente) : null,
         factura_relacionada: factura_relacionada || null,
         fecha_respuesta_dian: fechaEmisionCol,
-        detalle_nota: req.body.detalle_nota || null,
 
       },
     });
@@ -290,7 +290,6 @@ router.get("/historial", authRequired, async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
 
 export default router;
 

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { BASE_API_URL } from "../config/api";
-
+import { API_URL } from "../config";
 export default function Documentos() {
   const [docs, setDocs] = useState([]);
   const [filter, setFilter] = useState({ tipo: "", estado: "", fecha: "" });
@@ -10,7 +9,7 @@ export default function Documentos() {
   const [expandedDocId, setExpandedDocId] = useState(null);
 
   useEffect(() => {
-    fetch(`${BASE_API_URL}/api/facturas-notas/historial`, {
+    fetch(`${API_URL}/api/facturas-notas/historial`, {
       credentials: "include",
     })
       .then((res) => res.json())
@@ -63,7 +62,7 @@ export default function Documentos() {
 
   const descargarArchivo = async (id, tipo) => {
     try {
-      const res = await fetch(`${BASE_API_URL}/api/${tipo}/${id}`, { credentials: "include" });
+      const res = await fetch(`${API_URL}/api/${tipo}/${id}`, { credentials: "include" });
       if (!res.ok) throw new Error("Error descargando archivo");
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
@@ -85,6 +84,7 @@ export default function Documentos() {
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Visor de documentos enviados</h1>
       <div className="bg-white shadow-lg rounded-lg p-4 space-y-4">
+        {/* Filtros y búsqueda */}
         <div className="flex items-center justify-between">
           <div className="flex space-x-2">
             <input
@@ -199,6 +199,8 @@ export default function Documentos() {
             </tbody>
           </table>
         </div>
+
+        {/* Paginación */}
         <div className="flex justify-between items-center mt-2 px-2">
           <button onClick={() => setPage((p) => Math.max(1, p - 1))}
             className="bg-white bg-opacity-30 text-black px-3 py-1 rounded hover:bg-opacity-50 transition">

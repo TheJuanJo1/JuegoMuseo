@@ -26,10 +26,6 @@ export default function TopBarAdmin() {
       setTitle("Empresas");
     } else if (location.pathname === "/admin/registros") {
       setTitle("Registros");
-    } else if (location.pathname === "/admin/tokens") {
-      setTitle("Tokens API");
-    } else if (location.pathname === "/admin/configuracion") {
-      setTitle("Configuración Técnica");
     } else {
       setTitle("");
     }

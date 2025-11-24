@@ -5,6 +5,87 @@ import { prisma } from "../lib/prisma.js";
 import { sendEmail } from "../mailjet.js";   // ← NUEVO: usamos Mailjet
 
 const router = express.Router();
+// Obtener todas las empresas registradas
+router.get("/", async (req, res) => {
+  try {
+    const empresas = await prisma.usuarios.findMany({
+      where: { rol_usuario: "empresa" }, // solo empresas
+      select: {
+        id_usuario: true,
+        nombre_usuario: true,
+        nit_empresa: true,
+        correo_contacto: true,
+        estado: true,
+        fecha_registro: true,
+      },
+      orderBy: { fecha_registro: "desc" }
+    });
+
+    res.json(empresas);
+  } catch (err) {
+    console.error("Error obteniendo empresas:", err);
+    res.status(500).json({ error: "Error obteniendo empresas" });
+  }
+});
+// Obtener detalle de empresa
+router.get("/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const empresa = await prisma.usuarios.findUnique({
+      where: { id_usuario: parseInt(id) },
+      select: {
+        id_usuario: true,
+        nombre_usuario: true,
+        nit_empresa: true,
+        correo_contacto: true,
+        estado: true,
+        fecha_registro: true,
+        configuracionTecnica: {
+          select: {
+            direccion_empresa: true,
+            regimen_tributario: true,
+          }
+        }
+      },
+    });
+
+    if (!empresa) return res.status(404).json({ error: "Empresa no encontrada" });
+
+    res.json({
+      usuario: {
+        id_usuario: empresa.id_usuario,
+        nombre_usuario: empresa.nombre_usuario,
+        nit_empresa: empresa.nit_empresa,
+        correo_contacto: empresa.correo_contacto,
+        estado: empresa.estado,
+        fecha_registro: empresa.fecha_registro,
+        direccion: empresa.configuracionTecnica?.direccion_empresa || "No asignada",
+        regimen_tributario: empresa.configuracionTecnica?.regimen_tributario || "No asignado"
+      }
+    });
+  } catch (err) {
+    console.error("Error obteniendo empresa:", err);
+    res.status(500).json({ error: "Error obteniendo empresa" });
+  }
+});
+
+// Cambiar estado de una empresa
+router.put("/:id/estado", async (req, res) => {
+  const { id } = req.params;
+  const { estado } = req.body;
+
+  try {
+    const empresa = await prisma.usuarios.update({
+      where: { id_usuario: parseInt(id) },
+      data: { estado },
+    });
+
+    res.json({ message: "Estado actualizado", empresa });
+  } catch (err) {
+    console.error("Error cambiando estado:", err);
+    res.status(500).json({ error: "Error cambiando estado de la empresa" });
+  }
+});
 
 // --------------------------------------------------------
 // FUNCIÓN PARA ENVIAR CÓDIGO DE VERIFICACIÓN
@@ -196,4 +277,10 @@ router.post("/resend-code", async (req, res) => {
   }
 });
 
+<<<<<<< HEAD
 export default router;
+=======
+
+export default router;
+
+>>>>>>> upstream/main

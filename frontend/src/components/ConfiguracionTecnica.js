@@ -1,5 +1,9 @@
 import { useState, useEffect } from "react";
+<<<<<<< HEAD
 import { API_URL } from "../config";
+=======
+import { BASE_API_URL } from "../config/api";
+>>>>>>> upstream/main
 
 export default function ConfiguracionTecnica({ usuarioId }) {
   const [config, setConfig] = useState(null);
@@ -13,7 +17,11 @@ export default function ConfiguracionTecnica({ usuarioId }) {
   useEffect(() => {
     const fetchConfig = async () => {
       try {
+<<<<<<< HEAD
         const res = await fetch(`${API_URL}/api/configuracion/${usuarioId}`);
+=======
+        const res = await fetch(`${BASE_API_URL}/api/configuracion/${usuarioId}`);
+>>>>>>> upstream/main
         if (!res.ok) throw new Error("Error al obtener configuración");
         const data = await res.json();
         setConfig(data.configuracion);
@@ -28,7 +36,11 @@ export default function ConfiguracionTecnica({ usuarioId }) {
 
   const handleRegenerarToken = async () => {
     try {
+<<<<<<< HEAD
       const res = await fetch(`${API_URL}/api/token/regenerar/${usuarioId}`, {
+=======
+      const res = await fetch(`${BASE_API_URL}api/token/regenerar/${usuarioId}`, {
+>>>>>>> upstream/main
         method: "POST",
       });
       const data = await res.json();
@@ -44,7 +56,11 @@ export default function ConfiguracionTecnica({ usuarioId }) {
 
   const handleGuardarNumeracion = async () => {
     try {
+<<<<<<< HEAD
       const res = await fetch(`${API_URL}/api/configuracion/numeracion/${usuarioId}`, {
+=======
+      const res = await fetch(`${BASE_API_URL}/api/configuracion/numeracion/${usuarioId}`, {
+>>>>>>> upstream/main
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -86,7 +102,11 @@ export default function ConfiguracionTecnica({ usuarioId }) {
       formData.append("certificado_firma", nuevoCert.archivo);
       formData.append("fecha_expiracion", nuevoCert.fecha_expedicion);
 
+<<<<<<< HEAD
       const res = await fetch(`${API_URL}/api/configuracion/regenerar-certificado/${usuarioId}`, {
+=======
+      const res = await fetch(`${BASE_API_URL}/api/configuracion/regenerar-certificado/${usuarioId}`, {
+>>>>>>> upstream/main
         method: "POST",
         body: formData,
       });

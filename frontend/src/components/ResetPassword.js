@@ -4,8 +4,12 @@ import fluxLogo from "../assets/fluxdata.png";
 import backArrow from "../assets/back-arrow.png";
 import laptopImage from "../assets/laptop2.jpg";
 import laptop1 from "../assets/im1.png";
+<<<<<<< HEAD
 import { API_URL } from "../config";
 
+=======
+import { BASE_API_URL } from "../config/api";
+>>>>>>> upstream/main
 
 export default function ResetPassword() {
   const { token } = useParams();
@@ -33,7 +37,11 @@ export default function ResetPassword() {
     }
 
     try {
+<<<<<<< HEAD
       const res = await fetch(`${API_URL}/api/reset-password`, {
+=======
+      const res = await fetch(`${BASE_API_URL}/api/reset-password`, {
+>>>>>>> upstream/main
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token, password, confirmPassword }),

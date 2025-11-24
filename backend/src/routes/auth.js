@@ -48,7 +48,9 @@ router.post('/register', async (req, res) => {
         correo_contacto: email,
         contrasena_usuario: hash,
         nit_empresa: nit,
-        rol_usuario: "Intermediario" // opcional
+        rol_usuario: "empresa", // opcional
+        estado: "activo",
+        fecha_registro: new Date()
       },
       select: {
         id_usuario: true,

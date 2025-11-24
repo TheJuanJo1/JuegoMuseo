@@ -6,8 +6,7 @@ import registerImage from "../assets/register.jpg";
 import verifyImage from "../assets/Imagenes (7).jpg";
 import im3 from "../assets/im3.png";
 import im2 from "../assets/im2.png";
-import { API_URL } from "../config";
-
+import { BASE_API_URL } from "../config/api";
 
 export default function RegisterForm() {
   const [form, setForm] = useState({
@@ -90,7 +89,7 @@ export default function RegisterForm() {
     return;
   }
     try {
-      const res = await fetch(`${API_URL}/api/empresas/pre-register`, {
+      const res = await fetch(`${BASE_API_URL}/api/empresas/pre-register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -107,7 +106,7 @@ export default function RegisterForm() {
   const handleVerify = async (codigoCompleto) => {
     setMsgCodigo("");
     try {
-      const res = await fetch(`${API_URL}/api/empresas/verify-code`, {
+      const res = await fetch(`${BASE_API_URL}/api/empresas/verify-code`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ correo_contacto: form.correo_contacto, codigo: codigoCompleto }),
@@ -231,7 +230,7 @@ export default function RegisterForm() {
               <div className="flex justify-center">
                 <button type="button" onClick={async () => {
                   try {
-                    const res = await fetch(`${API_URL}/api/empresas/resend-code`, {
+                    const res = await fetch(`${BASE_API_URL}//api/empresas/resend-code`, {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },
                       body: JSON.stringify({ correo_contacto: form.correo_contacto }),

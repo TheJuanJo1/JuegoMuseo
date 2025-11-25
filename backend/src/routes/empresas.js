@@ -2,12 +2,12 @@
 import express from "express";
 import bcrypt from "bcryptjs";
 import { prisma } from "../lib/prisma.js";
-import { sendEmail } from "../mailjet.js";
+import { sendEmail } from "../mailjet.js";   // ← NUEVO: usamos Mailjet
 
 const router = express.Router();
 
 // --------------------------------------------------------
-// FUNCIÓN PARA ENVIAR CÓDIGO POR CORREO
+// FUNCIÓN PARA ENVIAR CÓDIGO DE VERIFICACIÓN
 // --------------------------------------------------------
 async function enviarCodigoCorreo(destino, codigo) {
   const html = `
@@ -18,30 +18,6 @@ async function enviarCodigoCorreo(destino, codigo) {
 
   return await sendEmail(destino, "Código de verificación", html);
 }
-
-// --------------------------------------------------------
-// GET / → LISTAR EMPRESAS
-// --------------------------------------------------------
-router.get("/", async (req, res) => {
-  try {
-    const empresas = await prisma.usuarios.findMany({
-      where: { rol_usuario: "empresa" },
-      select: {
-        id_usuario: true,
-        nombre_usuario: true,
-        nit_empresa: true,
-        correo_contacto: true,
-        creado_en: true
-      }
-    });
-
-    res.json(empresas);
-
-  } catch (error) {
-    console.error("Error en GET /empresas:", error);
-    res.status(500).json({ error: "Error al obtener empresas" });
-  }
-});
 
 // --------------------------------------------------------
 // PRE-REGISTER (Paso 1)

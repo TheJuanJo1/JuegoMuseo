@@ -43,6 +43,22 @@ export default function ConfiguracionTecnica({ usuarioId }) {
   };
 
   const handleGuardarNumeracion = async () => {
+    const inicial = parseInt(nuevoRango.numero_inicial);
+  const final = parseInt(nuevoRango.numero_final);
+
+  // Validaciones
+  if (isNaN(inicial) || isNaN(final)) {
+    alert("Los números deben ser válidos.");
+    return;
+  }
+  if (inicial < 1 || final < 1) {
+    alert("Los números deben ser 1 o mayores.");
+    return;
+  }
+  if (final < inicial) {
+    alert("El número final debe ser mayor o igual al número inicial.");
+    return;
+  }
     try {
       const res = await fetch(`${API_URL}/api/configuracion/numeracion/${usuarioId}`, {
         method: "POST",
@@ -85,7 +101,6 @@ export default function ConfiguracionTecnica({ usuarioId }) {
       const formData = new FormData();
       formData.append("certificado_firma", nuevoCert.archivo);
       formData.append("fecha_expiracion", nuevoCert.fecha_expedicion);
-
       const res = await fetch(`${API_URL}/api/configuracion/regenerar-certificado/${usuarioId}`, {
         method: "POST",
         body: formData,

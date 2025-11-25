@@ -4,13 +4,14 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, Legend,
   PieChart, Pie, Cell, ResponsiveContainer
 } from "recharts";
+
 function transformarDocumento(doc) {
   if (!doc) return {};
   const empresa = doc.Usuarios
     ? {
         id_empresa: doc.Usuarios.id_usuario,
         nombre_empresa: doc.Usuarios.nombre_usuario,
-        rol_empresa: doc.Usuarios.rol_usuario,
+        rol_empresa: "Intermediaria",
         nit_empresa: doc.Usuarios.nit_empresa,
         correo_contacto: doc.Usuarios.correo_contacto,
       }
@@ -23,7 +24,6 @@ function transformarDocumento(doc) {
       !["Usuarios", "Clientes", "id_usuario", "id_cliente"].includes(k)
   )
 );
-
   return {
     Empresa: empresa,
     Cliente: cliente,
@@ -45,6 +45,7 @@ const Reportes = () => {
     cliente: "",
   });
   const [selectedDoc, setSelectedDoc] = useState(null);
+
   // Cargar documentos iniciales
   useEffect(() => {
     fetch(`${API_URL}/ultimos`, {

@@ -6,8 +6,8 @@ import { API_URL } from "../config";
 
 export default function FormularioEmpresa({ usuarioId }) {
   const navigate = useNavigate();
-  // Dentro del useState inicial, agregamos los campos para NC y ND
-const [form, setForm] = useState({
+  // entro del useState inicial, agregamos los campos para NC y ND
+  const [form, setForm] = useState({
   direccion_empresa: "",
   prefijo_numeracion: "",
   numero_inicial: "",      // Para Facturas
@@ -26,6 +26,7 @@ const [form, setForm] = useState({
   useEffect(() => {
     const verificarEstado = async () => {
       try {
+
         const res = await fetch(`${API_URL}/api/configuracion/estado/${usuarioId}`);
         const data = await res.json();
         if (data.completado) {
@@ -40,6 +41,7 @@ const [form, setForm] = useState({
   useEffect(() => {
     const obtenerToken = async () => {
       try {
+
         const res = await fetch(`${API_URL}/api/token/${usuarioId}`);
         const data = await res.json();
         if (res.ok && data.token) {
@@ -58,6 +60,30 @@ const [form, setForm] = useState({
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
+      // Validación de rangos
+  const camposNumericos = [
+    { nombre: "Factura", inicio: form.numero_inicial, fin: form.numero_final },
+    { nombre: "NC", inicio: form.nc_numero_inicial, fin: form.nc_numero_final },
+    { nombre: "ND", inicio: form.nd_numero_inicial, fin: form.nd_numero_final },
+  ];
+
+  for (let campo of camposNumericos) {
+    const inicio = parseInt(campo.inicio);
+    const fin = parseInt(campo.fin);
+
+    if (isNaN(inicio) || isNaN(fin)) {
+      alert(`Los números de ${campo.nombre} deben ser válidos.`);
+      return;
+    }
+    if (inicio < 1 || fin < 1) {
+      alert(`Los números de ${campo.nombre} deben ser 1 o mayores.`);
+      return;
+    }
+    if (fin < inicio) {
+      alert(`El número final de ${campo.nombre} debe ser mayor o igual al número inicial.`);
+      return;
+    }
+  }
     const data = new FormData();
     Object.keys(form).forEach((key) => {
       if (form[key] !== null) {

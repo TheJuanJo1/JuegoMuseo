@@ -11,12 +11,9 @@ import A from "../assets/A.png";
 import C2 from "../assets/C2.png";
 import { API_URL } from "../config";
 
-
 export default function MainLayout() {
   const navigate = useNavigate();
-  const [collapsed, setCollapsed] = useState(false);
-
-  // 🚀 NUEVA constante: backend desde Vercel .env
+  const [collapsed, setCollapsed] = useState(false); 
 
   const handleLogout = async () => {
     try {
@@ -24,7 +21,6 @@ export default function MainLayout() {
         method: "POST",
         credentials: "include",
       });
-
       localStorage.removeItem("token");
       navigate("/login");
     } catch (err) {

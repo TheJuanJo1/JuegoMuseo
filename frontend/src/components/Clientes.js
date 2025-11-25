@@ -10,8 +10,8 @@ export default function ClientesForm() {
     direccion_cliente: "",
     correo_cliente: "",
   });
-
   const [msg, setMsg] = useState("");
+ 
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -61,9 +61,9 @@ export default function ClientesForm() {
           <option value="CE">Cédula extranjera</option>
         </select>
         <input type="text" name="numero_documento" placeholder="Número de documento" value={form.numero_documento} onChange={handleChange} className="w-full p-2 border rounded"/>
-        <input type="text" name="direccion_cliente" placeholder="Dirección" value={form.direccion_cliente} onChange={handleChange} className="w-full p-2 border rounded"/>
+        <input type="text" name="direccion_cliente" placeholder="Dirección (opcional)" value={form.direccion_cliente} onChange={handleChange} className="w-full p-2 border rounded"/>
         <input type="email" name="correo_cliente" placeholder="Correo electrónico" value={form.correo_cliente} onChange={handleChange} className="w-full p-2 border rounded"/>
-        <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Registrar</button>
+        <button type="submit" className="w-full bg-[#394867] text-white py-2 rounded hover:bg-[#394867]">Registrar</button>
         {msg && <p className="text-sm mt-2 text-center">{msg}</p>}
       </form>
     </div>

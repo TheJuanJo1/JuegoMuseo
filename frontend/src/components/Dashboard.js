@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import {
   LineChart,Line,ResponsiveContainer,PieChart,Pie,Cell,Tooltip,BarChart,Bar,XAxis,YAxis,CartesianGrid,
 } from "recharts";
-
 export default function Dashboard() {
   const navigate = useNavigate();
   const [docs, setDocs] = useState([]);
@@ -20,26 +19,26 @@ export default function Dashboard() {
   const [modalContent, setModalContent] = useState(null); // Controla qué datos mostrar
   const [selectedDoc, setSelectedDoc] = useState(null);
 
+
   // Cargar últimos documentos
   useEffect(() => {
-  fetch(`${API_URL}/api/ultimos`, {
-    credentials: "include",
-  })
-    .then((res) => res.json())
-    .then((data) => setDocs(Array.isArray(data) ? data : []))
-    .catch((err) => console.error(err));
-}, []);
+    fetch(`${API_URL}/api/ultimos`, {
+      credentials: "include",
+    })
+      .then((res) => res.json())
+      .then((data) => setDocs(Array.isArray(data) ? data : []))
+      .catch((err) => console.error(err));
+  }, []);
 
   // Cargar estadísticas globales
   useEffect(() => {
-  fetch(`${API_URL}/api/estadisticas`, {
-    credentials: "include",
-  })
-    .then((res) => res.json())
-    .then((data) => setEstadisticas(data))
-    .catch((err) => console.error(err));
-}, []);
-
+    fetch(`${API_URL}/api/estadisticas`, {
+      credentials: "include",
+    })
+      .then((res) => res.json())
+      .then((data) => setEstadisticas(data))
+      .catch((err) => console.error(err));
+  }, []);
 
   const filteredDocs = filter
     ? docs.filter((d) => {

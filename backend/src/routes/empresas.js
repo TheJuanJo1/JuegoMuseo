@@ -2,9 +2,32 @@
 import express from "express";
 import bcrypt from "bcryptjs";
 import { prisma } from "../lib/prisma.js";
-import { sendEmail } from "../mailjet.js";   // ← NUEVO: usamos Mailjet
+import sgMail from "@sendgrid/mail";
 
 const router = express.Router();
+
+// --------------------------------------------------------
+// CONFIGURAR SENDGRID
+// --------------------------------------------------------
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
+// Función genérica para enviar correo con SendGrid
+async function sendEmailSendGrid(destino, asunto, html) {
+  try {
+    const msg = {
+      to: destino,
+      from: process.env.SENDGRID_FROM,
+      subject: asunto,
+      html: html
+    };
+
+    await sgMail.send(msg);
+    return true;
+  } catch (err) {
+    console.error("Error SendGrid:", err.response?.body || err);
+    return false;
+  }
+}
 
 // --------------------------------------------------------
 // FUNCIÓN PARA ENVIAR CÓDIGO DE VERIFICACIÓN
@@ -16,7 +39,7 @@ async function enviarCodigoCorreo(destino, codigo) {
     <p>Este código expirará en 10 minutos.</p>
   `;
 
-  return await sendEmail(destino, "Código de verificación", html);
+  return await sendEmailSendGrid(destino, "Código de verificación", html);
 }
 
 // --------------------------------------------------------

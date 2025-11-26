@@ -4,7 +4,9 @@ import { PrismaClient } from "@prisma/client";
 const router = express.Router();
 const prisma = new PrismaClient();
 
-// Registrar un cliente
+// --------------------------------------------------------
+// POST — Registrar un cliente
+// --------------------------------------------------------
 router.post("/register", async (req, res) => {
   try {
     const {
@@ -20,24 +22,16 @@ router.post("/register", async (req, res) => {
     if (!nombre_cliente || !apellido_cliente || !tipo_documento || !numero_documento) {
       return res.status(400).json({ error: "Faltan campos obligatorios" });
     }
+
+    // Validar duplicados
     const clienteExistente = await prisma.clientes.findFirst({
       where: {
         OR: [
-          // Documento repetido sin importar tipo
-          { numero_documento: numero_documento },
-
-          // Correo repetido
-          correo_cliente ? { correo_cliente } : undefined,
-
-          // Dirección repetida
-          direccion_cliente ? { direccion_cliente } : undefined,
-
-          // Nombre + Apellido repetido
-          {
-            nombre_cliente,
-            apellido_cliente
-          }
-        ].filter(Boolean), // elimina undefined del OR
+          { numero_documento },                   // Documento repetido
+          correo_cliente ? { correo_cliente } : undefined, // Correo repetido
+          direccion_cliente ? { direccion_cliente } : undefined, // Dirección repetida
+          { nombre_cliente, apellido_cliente }     // Nombre + Apellido repetido
+        ].filter(Boolean)
       }
     });
 
@@ -56,16 +50,36 @@ router.post("/register", async (req, res) => {
         numero_documento,
         direccion_cliente,
         correo_cliente,
-        id_usuario: null // No vinculamos usuario
+        id_usuario: null // No vinculado a empresa o usuario
       },
     });
 
     res.status(201).json({ message: "Cliente registrado", cliente: nuevoCliente });
+
   } catch (error) {
-    console.error(error);
+    console.error("Error en POST /clientes/register:", error);
     res.status(500).json({ error: error.message || "Error al registrar cliente" });
   }
 });
 
-export default router;
+// --------------------------------------------------------
+// GET — Listar todos los clientes
+// --------------------------------------------------------
+router.get("/", async (req, res) => {
+  try {
+    const clientes = await prisma.clientes.findMany({
+      orderBy: { id_cliente: "desc" }
+    });
 
+    res.json({
+      total: clientes.length,
+      clientes
+    });
+
+  } catch (error) {
+    console.error("Error en GET /clientes:", error);
+    res.status(500).json({ error: "Error obteniendo clientes" });
+  }
+});
+
+export default router;

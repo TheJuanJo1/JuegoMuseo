@@ -196,32 +196,4 @@ router.post("/resend-code", async (req, res) => {
   }
 });
 
-// --------------------------------------------------------
-// GET — LISTAR TODAS LAS EMPRESAS REGISTRADAS
-// --------------------------------------------------------
-router.get("/", async (req, res) => {
-  try {
-    const empresas = await prisma.usuarios.findMany({
-      where: { rol_usuario: "empresa" },
-      select: {
-        id_usuario: true,
-        nombre_usuario: true,
-        nit_empresa: true,
-        correo_contacto: true,
-        creado_en: true
-      }
-    });
-
-    res.json({
-      total: empresas.length,
-      empresas
-    });
-
-  } catch (err) {
-    console.error("Error en GET /empresas:", err);
-    res.status(500).json({ error: "Error obteniendo empresas" });
-  }
-});
-
-
 export default router;

@@ -1,21 +1,20 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import TopBarAdmin from "./TopBarAdmin";
-import Logo from "../assets/Logo.png";
-import B from "../assets/B.png";
-import D1 from "../assets/D1.png";
-import E from "../assets/E.png";
-import R1 from "../assets/R1.png";
-import C2 from "../assets/C2.png";
+import Logo from "../assets/Logo.svg";
+import B from "../assets/B.svg";
+import D1 from "../assets/D1.svg";
+import E from "../assets/E.svg";
+import R1 from "../assets/R1.svg";
+import C2 from "../assets/C2.svg";
 
 export default function AdminLayout() {
   const navigate = useNavigate();
-  const [collapsed, setCollapsed] = useState(false);
-  const API_URL = import.meta.env.VITE_API_URL || "https://fluxdata3.onrender.com"; 
+  const [collapsed, setCollapsed] = useState(false); 
 
   const handleLogout = async () => {
     try {
-      await fetch(`${API_URL}/api/logout`, {
+      await fetch("http://localhost:3000api/logout", {
         method: "POST",
         credentials: "include",
       });

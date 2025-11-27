@@ -1,12 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Logo from "../assets/Logo.png";
-import Fluxdata from "../assets/fluxdata2.png";
+import Logo from "../assets/Logo.svg";
+import Fluxdata from "../assets/fluxdata2.svg";
 
 export default function FormularioEmpresa({ usuarioId }) {
   const navigate = useNavigate();
-  const API_URL = process.env.REACT_APP_API_URL || "https://fluxdata-1.onrender.com";
-  // entro del useState inicial, agregamos los campos para NC y ND
+  // Dentro del useState inicial, agregamos los campos para NC y ND
   const [form, setForm] = useState({
   direccion_empresa: "",
   prefijo_numeracion: "",
@@ -27,7 +26,7 @@ export default function FormularioEmpresa({ usuarioId }) {
     const verificarEstado = async () => {
       try {
 
-        const res = await fetch(`${API_URL}/api/configuracion/estado/${usuarioId}`);
+        const res = await fetch(`http://localhost:3000/api/configuracion/estado/${usuarioId}`);
         const data = await res.json();
         if (data.completado) {
           navigate("/dashboard"); 
@@ -42,7 +41,7 @@ export default function FormularioEmpresa({ usuarioId }) {
     const obtenerToken = async () => {
       try {
 
-        const res = await fetch(`${API_URL}/api/token/${usuarioId}`);
+        const res = await fetch(`http://localhost:3000/api/token/${usuarioId}`);
         const data = await res.json();
         if (res.ok && data.token) {
           setForm((prev) => ({ ...prev, token_api: data.token }));
@@ -94,7 +93,7 @@ export default function FormularioEmpresa({ usuarioId }) {
     data.append("tipo_documento", "Factura");
     data.append("id_usuario", usuarioId);
     try {
-      const res = await fetch(`${API_URL}/api/configuracion`, {
+      const res = await fetch("http://localhost:3000/api/configuracion", {
         method: "POST",
         body: data,
       });

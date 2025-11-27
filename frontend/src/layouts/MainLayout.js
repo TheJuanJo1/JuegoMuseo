@@ -1,23 +1,22 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import TopBar from "./TopBar";
-import Logo from "../assets/Logo.png";
-import B from "../assets/B.png";
-import D1 from "../assets/D1.png";
-import D2 from "../assets/D2.png";
-import R from "../assets/R.png";
-import C from "../assets/C.png";
-import A from "../assets/A.png";
-import C2 from "../assets/C2.png";
+import Logo from "../assets/Logo.svg";
+import B from "../assets/B.svg";
+import D1 from "../assets/D1.svg";
+import D2 from "../assets/D2.svg";
+import R from "../assets/R.svg";
+import C from "../assets/C.svg";
+import A from "../assets/A.svg";
+import C2 from "../assets/C2.svg";
 
 export default function MainLayout() {
   const navigate = useNavigate();
-  const [collapsed, setCollapsed] = useState(false);
-  const API_URL = import.meta.env.VITE_API_URL || "https://fluxdata3.onrender.com"; 
+  const [collapsed, setCollapsed] = useState(false); 
 
   const handleLogout = async () => {
     try {
-      await fetch(`${API_URL}/api/logout`, {
+      await fetch("http://localhost:3000/api/logout", {
         method: "POST",
         credentials: "include",
       });

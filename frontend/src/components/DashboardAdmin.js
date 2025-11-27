@@ -8,18 +8,15 @@ export default function DashboardGlobal() {
     totalDocumentos: 0,
     erroresDocumentos: 0
   });
-
   const [volumenDocs, setVolumenDocs] = useState([]);
   const [ultimosDocs, setUltimosDocs] = useState([]);
   const [validacionesSemana, setValidacionesSemana] = useState([]);
   const navigate = useNavigate();
-  const API_URL = process.env.REACT_APP_API_URL || "https://fluxdata-1.onrender.com";
- 
 
   useEffect(() => {
     const fetchDashboard = async () => {
       try {
-        const res = await fetch(`${API_URL}/api/admin/dashboard`, {
+        const res = await fetch("http://localhost:3000/api/admin/dashboard", {
           credentials: "include"
         });
         const data = await res.json();
@@ -117,7 +114,7 @@ export default function DashboardGlobal() {
             <tr key={i} className="hover:bg-gray-50">
               <td className="px-4 py-2 border border-gray-300 text-black">{doc.empresa}</td>
               <td className="px-4 py-2 border border-gray-300 text-black">{doc.tipo}</td>
-              <td className="px-4 py-2 border border-gray-300 text-black">{doc.numero_serie}</td>
+              <td className="px-4 py-2 border border-gray-300 text-black">{doc.numero_documento}</td>
               <td className="px-4 py-2 border border-gray-300 text-black">{doc.fecha}</td>
               <td className="px-4 py-2 border border-gray-300 font-semibold text-black">{doc.estado}</td>
               <td className="px-4 py-2 border border-gray-300 font-semibold text-black">

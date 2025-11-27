@@ -1,22 +1,21 @@
 import { useEffect, useState } from "react";
-import lup from "../assets/lup.png";
-import ps from "../assets/ps.png";
-import psr from "../assets/psr.png";
-import FL from "../assets/FL.png";
-import backArrow from "../assets/back-arrow.png";
-import fluxLogo from "../assets/Logo2.png";
+import lup from "../assets/lup.svg";
+import ps from "../assets/ps.svg";
+import psr from "../assets/psr.svg";
+import FL from "../assets/FL.svg";
+import backArrow from "../assets/back-arrow.svg";
+import fluxLogo from "../assets/Logo2.svg";
 
 export default function EmpresasAdmin() {
   const [empresas, setEmpresas] = useState([]);
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
   const [filtros, setFiltros] = useState({ nombre: "", nit: "", estado: "" });
   const [empresaSeleccionada, setEmpresaSeleccionada] = useState(null);
-  const API_URL = process.env.REACT_APP_API_URL || "https://fluxdata-1.onrender.com";
 
   // Obtener todas las empresas
   const obtenerEmpresas = async () => {
     try {
-      const res = await fetch(`${API_URL}/api/empresas`);
+      const res = await fetch("http://localhost:3000/api/empresas");
       const data = await res.json();
       setEmpresas(data);
     } catch (error) {
@@ -30,7 +29,7 @@ export default function EmpresasAdmin() {
     const nuevoEstado = estadoActual === "activo" ? "inactivo" : "activo";
     try {
 
-      await fetch(`${API_URL}/api/empresas/${id}/estado`, {
+      await fetch("http://localhost:3000/api/empresas/${id}/estado", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ estado: nuevoEstado }),
@@ -47,7 +46,7 @@ export default function EmpresasAdmin() {
   const verDetalle = async (id) => {
     try {
 
-      const res = await fetch(`${API_URL}/api/empresas/${id}`);
+      const res = await fetch(`http://localhost:3000/api/empresas/${id}`);
       const data = await res.json();
       setEmpresaSeleccionada(data.usuario); // abrir modal
     } catch (error) {

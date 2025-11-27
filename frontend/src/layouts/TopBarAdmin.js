@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import fluxLogo from "../assets/fluxdata.png";
+import fluxLogo from "../assets/fluxdata.svg";
 
 export default function TopBarAdmin() {
   const location = useLocation();

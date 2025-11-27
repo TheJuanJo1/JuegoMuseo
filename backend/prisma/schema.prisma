@@ -8,18 +8,19 @@ datasource db {
 }
 
 model Clientes {
-  id_cliente        Int              @id @default(autoincrement())
-  nombre_cliente    String
-  apellido_cliente  String
-  tipo_documento    String
-  numero_documento  String
-  direccion_cliente String
-  correo_cliente    String
-  id_usuario        Int?
-  Usuarios          Usuarios?        @relation(fields: [id_usuario], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction, map: "id_usuario")
+  id_cliente        Int      @id @default(autoincrement())
+  tipo_documento    String   // CC, NIT, TI, PAS...
+  numero_documento  String   @unique
+  nombre_completo   String
+  razon_social      String?
+  correo_cliente    String?
+  telefono          String?
+  direccion_cliente String?
+  ciudad            String?
+  departamento      String?
+  Usuarios   Usuarios? @relation(fields: [id_usuario], references: [id_usuario])
+  id_usuario Int?
   Documentos_XML    Documentos_XML[]
-
-  @@unique([numero_documento, id_usuario])
 }
 
 model Configuraciones_Firmas {
@@ -29,36 +30,43 @@ model Configuraciones_Firmas {
   contrasena  String
   metodo      String
   firma       String
-  id_usuario  Int
+  id_usuario  Int      @unique
   Usuarios    Usuarios @relation(fields: [id_usuario], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction, map: "id_usuario")
 }
 
 model Documentos_XML {
-  id_documento         Int                @id @default(autoincrement())
-  tipo_documento       String
+  id_documento         Int       @id @default(autoincrement())
+  tipo_documento       String    // FACTURA, NC, ND
   numero_documento     String
-  numero_serie         String? // nuevo, opcional
-  prefijo              String? // nuevo, opcional
-  fecha_emision        DateTime           @db.Timestamp(6)
-  valor_total          Decimal            @db.Decimal(15, 2)
-  impuestos            Decimal            @db.Decimal(15, 2)
-  estado_dian          String
-  codigo_dian          String
-  mensaje_dian         String
-  fecha_respuesta_dian DateTime?          @db.Timestamp(6)
+  numero_serie         String?
+  prefijo              String?
+  consecutivo_completo String? 
+  fecha_emision        DateTime
+  subtotal             Decimal?  @db.Decimal(15,2)
+  descuentos           Decimal?  @db.Decimal(15,2)
+  valor_total          Decimal   @db.Decimal(15,2)
+  impuestos            Decimal   @db.Decimal(15,2)
+  moneda               String?   // COP, USD...
+  forma_pago           String?
+  metodo_pago          String?
+  xml_archivo          String    // ruta, NO bytes
+  pdf_archivo          String?   // ruta
   cufe                 String?
   cude                 String?
-  detalle_nota         String? 
-  xml_archivo          String
-  pdf_archivo          Bytes
+  xml_json             Json? 
   id_cliente           Int?
-  factura_relacionada  String?
+  id_rango             Int?
+  estado_dian String? @default("Pendiente")
+  Clientes             Clientes? @relation(fields: [id_cliente], references: [id_cliente])
+  documento_relacionado  Int?
+  DocumentoPadre        Documentos_XML? @relation("DocumentoRelacion", fields: [documento_relacionado], references: [id_documento])
+  NotasRelacionadas     Documentos_XML[] @relation("DocumentoRelacion")
   id_usuario           Int
-  Clientes             Clientes?          @relation(fields: [id_cliente], references: [id_cliente])
-  Usuarios             Usuarios           @relation(fields: [id_usuario], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
-  Eventos              Eventos[]
+  Usuarios             Usuarios @relation(fields: [id_usuario], references: [id_usuario])
   Producto_Factura     Producto_Factura[]
+  Eventos              Eventos[]
 }
+
 
 model Eventos {
   id_evento      Int            @id(map: "id_evento")
@@ -73,42 +81,43 @@ model Eventos {
 }
 
 model Producto_Factura {
-  id_producto     Int            @id @default(autoincrement())
-  descripcion     String
-  cantidad        Int
-  precio_unitario Float
-  iva             Float
-  total           Float
-  id_documento    Int
-  Documentos_XML  Documentos_XML @relation(fields: [id_documento], references: [id_documento])
+  id_producto      Int      @id @default(autoincrement())
+  codigo           String?
+  descripcion      String
+  unidad_medida    String?
+  cantidad         Decimal   @db.Decimal(15,2)
+  precio_unitario  Decimal   @db.Decimal(15,2)
+  iva              Decimal   @db.Decimal(15,2)
+  total            Decimal   @db.Decimal(15,2)
+  codigo_estandar  String?   // NUEVO: UNSPSC
+  tipo_impuesto    String?   // NUEVO: IVA, INC, ICO
+  id_documento     Int
+  Documentos_XML   Documentos_XML @relation(fields: [id_documento], references: [id_documento])
 }
 
+
+
 model Usuarios {
-  id_usuario                   Int                      @id @default(autoincrement())
-  nombre_usuario               String                   @unique
-  rol_usuario                  String?
-  contrasena_usuario           String
-  nit_empresa                  String                   @unique
-  correo_contacto              String                   @unique
-  prefijo_numeracion           Int?
-  num_inicial                  Int?
-  num_final                    Int?
-  certificado_firma            String?
-  contrasena_certificado       String?
-  token_api                    String?
-  fecha_expiracion_certificado DateTime?
-  estado                       String    @default("activo") 
-  createdAt                    DateTime @default(now())
-  fecha_registro               DateTime @default(now())
-  Registros_Sistema            Registros_Sistema[] 
-  Clientes                     Clientes[]
-  Configuraciones_Firmas       Configuraciones_Firmas[]
-  Documentos_XML               Documentos_XML[]
-  Eventos                      Eventos[]
-  PasswordResetToken           PasswordResetToken[]
-  Rangos                       Rangos[]
-  configuracionTecnica         Configuracion_Tecnica?   @relation("UsuarioConfiguracion")
+  id_usuario         Int      @id @default(autoincrement())
+  nombre_usuario     String   @unique
+  rol_usuario        String?  // ADMIN, INTERMEDIARIO
+  contrasena_usuario String
+  nit_empresa        String   @unique
+  correo_contacto    String   @unique
+  estado             String    @default("activo") 
+  createdAt          DateTime  @default(now())
+  fecha_registro     DateTime  @default(now())
+  Configuraciones_Firmas Configuraciones_Firmas?
+  Documentos_XML      Documentos_XML[]
+  Clientes            Clientes[]
+  Configuracion       Configuracion_Tecnica?
+  Rangos              Rangos[]
+  Registros_Sistema   Registros_Sistema[]
+  Eventos             Eventos[]
+  PasswordResetToken PasswordResetToken[]
+
 }
+
 
 model PasswordResetToken {
   id         Int      @id @default(autoincrement())
@@ -130,18 +139,18 @@ model codigos_verificacion {
 }
 
 model Configuracion_Tecnica {
-  id_configuracion    Int      @id @default(autoincrement())
-  direccion_empresa   String?
-  regimen_tributario  String
-  certificado_firma   String
-  contrasena_cert     String
-  token_api           String
-  fecha_expiracion    DateTime
-  id_usuario          Int      @unique
-  usuario             Usuarios @relation("UsuarioConfiguracion", fields: [id_usuario], references: [id_usuario])
-   numeraciones        Json     @default("[]")
-
+  id_configuracion   Int      @id @default(autoincrement())
+  id_usuario         Int      @unique
+  direccion_empresa  String?
+  regimen_tributario String
+  certificado_firma  String   // Ruta del .p12
+  contrasena_cert    String
+  fecha_expiracion   DateTime
+  token_api          String
+  numeraciones       Json     @default("[]") // Info adicional DIAN
+  usuario            Usuarios @relation(fields: [id_usuario], references: [id_usuario])
 }
+
 
 model Registros_Sistema {
   id_registro      Int      @id @default(autoincrement())
@@ -162,9 +171,13 @@ model Registros_Sistema {
 
 model Rangos {
   id         Int      @id @default(autoincrement())
-  tipo       String // "FACTURA", "NC", "ND"
+  tipo       String   // FACTURA, NC, ND
+  prefijo    String   // Ej: SE, FE, NE
   inicio     Int
   fin        Int
+  resolucion String?
+  fecha_desde DateTime?
+  fecha_hasta DateTime?
   id_usuario Int
   Usuarios   Usuarios @relation(fields: [id_usuario], references: [id_usuario])
 }

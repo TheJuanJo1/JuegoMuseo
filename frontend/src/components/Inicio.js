@@ -1,11 +1,10 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import Logo from "../assets/Logo1.png";
+import Logo from "../assets/Logo1.svg";
 import MainImage from "../assets/im0.png";
 
 export default function Inicio() {
   const navigate = useNavigate();
-
   return (
     <div
       className="w-full min-h-screen flex flex-col font-sans overflow-hidden relative"

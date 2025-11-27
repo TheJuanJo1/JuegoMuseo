@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Logo from "../assets/Logo.png";
 import Fluxdata from "../assets/fluxdata2.png";
-import { API_URL } from "../config";
+import { API_URL } from "../config/api";
 
 export default function FormularioEmpresa({ usuarioId }) {
   const navigate = useNavigate();
@@ -26,7 +26,6 @@ export default function FormularioEmpresa({ usuarioId }) {
   useEffect(() => {
     const verificarEstado = async () => {
       try {
-
         const res = await fetch(`${API_URL}/api/configuracion/estado/${usuarioId}`);
         const data = await res.json();
         if (data.completado) {
@@ -41,7 +40,6 @@ export default function FormularioEmpresa({ usuarioId }) {
   useEffect(() => {
     const obtenerToken = async () => {
       try {
-
         const res = await fetch(`${API_URL}/api/token/${usuarioId}`);
         const data = await res.json();
         if (res.ok && data.token) {

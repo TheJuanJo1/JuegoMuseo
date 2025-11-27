@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { API_URL } from "../config";
 
+
 export default function Documentos() {
   const [docs, setDocs] = useState([]);
   const [filter, setFilter] = useState({ tipo: "", estado: "", fecha: "" });
@@ -11,8 +12,8 @@ export default function Documentos() {
 
 
   useEffect(() => {
-
     fetch(`${API_URL}/api/facturas-notas/historial`, {
+
       credentials: "include",
     })
       .then((res) => res.json())
@@ -65,8 +66,8 @@ export default function Documentos() {
 
   const descargarArchivo = async (id, tipo) => {
     try {
-
       const res = await fetch(`${API_URL}/api/${tipo}/${id}`, { credentials: "include" });
+
       if (!res.ok) throw new Error("Error descargando archivo");
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);

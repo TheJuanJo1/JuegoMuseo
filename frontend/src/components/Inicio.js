@@ -41,7 +41,7 @@ export default function Inicio() {
               </button>
             </div>
           </nav>
-        <div className="flex flex-1 items-center justify-between px-12 relative z-20"
+        <div className="flex flex-1 items-center justify-between px-12 relative z-10"
         style={{
           marginTop: "-6%",              
         }}>

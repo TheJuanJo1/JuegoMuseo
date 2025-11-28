@@ -5,7 +5,7 @@ import psr from "../assets/psr.png";
 import FL from "../assets/FL.png";
 import backArrow from "../assets/back-arrow.png";
 import fluxLogo from "../assets/Logo2.png";
-import { API_URL } from "../config";
+import { API_URL } from "../config.js";
 
 
 export default function EmpresasAdmin() {

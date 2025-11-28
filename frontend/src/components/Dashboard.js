@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   LineChart,Line,ResponsiveContainer,PieChart,Pie,Cell,Tooltip,BarChart,Bar,XAxis,YAxis,CartesianGrid,
 } from "recharts";
-import { API_URL } from "../config/api";
+import { API_URL } from "../config.js";
 
 export default function Dashboard() {
   const navigate = useNavigate();

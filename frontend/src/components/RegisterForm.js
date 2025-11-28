@@ -6,7 +6,7 @@ import registerImage from "../assets/register.jpg";
 import verifyImage from "../assets/Imagenes (7).jpg";
 import im3 from "../assets/im3.png";
 import im2 from "../assets/im2.png";
-import { API_URL } from "../config";
+import { API_URL } from "../config.js";
 
 export default function RegisterForm() {
   const [form, setForm] = useState({

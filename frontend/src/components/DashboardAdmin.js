@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { BarChart, Bar, XAxis, YAxis, Tooltip,Cell, CartesianGrid, ResponsiveContainer, LabelList } from "recharts";
-import { API_URL } from "../config";
+import { API_URL } from "../config.js";
 
 export default function DashboardGlobal() {
   const [resumen, setResumen] = useState({

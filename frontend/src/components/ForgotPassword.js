@@ -6,7 +6,7 @@ import fluxLogo from "../assets/fluxdata.png";
 import backArrow from "../assets/back-arrow.png";
 import laptopImage from "../assets/laptop2.jpg";
 import laptop1 from "../assets/im1.png";
-import { API_URL } from "../config/api";
+import { API_URL } from "../config.js";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");

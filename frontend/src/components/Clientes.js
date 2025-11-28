@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { API_URL } from "../config/api";
+import { API_URL } from "../config.js";
 
 export default function ClientesForm() {
   const [form, setForm] = useState({

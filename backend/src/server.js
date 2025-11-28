@@ -2,7 +2,6 @@ import express from "express"
 import cors from "cors"
 import dotenv from "dotenv"
 import authRoutes from "./routes/auth.js"
-import clientesRoutes from "./routes/clientes.js"
 import empresasRoutes from "./routes/empresas.js"
 import loginRoutes from "./routes/login.js"
 import forgotPasswordRoutes from "./routes/forgotPassword.js";

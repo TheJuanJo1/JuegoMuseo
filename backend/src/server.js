@@ -89,8 +89,6 @@ app.use("/api/pdf", pdfRoutes);
 
 app.use("/api/xml", xmlRoutes);
 
-app.use("/api/clientes", clientesRoutes)
-
 app.use("/api/registros", registrosRouter);
 
 

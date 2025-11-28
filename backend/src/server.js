@@ -16,7 +16,7 @@ import filtrarRoutes from "./routes/filtrar.js";
 import configurarRoutes from "./routes/configuracion.js";
 import tokenRoutes from "./routes/token.js";
 import pdfRoutes from "./routes/pdf.js";
-import xmlRoutes from "./routes/xml.js";
+import xmlRoutes from "./routes/xmldashboard.js";
 import registrosRouter from "./routes/registros.js";
 
 const app = express()

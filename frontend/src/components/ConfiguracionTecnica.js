@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { API_URL } from "../config/api";
+import { API_URL } from "../config.js";
 
 export default function ConfiguracionTecnica({ usuarioId }) {
   const [config, setConfig] = useState(null);

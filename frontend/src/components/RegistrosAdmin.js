@@ -3,7 +3,7 @@ import FL from "../assets/FL.png";
 import EX from "../assets/EX.png";
 import V1 from "../assets/V1.png";
 import V3 from "../assets/V3.png";
-import { API_URL } from "../config";
+import { API_URL } from "../config.js";
 
 export default function RegistrosAdmin() {
   const [animando, setAnimando] = useState(false);

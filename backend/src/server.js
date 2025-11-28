@@ -1,4 +1,5 @@
 import express from "express"
+import empresasRoutes from "./routes/empresas.js"
 import cors from "cors"
 import dotenv from "dotenv"
 import authRoutes from "./routes/auth.js"

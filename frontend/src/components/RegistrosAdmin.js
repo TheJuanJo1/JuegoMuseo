@@ -13,7 +13,6 @@ export default function RegistrosAdmin() {
   const [filtros, setFiltros] = useState({ nombre_usuario: "", tipo: "", resultado: "" });
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
 
-
   const fetchRegistros = async (page = 1) => {
     try {
       const params = new URLSearchParams();

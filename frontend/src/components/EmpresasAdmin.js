@@ -7,6 +7,7 @@ import backArrow from "../assets/back-arrow.png";
 import fluxLogo from "../assets/Logo2.png";
 import { API_URL } from "../config";
 
+
 export default function EmpresasAdmin() {
   const [empresas, setEmpresas] = useState([]);
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
@@ -16,6 +17,7 @@ export default function EmpresasAdmin() {
   const obtenerEmpresas = async () => {
     try {
       const res = await fetch(`${API_URL}/api/empresas`);
+
       const data = await res.json();
       setEmpresas(data);
     } catch (error) {
@@ -23,12 +25,10 @@ export default function EmpresasAdmin() {
     }
   };
 
-
   // Cambiar estado de empresa
   const cambiarEstado = async (id, estadoActual) => {
     const nuevoEstado = estadoActual === "activo" ? "inactivo" : "activo";
     try {
-
       await fetch(`${API_URL}/api/empresas/${id}/estado`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -45,7 +45,6 @@ export default function EmpresasAdmin() {
   // Ver detalle de empresa
   const verDetalle = async (id) => {
     try {
-
       const res = await fetch(`${API_URL}/api/empresas/${id}`);
       const data = await res.json();
       setEmpresaSeleccionada(data.usuario); // abrir modal

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { API_URL } from "../config";
+import { API_URL } from "../config/api";
+
 export default function FacturasNotas() {
   const [form, setForm] = useState({
     tipo_documento: "Factura",
@@ -259,7 +260,6 @@ const handleChangeForm = (e) => {
 
     try {
       const res = await fetch(
-
         `${API_URL}/api/facturas-notas/validar-factura/${encodeURIComponent(form.numero_serie)}/${encodeURIComponent(form.id_usuario)}/${encodeURIComponent(form.id_cliente)}`
       );
       const data = await res.json();
@@ -395,154 +395,375 @@ const payload = {
     }
   };
   return (
-    <div className="flex justify-center p-6">
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow-md w-[700px] space-y-4">
-        <h2 className="text-2xl font-bold text-center mb-4">Enviar Factura o Nota</h2>
+  <div className="flex justify-center p-6">
+    <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow-md w-[700px] space-y-4">
+      <h2 className="text-2xl font-bold text-center mb-4">Enviar Factura o Nota</h2>
 
-        <select name="tipo_documento" value={form.tipo_documento} onChange={handleChangeForm} className="w-full p-2 border rounded">
-          <option value="Factura">Factura</option>
-          <option value="Nota Crédito">Nota Crédito</option>
-          <option value="Nota Débito">Nota Débito</option>
-        </select>
-
-        <input type="text" name="numero_documento" placeholder="Número documento" value={form.numero_documento} onChange={handleChangeForm} className="w-full p-2 border rounded" />
-        {form.tipo_documento !== "Factura" && (
-          <div className="flex gap-2">
-            <input
-              type="text"
-              name="numero_serie"
-              placeholder="Número de serie de la factura"
-              value={form.numero_serie}
-              onChange={handleChangeForm}
-              className="flex-1 p-2 border rounded"/>
-            <button type="button" onClick={validarNumeroSerie}
-            className="bg-[#394867] text-white px-3 rounded hover:bg-[#2f3b55]">
-              Validar serie
-              </button>
-            </div>
-          )}
-
-        {mostarCamposNota && facturaValida && 
- (form.tipo_documento === "Nota Crédito" || form.tipo_documento === "Nota Débito") && (
-  <div className="p-3 bg-blue-50 rounded border">
-
-    <p className="font-semibold">
-      Factura válida: {facturaValida.numero_serie} — Total: {formatCOP(Number(facturaValida.valor_total || 0))}
-    </p>
-
-    <div className="mt-3 bg-white p-3 rounded border">
-      <p className="font-semibold mb-2">Productos de la factura</p>
-
-      {productosFactura.map((p, index) => (
-        <div key={index} className="border p-2 rounded mb-2 bg-gray-50">
-
-          <p className="font-semibold">{p.descripcion}</p>
-          <p className="text-sm text-gray-600">
-            Cantidad facturada: {p.cantidad} — Precio: {formatCOP(p.precio_unitario)}
-          </p>
-
-          {form.tipo_documento === "Nota Crédito" && (
-            <div className="flex items-center gap-2 mt-2">
-              <label className="text-sm">Cantidad a devolver:</label>
-             <input type="number" min="0" max={p.cantidad}
-             value={devoluciones[index] === "" ? "" : devoluciones[index]}
-             onChange={(e) => {
-              const v = e.target.value;
-              if (v === "") {
-                setDevoluciones((prev) => ({ ...prev, [index]: "" }));
-                return;
-              }
-              const num = Number(v);
-              if (num <= p.cantidad) {
-                setDevoluciones((prev) => ({ ...prev, [index]: num }));
-              }
-            }}className="w-24 p-1 border rounded"/>
-            </div>
-          )}
-
-          {form.tipo_documento === "Nota Débito" && (
-            <div className="flex items-center gap-2 mt-2">
-              <label className="text-sm">Cantidad adicional:</label>
-              <input type="number" min="0" max="1000000" value={p.cantidad_extra === "" ? "" : p.cantidad_extra}
-              onChange={(e) => { const valor = e.target.value;
-                if (valor === "") { const nuevo = [...productosFactura];
-                  nuevo[index].cantidad_extra = "";
-                  setProductosFactura(nuevo);
-                  return;
-                }
-                const num = Number(valor);
-                if (num <= 1000000) {
-                  const nuevo = [...productosFactura];
-                  nuevo[index].cantidad_extra = num;
-                  setProductosFactura(nuevo);
-                }
-              }}className="w-24 p-1 border rounded"/>
-            </div>
-          )}
-
-        </div>
-      ))}
-        <p className="mt-2 font-bold text-black">
-          Total de la nota: {formatCOP(Number(form.monto_nota || montoCalculado))}
-      </p>
-    </div>
-
-    {/* Monto manual igual para ambas */}
-    <div className="mt-3">
-      <label className="block text-sm font-medium">Monto de la nota</label>
-      <input name="monto_nota" type="number" step="0.01" value={form.monto_nota === "" ? "" : form.monto_nota}
-      onChange={handleMontoNotaChange}
-      className="w-full p-2 border rounded mt-1"/>
-      <p className="text-xs text-gray-500 mt-1">
-        Total calculado: {formatCOP(montoCalculado)}
-      </p>
-    </div>
-
-    <div className="mt-3">
-      <label className="block text-sm font-medium">Descripción / detalle</label>
-      <textarea
-        name="detalle_nota"
+      <select
+        name="tipo_documento"
+        value={form.tipo_documento}
         onChange={handleChangeForm}
-        value={form.detalle_nota || ""}
-        className="w-full p-2 border rounded mt-1"
-        placeholder="Explica brevemente el motivo"/>
+        className="w-full p-2 border rounded"
+      >
+        <option value="Factura">Factura</option>
+        <option value="Nota Crédito">Nota Crédito</option>
+        <option value="Nota Débito">Nota Débito</option>
+      </select>
+
+      <input
+        type="text"
+        name="numero_documento"
+        placeholder="Número documento"
+        value={form.numero_documento}
+        onChange={handleChangeForm}
+        className="w-full p-2 border rounded"
+      />
+
+      {form.tipo_documento !== "Factura" && (
+        <div className="flex gap-2">
+          <input
+            type="text"
+            name="numero_serie"
+            placeholder="Número de serie de la factura"
+            value={form.numero_serie}
+            onChange={handleChangeForm}
+            className="flex-1 p-2 border rounded"
+          />
+          <button
+            type="button"
+            onClick={validarNumeroSerie}
+            className="bg-[#394867] text-white px-3 rounded hover:bg-[#2f3b55]"
+          >
+            Validar serie
+          </button>
         </div>
-    </div>
-  )}
-        <input type="datetime-local" name="fecha_emision" value={form.fecha_emision} onChange={handleChangeForm} className="w-full p-2 border rounded" />
+      )}
 
-        <input type="number" name="id_usuario" placeholder="ID Usuario" value={form.id_usuario} onChange={handleChangeForm} className="w-full p-2 border rounded" />
+      {/* Detalle condicionado para Nota Crédito / Débito */}
+      {mostarCamposNota &&
+        facturaValida &&
+        (form.tipo_documento === "Nota Crédito" || form.tipo_documento === "Nota Débito") && (
+          <div className="p-3 bg-blue-50 rounded border">
+            <p className="font-semibold">
+              Factura válida: {facturaValida.numero_serie} — Total:{" "}
+              {formatCOP(Number(facturaValida.valor_total || 0))}
+            </p>
 
-        <input type="number" name="id_cliente" placeholder="ID Cliente" value={form.id_cliente} onChange={handleChangeForm} className="w-full p-2 border rounded" />
+            <div className="mt-3 bg-white p-3 rounded border">
+              <p className="font-semibold mb-2">Productos de la factura</p>
 
-        <input type="text" readOnly name="valor_total" placeholder="Total automático" value={formatCOP(Number(form.valor_total || 0))} className="w-full p-2 border rounded bg-gray-100" />
+              {productosFactura.map((p, index) => (
+                <div key={index} className="border p-2 rounded mb-2 bg-gray-50">
+                  <p className="font-semibold">{p.descripcion}</p>
+                  <p className="text-sm text-gray-600">
+                    Cantidad facturada: {p.cantidad} — Precio: {formatCOP(p.precio_unitario)}
+                  </p>
 
-        <input type="number" name="impuestos" placeholder="Impuestos" value={form.impuestos} onChange={handleChangeForm} className="w-full p-2 border rounded" />
+                  {form.tipo_documento === "Nota Crédito" && (
+                    <div className="flex items-center gap-2 mt-2">
+                      <label className="text-sm">Cantidad a devolver:</label>
+                      <input
+                        type="number"
+                        min="0"
+                        max={p.cantidad}
+                        value={devoluciones[index] === "" ? "" : devoluciones[index]}
+                        onChange={(e) => {
+                          const v = e.target.value;
+                          if (v === "") {
+                            setDevoluciones((prev) => ({ ...prev, [index]: "" }));
+                            return;
+                          }
+                          const num = Number(v);
+                          if (num <= p.cantidad) {
+                            setDevoluciones((prev) => ({ ...prev, [index]: num }));
+                          }
+                        }}
+                        className="w-24 p-1 border rounded"
+                      />
+                    </div>
+                  )}
 
-        <h3 className="font-semibold mt-4">Productos</h3>
-        {productos.map((p, i) => (
-          <div key={i} className="flex justify-between items-center mb-2 bg-gray-50 p-2 rounded">
-            <span>{p.descripcion} - {p.cantidad} x {formatCOP(p.precio_unitario)} (IVA: {p.iva}%) = {formatCOP(p.total)}</span>
-            <button type="button" onClick={() => eliminarProducto(i)} disabled={bloquearProductos} className={`text-sm ${bloquearProductos ? "text-gray-300" : "text-red-500"}`}>
-              Quitar
-              </button>
+                  {form.tipo_documento === "Nota Débito" && (
+                    <div className="flex items-center gap-2 mt-2">
+                      <label className="text-sm">Cantidad adicional:</label>
+                      <input
+                        type="number"
+                        min="0"
+                        max="1000000"
+                        value={p.cantidad_extra === "" ? "" : p.cantidad_extra}
+                        onChange={(e) => {
+                          const valor = e.target.value;
+                          if (valor === "") {
+                            const nuevo = [...productosFactura];
+                            nuevo[index].cantidad_extra = "";
+                            setProductosFactura(nuevo);
+                            return;
+                          }
+                          const num = Number(valor);
+                          if (num <= 1000000) {
+                            const nuevo = [...productosFactura];
+                            nuevo[index].cantidad_extra = num;
+                            setProductosFactura(nuevo);
+                          }
+                        }}
+                        className="w-24 p-1 border rounded"
+                      />
+                    </div>
+                  )}
+                </div>
+              ))}
+
+              {/* Total dinámico según el tipo */}
+              <p className="mt-2 font-bold text-black">
+                Total de la nota: {formatCOP(Number(form.monto_nota || montoCalculado))}
+              </p>
+            </div>
+
+            {/* Monto manual y descripción */}
+            <div className="mt-3">
+              <label className="block text-sm font-medium">Monto de la nota</label>
+              <input
+                name="monto_nota"
+                type="number"
+                step="0.01"
+                value={form.monto_nota === "" ? "" : form.monto_nota}
+                onChange={handleMontoNotaChange}
+                className="w-full p-2 border rounded mt-1"
+              />
+
+              <p className="text-xs text-gray-500 mt-1">Total calculado: {formatCOP(montoCalculado)}</p>
+            </div>
+
+            <div className="mt-3">
+              <label className="block text-sm font-medium">Descripción / detalle</label>
+              <textarea
+                name="detalle_nota"
+                onChange={handleChangeForm}
+                value={form.detalle_nota || ""}
+                className="w-full p-2 border rounded mt-1"
+                placeholder="Explica brevemente el motivo"
+              />
+            </div>
+          </div>
+        )}
+
+      {/* Resumen / Productos originales (lista principal) */}
+      <div className="mt-3 bg-white p-3 rounded border">
+        <p className="font-semibold mb-2">Productos de la factura</p>
+
+        {productosFactura.map((p, index) => (
+          <div key={index} className="border p-2 rounded mb-2 bg-gray-50">
+            <p className="font-semibold">{p.descripcion}</p>
+            <p className="text-sm text-gray-600">
+              Cantidad facturada: {p.cantidad} — Precio: {formatCOP(p.precio_unitario)}
+            </p>
+
+            {form.tipo_documento === "Nota Crédito" && (
+              <div className="flex items-center gap-2 mt-2">
+                <label className="text-sm">Cantidad a devolver:</label>
+                <input
+                  type="number"
+                  min="0"
+                  max={p.cantidad}
+                  value={devoluciones[index] === "" ? "" : devoluciones[index]}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    if (v === "") {
+                      setDevoluciones((prev) => ({ ...prev, [index]: "" }));
+                      return;
+                    }
+                    const num = Number(v);
+                    if (num <= p.cantidad) {
+                      setDevoluciones((prev) => ({ ...prev, [index]: num }));
+                    }
+                  }}
+                  className="w-24 p-1 border rounded"
+                />
+              </div>
+            )}
+
+            {form.tipo_documento === "Nota Débito" && (
+              <div className="flex items-center gap-2 mt-2">
+                <label className="text-sm">Cantidad adicional:</label>
+                <input
+                  type="number"
+                  min="0"
+                  max="1000000"
+                  value={p.cantidad_extra === "" ? "" : p.cantidad_extra}
+                  onChange={(e) => {
+                    const valor = e.target.value;
+                    if (valor === "") {
+                      const nuevo = [...productosFactura];
+                      nuevo[index].cantidad_extra = "";
+                      setProductosFactura(nuevo);
+                      return;
+                    }
+                    const num = Number(valor);
+                    if (num <= 1000000) {
+                      const nuevo = [...productosFactura];
+                      nuevo[index].cantidad_extra = num;
+                      setProductosFactura(nuevo);
+                    }
+                  }}
+                  className="w-24 p-1 border rounded"
+                />
+              </div>
+            )}
           </div>
         ))}
 
-        <div className="flex gap-2 mt-2">
-          <input name="descripcion" placeholder="Descripción" value={productoTemp.descripcion} onChange={handleChangeProducto} disabled={bloquearProductos} className="flex-1 p-2 border rounded" />
-          <input name="cantidad" type="number" placeholder="Cant." value={productoTemp.cantidad} onChange={handleChangeProducto} disabled={bloquearProductos} className="w-20 p-2 border rounded" />
-          <input name="precio_unitario" type="number" placeholder="Precio" value={productoTemp.precio_unitario} onChange={handleChangeProducto} disabled={bloquearProductos} className="w-24 p-2 border rounded" />
-          <input name="iva" type="number" placeholder="IVA %" value={productoTemp.iva} onChange={handleChangeProducto} disabled={bloquearProductos} className="w-20 p-2 border rounded" />
-          <button type="button" onClick={agregarProducto} disabled={bloquearProductos} className={`px-3 rounded text-white ${ bloquearProductos ? "bg-gray-400" : "bg-[#394867] hover:bg-[#2f3b55]"}`}>
-            + Agregar
-          </button>
+        <p className="mt-2 font-bold text-black">
+          Total de la nota: {formatCOP(Number(form.monto_nota || montoCalculado))}
+        </p>
+      </div>
+
+      {/* Monto manual y descripción (sección común si aún no la mostró arriba) */}
+      {!(
+        mostarCamposNota &&
+        facturaValida &&
+        (form.tipo_documento === "Nota Crédito" || form.tipo_documento === "Nota Débito")
+      ) && (
+        <>
+          <div className="mt-3">
+            <label className="block text-sm font-medium">Monto de la nota</label>
+            <input
+              name="monto_nota"
+              type="number"
+              step="0.01"
+              value={form.monto_nota === "" ? "" : form.monto_nota}
+              onChange={handleMontoNotaChange}
+              className="w-full p-2 border rounded mt-1"
+            />
+            <p className="text-xs text-gray-500 mt-1">Total calculado: {formatCOP(montoCalculado)}</p>
           </div>
-          <button type="submit" className="w-full bg-[#394867] text-white py-2 rounded hover:bg-[#2f3b55]">
-            Enviar
+
+          <div className="mt-3">
+            <label className="block text-sm font-medium">Descripción / detalle</label>
+            <textarea
+              name="detalle_nota"
+              onChange={handleChangeForm}
+              value={form.detalle_nota || ""}
+              className="w-full p-2 border rounded mt-1"
+              placeholder="Explica brevemente el motivo"
+            />
+          </div>
+        </>
+      )}
+
+      <input
+        type="datetime-local"
+        name="fecha_emision"
+        value={form.fecha_emision}
+        onChange={handleChangeForm}
+        className="w-full p-2 border rounded"
+      />
+
+      <input
+        type="number"
+        name="id_usuario"
+        placeholder="ID Usuario"
+        value={form.id_usuario}
+        onChange={handleChangeForm}
+        className="w-full p-2 border rounded"
+      />
+
+      <input
+        type="number"
+        name="id_cliente"
+        placeholder="ID Cliente"
+        value={form.id_cliente}
+        onChange={handleChangeForm}
+        className="w-full p-2 border rounded"
+      />
+
+      <input
+        type="text"
+        readOnly
+        name="valor_total"
+        placeholder="Total automático"
+        value={formatCOP(Number(form.valor_total || 0))}
+        className="w-full p-2 border rounded bg-gray-100"
+      />
+
+      <input
+        type="number"
+        name="impuestos"
+        placeholder="Impuestos"
+        value={form.impuestos}
+        onChange={handleChangeForm}
+        className="w-full p-2 border rounded"
+      />
+
+      <h3 className="font-semibold mt-4">Productos</h3>
+      {productos.map((p, i) => (
+        <div key={i} className="flex justify-between items-center mb-2 bg-gray-50 p-2 rounded">
+          <span>
+            {p.descripcion} - {p.cantidad} x {formatCOP(p.precio_unitario)} (IVA: {p.iva}%) ={" "}
+            {formatCOP(p.total)}
+          </span>
+          <button
+            type="button"
+            onClick={() => eliminarProducto(i)}
+            disabled={bloquearProductos}
+            className={`text-sm ${bloquearProductos ? "text-gray-300" : "text-red-500"}`}
+          >
+            Quitar
           </button>
-        {msg && <p className="text-center text-sm mt-2">{msg}</p>}
-      </form>
-    </div>
-  );
+        </div>
+      ))}
+
+      <div className="flex gap-2 mt-2">
+        <input
+          name="descripcion"
+          placeholder="Descripción"
+          value={productoTemp.descripcion}
+          onChange={handleChangeProducto}
+          disabled={bloquearProductos}
+          className="flex-1 p-2 border rounded"
+        />
+        <input
+          name="cantidad"
+          type="number"
+          placeholder="Cant."
+          value={productoTemp.cantidad}
+          onChange={handleChangeProducto}
+          disabled={bloquearProductos}
+          className="w-20 p-2 border rounded"
+        />
+        <input
+          name="precio_unitario"
+          type="number"
+          placeholder="Precio"
+          value={productoTemp.precio_unitario}
+          onChange={handleChangeProducto}
+          disabled={bloquearProductos}
+          className="w-24 p-2 border rounded"
+        />
+        <input
+          name="iva"
+          type="number"
+          placeholder="IVA %"
+          value={productoTemp.iva}
+          onChange={handleChangeProducto}
+          disabled={bloquearProductos}
+          className="w-20 p-2 border rounded"
+        />
+        <button
+          type="button"
+          onClick={agregarProducto}
+          disabled={bloquearProductos}
+          className={`px-3 rounded text-white ${bloquearProductos ? "bg-gray-400" : "bg-[#394867] hover:bg-[#2f3b55]"}`}
+        >
+          + Agregar
+        </button>
+      </div>
+
+      <button type="submit" className="w-full bg-[#394867] text-white py-2 rounded hover:bg-[#2f3b55]">
+        Enviar
+      </button>
+
+      {msg && <p className="text-center text-sm mt-2">{msg}</p>}
+    </form>
+  </div>
+);
 }

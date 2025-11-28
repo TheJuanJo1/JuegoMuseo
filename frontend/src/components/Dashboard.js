@@ -1,9 +1,10 @@
 import React,{ useEffect, useState } from "react";
-import { API_URL } from "../config";
 import { useNavigate } from "react-router-dom";
 import {
   LineChart,Line,ResponsiveContainer,PieChart,Pie,Cell,Tooltip,BarChart,Bar,XAxis,YAxis,CartesianGrid,
 } from "recharts";
+import { API_URL } from "../config/api";
+
 export default function Dashboard() {
   const navigate = useNavigate();
   const [docs, setDocs] = useState([]);
@@ -23,6 +24,7 @@ export default function Dashboard() {
   // Cargar últimos documentos
   useEffect(() => {
     fetch(`${API_URL}/api/ultimos`, {
+
       credentials: "include",
     })
       .then((res) => res.json())

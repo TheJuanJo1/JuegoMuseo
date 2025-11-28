@@ -27,6 +27,7 @@ import DashboardAdmin from "./components/DashboardAdmin";
 import EmpresasAdmin from "./components/EmpresasAdmin";
 import RegistrosAdmin from "./components/RegistrosAdmin";
 
+
 // Wrapper para pasar usuarioId desde params a FormularioEmpresa
 const FormularioEmpresaWrapper = () => {
   const { usuarioId } = useParams();

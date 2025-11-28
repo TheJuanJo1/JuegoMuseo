@@ -19,47 +19,27 @@ import pdfRoutes from "./routes/pdf.js";
 import xmlRoutes from "./routes/xml.js";
 import registrosRouter from "./routes/registros.js";
 
+import dashboardAdmin from "./routes/dashboardAdmin.js";
+
+
 const app = express()
+const FRONTEND_ORIGIN = process.env.FRONTEND_URL || "http://localhost:5173";
 
-// ----------------------------------------------------
-// ✅ CORRECCIÓN CORS para permitir Vercel y Localhost
-// ----------------------------------------------------
-
-const allowedOrigins = [
-    "http://localhost:5173",           // Desarrollo local (Vite/React)
-    "https://fluxdata-phi.vercel.app", // Producción en Vercel
-];
-
-const corsOptions = {
-    origin: (origin, callback) => {
-        // Permitir si el origen está en la lista blanca (o si es undefined para requests sin origen)
-        if (allowedOrigins.includes(origin) || !origin) {
-            callback(null, true);
-        } else {
-            // Rechazar si no está en la lista
-            callback(new Error(`Not allowed by CORS for origin: ${origin}`));
-        }
-    },
-    credentials: true, // Importante para que las cookies/sesiones funcionen
-};
-
-app.use(cors(corsOptions));
-
-// ----------------------------------------------------
-// Middleware y Rutas
-// ----------------------------------------------------
+app.use(cors({
+  origin: FRONTEND_ORIGIN,
+  credentials: true,
+}));
 
 app.use(express.json())
 app.use(cookieParser());
-
 app.get('/', (req, res) => {
-    res.json({ ok: true, msg: 'API FluxData funcionando' })
+  res.json({ ok: true, msg: 'API FluxData funcionando' })
 })
 
 
 // Ejemplo de ruta protegida
 app.get("/api/auth/me", authRequired, (req, res) => {
-    res.json({ user: req.user });
+  res.json({ user: req.user });
 });
 
 // Rutas de empresas
@@ -94,10 +74,13 @@ app.use("/api/clientes", clientesRoutes)
 
 app.use("/api/registros", registrosRouter);
 
+app.use("/api/admin/dashboard", dashboardAdmin);
+
 
 app.get('/api/auth/me', authRequired, (req, res) => {
-    res.json({ user: req.user })
+  res.json({ user: req.user })
 })
 
 const PORT = process.env.PORT || 3000
 app.listen(PORT, () => console.log(`Servidor en http://localhost:${PORT}`))
+

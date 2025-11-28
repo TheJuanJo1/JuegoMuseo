@@ -9,17 +9,16 @@ export default function DashboardGlobal() {
     totalDocumentos: 0,
     erroresDocumentos: 0
   });
-
   const [volumenDocs, setVolumenDocs] = useState([]);
   const [ultimosDocs, setUltimosDocs] = useState([]);
   const [validacionesSemana, setValidacionesSemana] = useState([]);
   const navigate = useNavigate();
- 
 
   useEffect(() => {
     const fetchDashboard = async () => {
       try {
         const res = await fetch(`${API_URL}/api/admin/dashboard`, {
+
           credentials: "include"
         });
         const data = await res.json();
@@ -144,3 +143,4 @@ export default function DashboardGlobal() {
 </div>
 );
 }
+

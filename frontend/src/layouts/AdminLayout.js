@@ -7,7 +7,7 @@ import D1 from "../assets/D1.png";
 import E from "../assets/E.png";
 import R1 from "../assets/R1.png";
 import C2 from "../assets/C2.png";
-import { API_URL } from "../config/api";
+import { API_URL } from "../config.js";
 
 export default function AdminLayout() {
   const navigate = useNavigate();

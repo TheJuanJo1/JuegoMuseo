@@ -17,6 +17,7 @@ import tokenRoutes from "./routes/token.js";
 import pdfRoutes from "./routes/pdf.js";
 import xmlRoutes from "./routes/xmldashboard.js";
 import registrosRouter from "./routes/registros.js";
+import dashboardAdmin from "./routes/dashboardAdmin.js";
 
 const app = express()
 
@@ -91,6 +92,7 @@ app.use("/api/xml", xmlRoutes);
 
 app.use("/api/registros", registrosRouter);
 
+app.use("/api/admin/dashboard", dashboardAdmin);
 
 app.get('/api/auth/me', authRequired, (req, res) => {
     res.json({ user: req.user })

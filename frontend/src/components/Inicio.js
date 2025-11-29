@@ -7,84 +7,115 @@ export default function Inicio() {
   const navigate = useNavigate();
 
   return (
-    <div className="w-full min-h-screen flex flex-col font-sans overflow-hidden relative">
+    <div
+      className="w-full min-h-screen flex flex-col font-sans overflow-hidden relative"
+      style={{ fontFamily: "'Work Sans', sans-serif" }}
+    >
+      {/* NAVBAR */}
+      <nav className="flex justify-between items-center p-6 relative z-20">
 
-      {/* NAV */}
-      <nav className="flex justify-between items-center p-4 md:p-6 z-20">
-        {/* Logo */}
-        <img
-          src={Logo}
-          alt="Logo"
-          className="h-20 md:h-28 lg:h-36 ml-2 md:ml-0 object-contain"
-        />
+        {/* LOGO */}
+        <div className="flex items-center">
+          <img
+            src={Logo}
+            alt="Logo"
+            className="h-24 md:h-32"
+            style={{
+              marginTop: "10px",
+              marginLeft: "10px",
+            }}
+          />
+        </div>
 
-        {/* Botones escritorio */}
-        <div className="hidden md:flex items-center space-x-10 pr-4">
+        {/* MENU */}
+        <div
+          className="hidden md:flex items-center space-x-12"
+          style={{ marginRight: "40px" }}
+        >
           <button
-            className="px-4 py-2 text-black rounded-md border border-transparent hover:border-black transition"
+            className="px-4 py-2 rounded-md text-black font-medium border border-transparent transition-all hover:border-black"
             onClick={() => navigate("/faq")}
           >
             FAQ
           </button>
+
           <button
-            className="px-4 py-2 text-black rounded-md border border-transparent hover:border-black transition"
+            className="px-4 py-2 rounded-md text-black font-medium border border-transparent transition-all hover:border-black"
             onClick={() => navigate("/register", { state: { fromInicio: true } })}
           >
             Registrarse
           </button>
+
           <button
-            className="px-4 py-2 text-black rounded-md border border-transparent hover:border-black transition"
+            className="px-4 py-2 rounded-md text-black font-medium border border-transparent transition-all hover:border-black"
             onClick={() => navigate("/login")}
           >
             Iniciar Sesión
           </button>
         </div>
+
+        {/* MENU MÓVIL */}
+        <div className="flex md:hidden gap-3">
+          <button
+            className="text-black font-medium px-2 py-1"
+            onClick={() => navigate("/faq")}
+          >
+            FAQ
+          </button>
+          <button
+            className="text-black font-medium px-2 py-1"
+            onClick={() => navigate("/register", { state: { fromInicio: true } })}
+          >
+            Registro
+          </button>
+          <button
+            className="text-black font-medium px-2 py-1"
+            onClick={() => navigate("/login")}
+          >
+            Login
+          </button>
+        </div>
       </nav>
 
-      {/* Menú móvil */}
-      <div className="flex md:hidden justify-center space-x-3 pb-4">
-        <button className="px-3 py-1 border rounded" onClick={() => navigate("/faq")}>
-          FAQ
-        </button>
-        <button className="px-3 py-1 border rounded" onClick={() => navigate("/register")}>
-          Registrarse
-        </button>
-        <button className="px-3 py-1 border rounded" onClick={() => navigate("/login")}>
-          Login
-        </button>
-      </div>
-
-      {/* CONTENIDO */}
-      <div className="flex flex-col lg:flex-row flex-1 items-center justify-between px-6 md:px-12 relative z-10 mt-6 lg:mt-0">
-
+      {/* CONTENIDO PRINCIPAL */}
+      <div
+        className="flex flex-col md:flex-row flex-1 items-center justify-between px-8 md:px-12 relative z-10"
+      >
         {/* TEXTO */}
-        <div className="max-w-xl text-center lg:text-left space-y-8">
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold">
+        <div className="max-w-lg space-y-8 mt-6 md:mt-0">
+          <h1
+            className="font-bold"
+            style={{ fontSize: "2.4rem" }}
+          >
             ¿Quiénes Somos?
           </h1>
 
-          <p className="text-gray-700 text-lg md:text-xl leading-relaxed">
-            En FluxData somos el puente que actúa de manera confiable entre
-            las empresas y la DIAN, simplificando el proceso de facturación
-            electrónica con seguridad y eficiencia.
+          <p
+            className="text-gray-700"
+            style={{
+              fontSize: "1.2rem",
+              lineHeight: "1.9rem",
+            }}
+          >
+            En FluxData somos el puente confiable entre las empresas y la DIAN,
+            simplificando el proceso de facturación electrónica con seguridad y eficiencia.
           </p>
         </div>
 
-        {/* IMAGEN */}
-        <div
-          className="
-            w-full 
-            lg:w-1/2 
-            h-64 
-            md:h-96 
-            bg-no-repeat 
-            bg-contain 
-            bg-right-bottom 
-            mt-10 
-            lg:mt-0
-          "
-          style={{ backgroundImage: `url(${MainImage})` }}
-        />
+        {/* IMAGEN PRINCIPAL */}
+        <div className="w-full md:w-auto md:absolute md:bottom-0 md:right-0">
+          <div
+            aria-hidden="true"
+            className="w-full h-64 md:h-[80vh]"
+            style={{
+              backgroundImage: `url(${MainImage})`,
+              backgroundRepeat: "no-repeat",
+              backgroundPosition: "right bottom",
+              backgroundSize: "contain",
+              pointerEvents: "none",
+            }}
+          ></div>
+        </div>
       </div>
     </div>
   );

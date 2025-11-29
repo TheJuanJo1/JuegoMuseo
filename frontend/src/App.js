@@ -5,7 +5,6 @@ import RegisterForm from "./components/RegisterForm";
 import LoginForm from "./components/LoginForm";
 import ForgotPassword from "./components/ForgotPassword";
 import ResetPassword from "./components/ResetPassword";
-import FacturasNotas from "./components/FacturasNotas";
 import Inicio from "./components/Inicio";
 import FAQ from "./components/FAQ";
 
@@ -51,7 +50,6 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/empresa/:usuarioId" element={<FormularioEmpresaWrapper />} />
-        <Route path="/facturas-notas" element={<FacturasNotas />} />
 
         <Route element={<MainLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />

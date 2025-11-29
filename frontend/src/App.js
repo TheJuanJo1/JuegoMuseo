@@ -43,25 +43,16 @@ const ConfiguracionTecnicaWrapper = () => {
 };
 
 function App() {
-  // 📌 Solo mostrar splash si NO existe la clave en localStorage
-  const [showSplash, setShowSplash] = useState(() => {
-    return !localStorage.getItem("splashShown");
-  });
+  const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
-    if (showSplash) {
-      const timer = setTimeout(() => {
-        localStorage.setItem("splashShown", "true");
-        setShowSplash(false);
-      }, 1800); // duración de tu animación
-      return () => clearTimeout(timer);
-    }
-  }, [showSplash]);
+    // Mostrar el splash por 1.8s (ajusta según tu animación)
+    const timer = setTimeout(() => setShowSplash(false), 1800);
+    return () => clearTimeout(timer);
+  }, []); 
+  // <-- Importante: [] permite que solo ocurra en la primera carga real de la página
 
-  // 🟣 Mostrar splash solo mientras showSplash sea true
-  if (showSplash) {
-    return <LoadingScreen />;
-  }
+  if (showSplash) return <LoadingScreen />;
 
   return (
     <Router>

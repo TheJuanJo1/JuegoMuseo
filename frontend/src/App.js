@@ -1,4 +1,8 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, useParams } from "react-router-dom";
+import { useState, useEffect } from "react";
+
+// Splash
+import LoadingScreen from "./components/LoadingScreen"; // <-- tu animación inicial
 
 // Formularios y páginas
 import RegisterForm from "./components/RegisterForm";
@@ -25,13 +29,13 @@ import DashboardAdmin from "./components/DashboardAdmin";
 import EmpresasAdmin from "./components/EmpresasAdmin";
 import RegistrosAdmin from "./components/RegistrosAdmin";
 
-// Wrapper para pasar usuarioId desde params a FormularioEmpresa
+// Wrapper para params
 const FormularioEmpresaWrapper = () => {
   const { usuarioId } = useParams();
   return <FormularioEmpresa usuarioId={usuarioId} />;
 };
 
-// Wrapper para ConfiguracionTecnica obteniendo usuarioId desde localStorage
+// Wrapper para ConfiguracionTecnica
 const ConfiguracionTecnicaWrapper = () => {
   const usuarioId = localStorage.getItem("usuarioId");
   if (!usuarioId) return <Navigate to="/login" />;
@@ -39,6 +43,26 @@ const ConfiguracionTecnicaWrapper = () => {
 };
 
 function App() {
+  // 📌 Solo mostrar splash si NO existe la clave en localStorage
+  const [showSplash, setShowSplash] = useState(() => {
+    return !localStorage.getItem("splashShown");
+  });
+
+  useEffect(() => {
+    if (showSplash) {
+      const timer = setTimeout(() => {
+        localStorage.setItem("splashShown", "true");
+        setShowSplash(false);
+      }, 1800); // duración de tu animación
+      return () => clearTimeout(timer);
+    }
+  }, [showSplash]);
+
+  // 🟣 Mostrar splash solo mientras showSplash sea true
+  if (showSplash) {
+    return <LoadingScreen />;
+  }
+
   return (
     <Router>
       <Routes>
@@ -61,9 +85,9 @@ function App() {
         </Route>
 
         <Route element={<AdminLayout />}>
-        <Route path="/admin/dashboard" element={<DashboardAdmin />} />
-        <Route path="/admin/empresas" element={<EmpresasAdmin />} />
-        <Route path="/admin/registros" element={<RegistrosAdmin />} />
+          <Route path="/admin/dashboard" element={<DashboardAdmin />} />
+          <Route path="/admin/empresas" element={<EmpresasAdmin />} />
+          <Route path="/admin/registros" element={<RegistrosAdmin />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/login" />} /> 

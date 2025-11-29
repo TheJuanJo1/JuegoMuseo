@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import lup from "../assets/lup.png";
-import ps from "../assets/ps.png";
-import psr from "../assets/psr.png";
-import FL from "../assets/FL.png";
-import backArrow from "../assets/back-arrow.png";
-import fluxLogo from "../assets/Logo2.png";
+import lup from "../assets/lup.svg";
+import ps from "../assets/ps.svg";
+import psr from "../assets/psr.svg";
+import FL from "../assets/FL.svg";
+import backArrow from "../assets/back-arrow.svg";
+import fluxLogo from "../assets/Logo2.svg";
 import { API_URL } from "../config";
 
 export default function EmpresasAdmin() {
@@ -12,6 +12,7 @@ export default function EmpresasAdmin() {
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
   const [filtros, setFiltros] = useState({ nombre: "", nit: "", estado: "" });
   const [empresaSeleccionada, setEmpresaSeleccionada] = useState(null);
+
   // Obtener todas las empresas
   const obtenerEmpresas = async () => {
     try {

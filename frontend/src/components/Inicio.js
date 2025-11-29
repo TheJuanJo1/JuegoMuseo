@@ -1,7 +1,7 @@
 
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import Logo from "../assets/Logo1.svg";
+import Logo from "../assets/Logo1.png";
 import MainImage from "../assets/im0.png";
 
 export default function Inicio() {

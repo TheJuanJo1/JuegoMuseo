@@ -9,7 +9,6 @@ export default function ConfiguracionTecnica({ usuarioId }) {
   const [mostrarModalCert, setMostrarModalCert] = useState(false);
   const [nuevoCert, setNuevoCert] = useState({ archivo: null, fecha_expedicion: "" });
   const [nuevoRango, setNuevoRango] = useState({ tipo_documento: "Factura", numero_inicial: "", numero_final: "" });
-
   useEffect(() => {
     const fetchConfig = async () => {
       try {

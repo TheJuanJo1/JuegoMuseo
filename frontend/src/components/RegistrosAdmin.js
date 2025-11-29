@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import FL from "../assets/FL.png";
-import EX from "../assets/EX.png";
-import V1 from "../assets/V1.png";
-import V3 from "../assets/V3.png";
+import FL from "../assets/FL.svg";
+import EX from "../assets/EX.svg";
+import V1 from "../assets/V1.svg";
+import V3 from "../assets/V3.svg";
 import { API_URL } from "../config";
 
 export default function RegistrosAdmin() {
@@ -12,7 +12,6 @@ export default function RegistrosAdmin() {
   const [totalPaginas, setTotalPaginas] = useState(1);
   const [filtros, setFiltros] = useState({ nombre_usuario: "", tipo: "", resultado: "" });
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
-
 
   const fetchRegistros = async (page = 1) => {
     try {

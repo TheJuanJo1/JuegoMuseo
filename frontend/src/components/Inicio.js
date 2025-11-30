@@ -7,29 +7,28 @@ export default function Inicio() {
   const navigate = useNavigate();
 
   return (
-    <div className="w-full min-h-screen flex flex-col font-sans relative overflow-hidden bg-white">
+    <div className="w-full min-h-screen flex flex-col font-sans bg-white">
 
       {/* NAVBAR */}
-      <nav className="flex justify-between items-center px-6 py-4 md:px-12 z-20">
+      <nav className="flex justify-between items-center px-6 py-4 md:px-12 z-20 w-full">
         
-        {/* Logo */}
         <img
           src={Logo}
           alt="Logo"
           className="h-16 md:h-24 lg:h-32 object-contain"
         />
 
-        {/* Buttons Desktop */}
-        <div className="hidden md:flex items-center space-x-8">
+        {/* BOTONES AHORA NO SE OCULTAN EN MÓVIL */}
+        <div className="flex items-center space-x-4 md:space-x-8">
           <button
-            className="px-4 py-2 rounded-md text-black font-medium border border-transparent hover:border-black transition"
+            className="px-3 py-2 md:px-4 md:py-2 rounded-md text-black font-medium border border-transparent hover:border-black transition"
             onClick={() => navigate("/faq")}
           >
             FAQ
           </button>
 
           <button
-            className="px-4 py-2 rounded-md text-black font-medium border border-transparent hover:border-black transition"
+            className="px-3 py-2 md:px-4 md:py-2 rounded-md text-black font-medium border border-transparent hover:border-black transition"
             onClick={() =>
               navigate("/register", { state: { fromInicio: true } })
             }
@@ -38,7 +37,7 @@ export default function Inicio() {
           </button>
 
           <button
-            className="px-4 py-2 rounded-md text-black font-medium border border-transparent hover:border-black transition"
+            className="px-3 py-2 md:px-4 md:py-2 rounded-md text-black font-medium border border-transparent hover:border-black transition"
             onClick={() => navigate("/login")}
           >
             Iniciar Sesión
@@ -46,11 +45,11 @@ export default function Inicio() {
         </div>
       </nav>
 
-      {/* CONTENIDO PRINCIPAL */}
-      <div className="flex flex-col lg:flex-row items-center justify-between px-6 md:px-12 lg:px-16 flex-1 mt-10 lg:mt-0 relative z-10">
-
-        {/* Texto */}
-        <div className="max-w-lg space-y-6">
+      {/* CONTENIDO */}
+      <div className="flex flex-col-reverse lg:flex-row items-center justify-between px-6 md:px-12 lg:px-16 flex-1 w-full mt-4 md:mt-10">
+        
+        {/* TEXTO */}
+        <div className="max-w-xl space-y-6 text-center lg:text-left mt-6 lg:mt-0">
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold">
             ¿Quiénes Somos?
           </h1>
@@ -62,25 +61,20 @@ export default function Inicio() {
           </p>
         </div>
 
+        {/* IMAGEN — ahora es parte del flujo en móvil */}
+        <div className="flex justify-center w-full lg:w-auto">
+          <img
+            src={MainImage}
+            alt="Imagen"
+            className="
+              w-3/4 sm:w-2/3 md:w-1/2 
+              lg:w-[500px] 
+              xl:w-[600px] 
+              object-contain"
+          />
+        </div>
       </div>
 
-      {/* IMAGEN DECORATIVA */}
-      <div
-        aria-hidden="true"
-        className="
-          absolute 
-          right-0 
-          bottom-0 
-          w-[70%] 
-          h-[40%]
-          sm:w-[60%] sm:h-[50%]
-          md:w-[55%] md:h-[60%]
-          lg:w-[45%] lg:h-[75%]
-          bg-no-repeat bg-contain bg-right-bottom 
-          pointer-events-none z-0
-        "
-        style={{ backgroundImage: `url(${MainImage})` }}
-      />
     </div>
   );
 }

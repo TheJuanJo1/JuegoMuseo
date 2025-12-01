@@ -12,7 +12,7 @@ export default function Documentos() {
 
 
   useEffect(() => {
-    fetch(`${API_URL}/api/facturas-notas/historial`, {
+    fetch(`${API_URL}/api/dashboard-xml/historial`, {
 
       credentials: "include",
     })
@@ -147,8 +147,14 @@ export default function Documentos() {
                 <React.Fragment key={d.id_documento}>
                   <tr className="hover:bg-gray-50">
                     <td className="p-2 border">{d.tipo_documento}</td>
-                    <td className="p-2 border">{d.numero_serie}</td>
-                    <td className="p-2 border">{d.cufe || d.cude || "-"}</td>
+                    <td className="p-2 border">{d.numero_documento}</td>
+                    <td className="p-2 border">
+                      {(() => {
+                        const cufe = d.cufe || d.cude;
+                        if (!cufe) return "-";
+                        if (cufe.length <= 12) return cufe;
+                        return `${cufe.slice(0, 4)}...${cufe.slice(-4)}`;
+                        })()}</td>
                     <td className="p-2 border">{getDocDate(d)}</td>
                     <td className="p-2 border">{d.estado_dian}</td>
                     <td className="p-2 border">{d.estado_dian !== "Pendiente" ? "Sí" : "No"}</td>

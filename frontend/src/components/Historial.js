@@ -1,19 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { API_URL } from "../config.js";
 
 export default function Historial() {
   const [docs, setDocs] = useState([]);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    fetch(`${API_URL}/api/facturas-notas/historial`, {
-      credentials: "include",
-    })
-      .then((res) => res.json())
-      .then((data) => setDocs(Array.isArray(data) ? data : []))
-      .catch((err) => console.error(err));
-  }, []);
+  const API_URL = import.meta.env.VITE_API_URL; 
 
   return (
     <div className="p-6">

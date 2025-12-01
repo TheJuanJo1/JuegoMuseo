@@ -25,11 +25,43 @@ router.get("/", async (req, res) => {
         id_documento: true,
         tipo_documento: true,
         numero_documento: true,
+        numero_serie: true,
+        prefijo: true,
+        consecutivo_completo: true,
+        fecha_emision: true,
+        subtotal: true,
+        descuentos: true,
         valor_total: true,
+        impuestos: true,
+        moneda: true,
+        forma_pago: true,
+        metodo_pago: true,
         cufe: true,
         cude: true,
-        estado_dian: true,
-        fecha_emision: true,
+        xml_archivo: true,
+        pdf_archivo: true,
+        id_cliente: true,
+        Clientes: {
+          select: {
+            nombre_completo: true,
+            razon_social: true,
+            correo_cliente: true,
+          },
+        },
+        DocumentoPadre: {
+          select: {
+            id_documento: true,
+            tipo_documento: true,
+            numero_documento: true,
+          },
+        },
+        NotasRelacionadas: {
+          select: {
+            id_documento: true,
+            tipo_documento: true,
+            numero_documento: true,
+          },
+        },
       },
     });
 

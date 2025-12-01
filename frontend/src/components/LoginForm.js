@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import fluxLogo from "../assets/fluxdata.png";
-import backArrow from "../assets/back-arrow.svg";
+import backArrow from "../assets/back-arrow.png";
 import laptopImage from "../assets/laptop.jpg";
 import laptop from "../assets/im.png";
 import { API_URL } from "../config";

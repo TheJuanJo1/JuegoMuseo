@@ -7,6 +7,7 @@ import D1 from "../assets/D1.svg";
 import E from "../assets/E.svg";
 import R1 from "../assets/R1.svg";
 import C2 from "../assets/C2.svg";
+import { API_URL } from "../config";
 
 export default function AdminLayout() {
   const navigate = useNavigate();

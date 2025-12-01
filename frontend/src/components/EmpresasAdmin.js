@@ -5,6 +5,7 @@ import psr from "../assets/psr.svg";
 import FL from "../assets/FL.svg";
 import backArrow from "../assets/back-arrow.svg";
 import fluxLogo from "../assets/Logo2.svg";
+import { API_URL } from "../config";
 
 export default function EmpresasAdmin() {
   const [empresas, setEmpresas] = useState([]);

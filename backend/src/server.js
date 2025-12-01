@@ -18,6 +18,7 @@ import pdfRoutes from "./routes/pdf.js";
 import xmlRoutes from "./routes/xmldashboard.js";
 import registrosRouter from "./routes/registros.js";
 import dashboardAdmin from "./routes/dashboardAdmin.js";
+import xmlDashboardRouter from "./routes/xmldashboard.js"
 
 const app = express()
 
@@ -83,7 +84,7 @@ app.use("/api/token", tokenRoutes);
 
 app.use("/api/pdf", pdfRoutes);
 
-app.use("/api/xml", xmlRoutes);
+app.use("/api/dashboard-xml", xmlDashboardRouter);
 
 app.use("/api/registros", registrosRouter);
 

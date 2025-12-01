@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import fluxLogo from "../assets/fluxdata.svg";
+import fluxLogo from "../assets/fluxdata.png";
 import backArrow from "../assets/back-arrow.svg";
 import laptopImage from "../assets/laptop.jpg";
 import laptop from "../assets/im.png";

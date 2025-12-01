@@ -67,7 +67,7 @@ export default function ConfiguracionTecnica({ usuarioId }) {
           numero_inicial: nuevoRango.numero_inicial,
           numero_final: nuevoRango.numero_final,
           resolucion: "Resolución automática",
-          fecha_resolucion: new Date().toISOString(),
+          fecha_resolucion: new Date().toISOString().split("T")[0],
         }),
       });
 
@@ -142,7 +142,7 @@ export default function ConfiguracionTecnica({ usuarioId }) {
           {numeraciones.map((num) => (
             <tr key={num.id}>
               <td className="border border-gray-300 p-2">{num.prefijo}</td>
-              <td className="border border-gray-300 p-2">{num.numero_inicial} - {num.numero_final}</td>
+              <td className="border border-gray-300 p-2">{num.inicio} - {num.fin}</td>
               <td className="border border-gray-300 p-2">{num.resolucion}</td>
               <td className="border border-gray-300 p-2">{new Date(num.fecha_resolucion).toLocaleDateString()}</td>
               <td className="border border-gray-300 p-2">{num.estado}</td>

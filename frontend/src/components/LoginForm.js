@@ -14,7 +14,6 @@ export default function LoginForm() {
   const handleSubmit = async (e) => {
   e.preventDefault();
   setError("");
-
   try {
     const res = await fetch(`${API_URL}/api/login`, {
       method: "POST",
@@ -22,7 +21,6 @@ export default function LoginForm() {
       body: JSON.stringify({ emailOrName, password }),
       credentials: "include",
     });
-
     const data = await res.json();
     if (!res.ok) {
       setError(data.error || "Error en login");
@@ -70,6 +68,7 @@ export default function LoginForm() {
           }}>
           <div className="flex justify-between items-center mb-6">
             <img src={fluxLogo} alt="FluxData" className="h-4" />
+
             <img
               src={backArrow}
               alt="Volver"
@@ -105,6 +104,7 @@ export default function LoginForm() {
                 <Link
                   to="/forgot-password"
                   className="text-sm text-gray-500 hover:text-blue-600">
+
                   ¿Olvidaste tu contraseña?
                 </Link>
               </div>

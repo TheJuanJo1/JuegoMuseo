@@ -9,7 +9,7 @@ import R from "../assets/R.png";
 import C from "../assets/C.png";
 import A from "../assets/A.png";
 import C2 from "../assets/C2.png";
-import { API_URL } from "../config/api";
+import { API_URL } from "../config";
 
 export default function MainLayout() {
   const navigate = useNavigate();

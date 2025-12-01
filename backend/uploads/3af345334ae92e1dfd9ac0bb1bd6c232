@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+         xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+         xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+
+  <cbc:ProfileID>DIAN 2.1</cbc:ProfileID>
+  <cbc:ID>FE20251234</cbc:ID>
+  <cbc:UUID schemeID="CUFE-SHA384">a8d4e317fabbe1c82c57af918a6de347b30ee72c9a2e5646eb471cc5fae4ae3db861ee8591e5e702ad0e3cfa2290c0b2</cbc:UUID>
+  <cbc:IssueDate>2025-11-28</cbc:IssueDate>
+  <cbc:IssueTime>14:35:00</cbc:IssueTime>
+  <cbc:InvoiceTypeCode>01</cbc:InvoiceTypeCode>
+  <cbc:DocumentCurrencyCode>COP</cbc:DocumentCurrencyCode>
+
+  <cac:AccountingSupplierParty>
+    <cac:Party>
+      <cac:PartyName>
+        <cbc:Name>FLUXDATA S.A.S</cbc:Name>
+      </cac:PartyName>
+      <cac:PartyTaxScheme>
+        <cbc:CompanyID>901987654</cbc:CompanyID>
+        <cbc:TaxLevelCode>O-13</cbc:TaxLevelCode>
+      </cac:PartyTaxScheme>
+      <cac:PartyLegalEntity>
+        <cbc:RegistrationName>FLUXDATA S.A.S</cbc:RegistrationName>
+      </cac:PartyLegalEntity>
+    </cac:Party>
+  </cac:AccountingSupplierParty>
+
+  <cac:AccountingCustomerParty>
+    <cac:Party>
+      <cac:PartyIdentification>
+        <cbc:ID>1144223355</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PartyName>
+        <cbc:Name>Cliente simulado de prueba</cbc:Name>
+      </cac:PartyName>
+      <cac:PartyLegalEntity>
+        <cbc:RegistrationName>Juan Sebastián Torres</cbc:RegistrationName>
+      </cac:PartyLegalEntity>
+      <cac:Contact>
+        <cbc:Telephone>3104456789</cbc:Telephone>
+        <cbc:ElectronicMail>cliente.pruebas@example.com</cbc:ElectronicMail>
+      </cac:Contact>
+      <cac:PostalAddress>
+        <cbc:StreetName>Calle 12 # 34-56</cbc:StreetName>
+        <cbc:CityName>Pereira</cbc:CityName>
+        <cbc:CountrySubentity>Risaralda</cbc:CountrySubentity>
+        <cac:Country>
+          <cbc:IdentificationCode>CO</cbc:IdentificationCode>
+        </cac:Country>
+      </cac:PostalAddress>
+    </cac:Party>
+  </cac:AccountingCustomerParty>
+
+  <cac:InvoiceLine>
+    <cbc:ID>1</cbc:ID>
+    <cbc:InvoicedQuantity unitCode="NIU">3</cbc:InvoicedQuantity>
+    <cbc:LineExtensionAmount currencyID="COP">90000.00</cbc:LineExtensionAmount>
+    <cac:Item>
+      <cbc:Description>Servicio aceptado por DIAN - Simulación</cbc:Description>
+      <cac:ClassifiedTaxCategory>
+        <cbc:Percent>19</cbc:Percent>
+        <cac:TaxScheme>
+          <cbc:ID>01</cbc:ID>
+        </cac:TaxScheme>
+      </cac:ClassifiedTaxCategory>
+    </cac:Item>
+    <cac:Price>
+      <cbc:PriceAmount currencyID="COP">30000.00</cbc:PriceAmount>
+    </cac:Price>
+  </cac:InvoiceLine>
+
+  <cac:TaxTotal>
+    <cbc:TaxAmount currencyID="COP">17100.00</cbc:TaxAmount>
+  </cac:TaxTotal>
+
+  <cac:LegalMonetaryTotal>
+    <cbc:LineExtensionAmount currencyID="COP">90000.00</cbc:LineExtensionAmount>
+    <cbc:TaxExclusiveAmount currencyID="COP">90000.00</cbc:TaxExclusiveAmount>
+    <cbc:TaxInclusiveAmount currencyID="COP">107100.00</cbc:TaxInclusiveAmount>
+    <cbc:PayableAmount currencyID="COP">107100.00</cbc:PayableAmount>
+  </cac:LegalMonetaryTotal>
+
+</Invoice>

@@ -40,7 +40,7 @@ router.get("/:id", async (req, res) => {
         correo_contacto: true,
         estado: true,
         fecha_registro: true,
-        configuracion: {
+        Configuracion: {
           select: {
             direccion_empresa: true,
             regimen_tributario: true,

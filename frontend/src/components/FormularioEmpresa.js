@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Logo from "../assets/Logo.svg";
 import Fluxdata from "../assets/fluxdata2.svg";
+import { API_URL } from "../config";
 
 export default function FormularioEmpresa({ usuarioId }) {
   const navigate = useNavigate();

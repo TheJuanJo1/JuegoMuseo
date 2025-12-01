@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Factura><ID>ELECTR</ID><FechaEmision>2025-09-11</FechaEmision><CUFE>1684b26aedeea05b20aa934c25674b0f74cfdc7518d995776115de356b9bf3cbef8d82bf934d9cc1b7fc5367b5e3912c</CUFE><Moneda>COP</Moneda><ValorTotal>42789.00</ValorTotal><Detalle /><RawTextSnippet>$
+$
+$
+$
+$
+$
+$
+$
+$
+$
+$
+$
+$
+$
+$
+FACTURA ELECTRÓNICA DE VENTA
+Representación Gráfica
+ 
+Datos del Documento
+Código Único de Factura - CUFE 
+:
+1684b26aedeea05b20aa934c25674b0f74cfdc7518d995776115de356b9bf3cbef8d82bf934d9cc1b7fc5367b5e3912c
+Número de Factura:
+ 
+  
+E398-78022
+Forma de pago:
+ 
+  
+Contado
+Fecha de Emisión:
+ 
+  
+11/09/2025
+Medio de Pago:
+ 
+  
+Efectivo
+Fecha de Vencimiento:
+ 
+  
+ 
+Orden de pedido:
+ 
+ 
+Tipo de Operación:
+ 
+  
+10 - Estándar
+Fecha de orden de pedido:
+ 
+  
+ 
+Datos del Emisor / Vendedor
+Razón Social:
+ 
+  
+DISTRIBUIDORA PASTEUR S.A.
+Nombre Comercial:
+ 
+  
+DISTRIBUIDORA PASTEUR S.A.
+Nit del Emisor:
+ 
+  
+890941663
+País:
+ 
+  
+Colombia
+Tipo de Contribuyente:
+ 
+  
+Persona Jurídica
+Departamento:
+ 
+  
+Antioquia
+Régimen Fiscal:
+O-13;O-15;O-23
+Municipio / Ciudad:
+ 
+  
+Medellín
+Responsabilidad tributaria:
+ 
+  
+01 
+- 
+IVA
+Dirección:
+ 
+  
+CALLE 49 No 57-35
+Actividad Económica:
+ 
+ 
+Teléfono / Móvil:
+ 
+  
+6045753900
+Correo:
+ 
+  
+facturaelectronica@pasteur.com.co
+Datos del Adquiriente / Comprador
+Nombre o Razón Social:
+ 
+  
+CONSUMIDOR FINAL
+Tipo de Documento:
+ 
+  
+NIT
+País:
+ 
+  
+Colombia
+Número Documento:
+ 
+  
+222222222222
+Departamento:
+ 
+  
+ANTIOQUIA
+Tipo de Contribuyente:
+ 
+  
+Persona Natural
+Municipio / Ciudad:
+ 
+  
+MEDELLÍN
+Régimen fiscal:
+ 
+  
+R-99-PN
+Dirección:
+ 
+ 
+Responsabilidad tributaria:
+ 
+  
+01 
+- 
+IVA
+Teléfono / Móvil:
+ 
+ 
+Correo:
+ 
+  
+1@GMAIL.COM
+Detalles de Productos
+ 
+ 
+IMPUESTOS
+Precio
+unitario de
+venta
+Nro.
+Código
+Descripción
+U/M
+Cantidad
+Precio unitario
+Descuento detalle
+Recargo detalle
+IVA
+%
+INC
+%
+1
+124105
+SHAMPOO HEAD 
+SHOULD
+ERS MEN 3 EN 1 
+FRASCO 
+375 ML
+94
+1,00
+22.217,00
+0,00
+0,00
+4.221,00
+19.00
+ 
+ 
+22.217,00
+2
+092314
+DESODORANTE REXONA 
+MEN ANTIBACTERIAL + 
+IN
+VISIBLE SPRAY 150 ML
+94
+1,00
+20.320,00
+0,00
+0,00
+3.861,00
+19.00
+ 
+ 
+20.320,00
+3
+1256012
+BOLSA MAHIZ GRANDE X 
+250 UNDS
+94
+1,00
+252,00
+0,00
+0,00
+48,00
+19.00
+ 
+ 
+252,00
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Referencias
+Tipo de Documento Referencia
+Número Referencia
+Fecha Referencia
+E39878022
+11/09</RawTextSnippet></Factura>

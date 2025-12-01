@@ -116,7 +116,7 @@ export default function DashboardGlobal() {
             <tr key={i} className="hover:bg-gray-50">
               <td className="px-4 py-2 border border-gray-300 text-black">{doc.empresa}</td>
               <td className="px-4 py-2 border border-gray-300 text-black">{doc.tipo}</td>
-              <td className="px-4 py-2 border border-gray-300 text-black">{doc.numero_serie}</td>
+              <td className="px-4 py-2 border border-gray-300 text-black">{doc.numero_documento}</td>
               <td className="px-4 py-2 border border-gray-300 text-black">{doc.fecha}</td>
               <td className="px-4 py-2 border border-gray-300 font-semibold text-black">{doc.estado}</td>
               <td className="px-4 py-2 border border-gray-300 font-semibold text-black">

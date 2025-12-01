@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Logo from "../assets/Logo.png";
-import Fluxdata from "../assets/fluxdata2.png";
-import { API_URL } from "../config.js";
+import Logo from "../assets/Logo.svg";
+import Fluxdata from "../assets/fluxdata2.svg";
+import { API_URL } from "../config";
 
 export default function FormularioEmpresa({ usuarioId }) {
   const navigate = useNavigate();
-  // entro del useState inicial, agregamos los campos para NC y ND
+  // Dentro del useState inicial, agregamos los campos para NC y ND
   const [form, setForm] = useState({
   direccion_empresa: "",
   prefijo_numeracion: "",

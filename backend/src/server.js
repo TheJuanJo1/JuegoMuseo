@@ -22,13 +22,18 @@ import xmlDashboardRouter from "./routes/xmldashboard.js"
 
 const app = express()
 
+// ----------------------------------------------------
+// ✅ CORRECCIÓN CORS para permitir Vercel y Localhost
+// ----------------------------------------------------
+
 const allowedOrigins = [
-    "http://localhost:5173",           
-    "https://fluxdata-phi.vercel.app", 
+    "http://localhost:5173",           // Desarrollo local (Vite/React)
+    "https://fluxdata-phi.vercel.app", // Producción en Vercel
 ];
 
 const corsOptions = {
     origin: (origin, callback) => {
+        // Permitir si el origen está en la lista blanca (o si es undefined para requests sin origen)
         if (allowedOrigins.includes(origin) || !origin) {
             callback(null, true);
         } else {
@@ -84,11 +89,13 @@ app.use("/api/token", tokenRoutes);
 
 app.use("/api/pdf", pdfRoutes);
 
-app.use("/api/dashboard-xml", xmlDashboardRouter);
+app.use("/api/xml", xmlRoutes);
 
 app.use("/api/registros", registrosRouter);
 
 app.use("/api/admin/dashboard", dashboardAdmin);
+
+app.use("/api/dashboard-xml", xmlDashboardRouter);
 
 app.get('/api/auth/me', authRequired, (req, res) => {
     res.json({ user: req.user })

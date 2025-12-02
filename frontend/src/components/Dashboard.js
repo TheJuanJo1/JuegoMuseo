@@ -21,7 +21,7 @@ export default function Dashboard() {
   // Cargar datos desde el nuevo backend xmldashboard.js
   const loadData = async () => {
     try {
-      const res = await fetch(`${API_URL}`, { credentials: "include" });
+      const res = await fetch(`${API_URL}/api/dashboard-xml/data`, { credentials: "include" });
       const data = await res.json();
 
       setDocs(Array.isArray(data.docs) ? data.docs : []);
@@ -95,7 +95,7 @@ export default function Dashboard() {
     formData.append("archivo", file);
 
     try {
-      const res = await fetch("http://localhost:3000/api/dashboard-xml/upload", {
+      const res = await fetch(`${API_URL}/api/dashboard-xml/upload`, {
         method: "POST",
         body: formData,
         credentials: "include",

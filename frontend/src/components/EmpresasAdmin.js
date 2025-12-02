@@ -5,17 +5,18 @@ import psr from "../assets/psr.svg";
 import FL from "../assets/FL.svg";
 import backArrow from "../assets/back-arrow.svg";
 import fluxLogo from "../assets/Logo2.svg";
+import { API_URL } from "../config";
 
 export default function EmpresasAdmin() {
   const [empresas, setEmpresas] = useState([]);
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
   const [filtros, setFiltros] = useState({ nombre: "", nit: "", estado: "" });
   const [empresaSeleccionada, setEmpresaSeleccionada] = useState(null);
-
   // Obtener todas las empresas
   const obtenerEmpresas = async () => {
     try {
-      const res = await fetch("http://localhost:3000/api/empresas");
+      const res = await fetch(`${API_URL}/api/empresas`);
+
       const data = await res.json();
       setEmpresas(data);
     } catch (error) {
@@ -23,13 +24,11 @@ export default function EmpresasAdmin() {
     }
   };
 
-
   // Cambiar estado de empresa
   const cambiarEstado = async (id, estadoActual) => {
     const nuevoEstado = estadoActual === "activo" ? "inactivo" : "activo";
     try {
-
-      await fetch(`http://localhost:3000/api/empresas/${id}/estado`, {
+      await fetch(`${API_URL}/api/empresas/${id}/estado`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ estado: nuevoEstado }),
@@ -45,8 +44,7 @@ export default function EmpresasAdmin() {
   // Ver detalle de empresa
   const verDetalle = async (id) => {
     try {
-
-      const res = await fetch(`http://localhost:3000/api/empresas/${id}`);
+      const res = await fetch(`${API_URL}/api/empresas/${id}`);
       const data = await res.json();
       setEmpresaSeleccionada(data.usuario); // abrir modal
     } catch (error) {

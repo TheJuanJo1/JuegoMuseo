@@ -4,6 +4,7 @@ import fluxLogo from "../assets/fluxdata.svg";
 import backArrow from "../assets/back-arrow.svg";
 import laptopImage from "../assets/laptop.jpg";
 import laptop from "../assets/im.png";
+import { API_URL } from "../config.js";
 
 export default function LoginForm() {
   const [emailOrName, setEmailOrName] = useState("");
@@ -15,7 +16,7 @@ export default function LoginForm() {
   setError("");
 
   try {
-    const res = await fetch("http://localhost:3000/api/login", {
+    const res = await fetch(`${API_URL}/api/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ emailOrName, password }),
@@ -32,7 +33,7 @@ export default function LoginForm() {
       } else {
     const usuarioId = data.user.id;
     localStorage.setItem("usuarioId", usuarioId);
-    const estadoRes = await fetch(`http://localhost:3000/api/configuracion/estado/${usuarioId}`);
+    const estadoRes = await fetch(`${API_URL}/api/configuracion/estado/${usuarioId}`);
     const estadoData = await estadoRes.json();
 
     if (estadoData.completado) {
@@ -123,4 +124,3 @@ export default function LoginForm() {
     </div>
   );
 }
-

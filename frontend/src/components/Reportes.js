@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { API_URL } from "../config.js";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, Legend,
   PieChart, Pie, Cell, ResponsiveContainer
@@ -44,9 +45,10 @@ const Reportes = () => {
     cliente: "",
   });
   const [selectedDoc, setSelectedDoc] = useState(null);
+
   // Cargar documentos iniciales
   useEffect(() => {
-    fetch("http://localhost:3000/ultimos", {
+    fetch(`${API_URL}/ultimos`, {
       credentials: "include",
     })
       .then((res) => res.json())
@@ -55,7 +57,7 @@ const Reportes = () => {
   }, []);
   // Cargar estadísticas iniciales
   useEffect(() => {
-    fetch("http://localhost:3000/api/estadisticas", {
+    fetch(`${API_URL}/api/estadisticas`, {
       credentials: "include",
     })
       .then((res) => res.json())
@@ -72,7 +74,7 @@ const Reportes = () => {
       cliente: filters.cliente ? filters.cliente.trim() : null,
     };
 
-    const res = await fetch("http://localhost:3000/api/filtrar", {
+    const res = await fetch(`${API_URL}/api/filtrar`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -97,7 +99,7 @@ const Reportes = () => {
   }
 };
   useEffect(() => {
-    fetch("http://localhost:3000/api/filtrar", {
+    fetch(`${API_URL}/api/filtrar`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Logo from "../assets/Logo.svg";
 import Fluxdata from "../assets/fluxdata2.svg";
 import WhiteArrow from "../assets/white-arrow.svg";
+import { API_URL } from "../config";
 
 export default function FormularioEmpresa({ usuarioId }) {
   const navigate = useNavigate();
@@ -26,9 +27,7 @@ export default function FormularioEmpresa({ usuarioId }) {
   useEffect(() => {
     const verificarEstado = async () => {
       try {
-        const res = await fetch(
-          `http://localhost:3000/api/configuracion/estado/${usuarioId}`
-        );
+        const res = await fetch(`${API_URL}/api/configuracion/estado/${usuarioId}`);
         const data = await res.json();
         if (data.completado) {
           navigate("/dashboard");
@@ -42,7 +41,7 @@ export default function FormularioEmpresa({ usuarioId }) {
   useEffect(() => {
     const obtenerToken = async () => {
       try {
-        const res = await fetch(`http://localhost:3000/api/token/${usuarioId}`);
+        const res = await fetch(`${API_URL}/api/token/${usuarioId}`);
         const data = await res.json();
         if (res.ok && data.token) {
           setForm((prev) => ({ ...prev, token_api: data.token }));
@@ -139,7 +138,7 @@ export default function FormularioEmpresa({ usuarioId }) {
     data.append("numeraciones", JSON.stringify(numeraciones));
     data.append("id_usuario", usuarioId);
     try {
-      const res = await fetch("http://localhost:3000/api/configuracion", {
+      const res = await fetch(`${API_URL}/api/configuracion`, {
         method: "POST",
         body: data,
       });

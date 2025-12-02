@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import SignatureCanvas from "react-signature-canvas";
 import {
   LineChart, Line, ResponsiveContainer, PieChart, Pie, Cell, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid,
 } from "recharts";
+import { API_URL } from "../config.js";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -21,7 +21,7 @@ export default function Dashboard() {
   // Cargar datos desde el nuevo backend xmldashboard.js
   const loadData = async () => {
     try {
-      const res = await fetch("http://localhost:3000/api/dashboard-xml/data", { credentials: "include" });
+      const res = await fetch(`${API_URL}`, { credentials: "include" });
       const data = await res.json();
 
       setDocs(Array.isArray(data.docs) ? data.docs : []);

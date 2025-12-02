@@ -6,6 +6,7 @@ import fluxLogo from "../assets/fluxdata.svg";
 import backArrow from "../assets/back-arrow.svg";
 import laptopImage from "../assets/laptop2.jpg";
 import laptop1 from "../assets/im1.png";
+import { API_URL } from "../config.js";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -18,7 +19,7 @@ export default function ForgotPassword() {
     setError("");
 
     try {
-      const res = await fetch("http://localhost:3000/api/forgot-password", {
+      const res = await fetch(`${API_URL}api/forgot-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),

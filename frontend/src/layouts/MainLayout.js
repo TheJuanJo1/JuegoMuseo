@@ -12,7 +12,7 @@ import C2 from "../assets/C2.svg";
 
 export default function MainLayout() {
   const navigate = useNavigate();
-  const [collapsed, setCollapsed] = useState(false); 
+  const [collapsed, setCollapsed] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -49,8 +49,6 @@ export default function MainLayout() {
             onClick={() => setCollapsed(!collapsed)}
           />
         </div>
-
-        {/* Contenido scrollable */}
         <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
           <nav className="flex flex-col space-y-3 p-4">
             <NavLink
@@ -124,8 +122,6 @@ export default function MainLayout() {
             </NavLink>
           </nav>
         </div>
-
-        {/* Botón logout fijo abajo */}
         <div className="p-4 border-t border-gray-700">
           <button
             onClick={handleLogout}
@@ -138,15 +134,14 @@ export default function MainLayout() {
           </button>
         </div>
       </aside>
-
-      {/* Main content con margen a la izquierda */}
       <div
-        className={`flex-1 flex flex-col transition-all duration-300 ${
+        className={`flex-1 flex flex-col relative transition-all duration-300 ${
           collapsed ? "ml-32" : "ml-80"
         }`}
       >
         <TopBar />
-        <main className="flex-1 p-6">
+
+        <main className="flex-1 p-6 pt-[100px]">
           <Outlet />
         </main>
       </div>

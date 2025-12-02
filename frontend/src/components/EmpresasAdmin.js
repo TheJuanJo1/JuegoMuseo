@@ -29,7 +29,7 @@ export default function EmpresasAdmin() {
     const nuevoEstado = estadoActual === "activo" ? "inactivo" : "activo";
     try {
 
-      await fetch("http://localhost:3000/api/empresas/${id}/estado", {
+      await fetch(`http://localhost:3000/api/empresas/${id}/estado`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ estado: nuevoEstado }),

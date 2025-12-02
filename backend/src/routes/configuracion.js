@@ -55,43 +55,46 @@ router.post("/", upload.single("certificado_firma"), async (req, res) => {
 
     const certificadoPath = req.file ? req.file.path : null;
 
+    // Parsear numeraciones
+    let numeracionesParseadas = [];
+    try {
+      numeracionesParseadas = numeraciones ? JSON.parse(numeraciones) : [];
+    } catch (err) {
+      return res.status(400).json({ error: "Numeraciones inválidas" });
+    }
+
+    if (!numeracionesParseadas.length) {
+      return res.status(400).json({ error: "Debe enviar numeraciones válidas desde el formulario" });
+    }
+    
+
+    // Asegurar números válidos
+    numeracionesParseadas = numeracionesParseadas.map(n => ({
+  tipo_documento: n.tipo_documento,
+  prefijo: n.prefijo || (n.tipo_documento === "Factura" ? "FE" : n.tipo_documento === "Nota Crédito" ? "NC" : "ND"),
+  numero_inicial: Number(n.inicio),
+  numero_final: Number(n.fin),
+  numero_actual: Number(n.inicio) - 1,
+  resolucion: n.resolucion || "Automática",
+  fecha_resolucion: n.fecha_resolucion ? new Date(n.fecha_resolucion) : new Date(),
+  estado: n.estado || "Activo",
+}));
+
+
     // Buscar configuración existente
     let config = await prisma.Configuracion_Tecnica.findUnique({
       where: { id_usuario: parseInt(id_usuario) },
     });
 
-    // Parsear numeraciones si vienen
-    let numeracionesParseadas = [];
-    try {
-      numeracionesParseadas = numeraciones ? JSON.parse(numeraciones) : [];
-    } catch {
-      numeracionesParseadas = [];
-    }
-
-    // Si no hay configuración y numeraciones vacías → rangos por defecto
-    if (!config && numeracionesParseadas.length === 0) {
-      numeracionesParseadas = [
-        { tipo_documento: "Factura", prefijo: "FE", numero_inicial: 1, numero_final: 10000, numero_actual: 0, resolucion: "Automática", fecha_resolucion: new Date(), estado: "Activo" },
-        { tipo_documento: "Nota Crédito", prefijo: "NC", numero_inicial: 1, numero_final: 10000, numero_actual: 0, resolucion: "Automática", fecha_resolucion: new Date(), estado: "Activo" },
-        { tipo_documento: "Nota Débito", prefijo: "ND", numero_inicial: 1, numero_final: 10000, numero_actual: 0, resolucion: "Automática", fecha_resolucion: new Date(), estado: "Activo" },
-      ];
-    }
-
-    // Asegurar números válidos
-    numeracionesParseadas = numeracionesParseadas.map(n => ({
-      ...n,
-      numero_inicial: Number(n.numero_inicial) || 1,
-      numero_final: Number(n.numero_final) || 10000,
-      numero_actual: n.numero_actual ?? (Number(n.numero_inicial) || 1) - 1,
-      fecha_resolucion: n.fecha_resolucion ? new Date(n.fecha_resolucion) : new Date(),
-    }));
-
     if (config) {
-      // Actualizar configuración existente: actualizar solo Factura
+      // Actualizar configuración existente y rangos
       let numeracionesFinales = config.numeraciones || [];
-      const indexFactura = numeracionesFinales.findIndex(n => n.tipo_documento === "Factura");
-      if (indexFactura >= 0) numeracionesFinales[indexFactura] = numeracionesParseadas[0];
-      else numeracionesFinales.push(numeracionesParseadas[0]);
+
+      numeracionesParseadas.forEach((nuevaNum) => {
+        const index = numeracionesFinales.findIndex(n => n.tipo_documento === nuevaNum.tipo_documento);
+        if (index >= 0) numeracionesFinales[index] = nuevaNum;
+        else numeracionesFinales.push(nuevaNum);
+      });
 
       config = await prisma.Configuracion_Tecnica.update({
         where: { id_usuario: parseInt(id_usuario) },
@@ -105,6 +108,33 @@ router.post("/", upload.single("certificado_firma"), async (req, res) => {
           numeraciones: numeracionesFinales,
         },
       });
+
+      // Actualizar tabla de rangos individualmente
+      for (const n of numeracionesParseadas) {
+        const tipo = n.tipo_documento === "Factura" ? "FACTURA" :
+                     n.tipo_documento === "Nota Crédito" ? "NC" : "ND";
+
+        await prisma.rangos.upsert({
+          where: { id_usuario_tipo: { id_usuario: Number(id_usuario), tipo } },
+          update: {
+            inicio: n.numero_inicial,
+            fin: n.numero_final,
+            resolucion: n.resolucion,
+            fecha_desde: n.fecha_resolucion,
+          },
+          create: {
+            tipo,
+            prefijo: n.prefijo,
+            inicio: n.numero_inicial,
+            fin: n.numero_final,
+            resolucion: n.resolucion,
+            fecha_desde: n.fecha_resolucion,
+            estado: "Activo",
+            id_usuario: Number(id_usuario),
+          },
+        });
+      }
+
     } else {
       // Crear nueva configuración
       config = await prisma.Configuracion_Tecnica.create({
@@ -120,11 +150,14 @@ router.post("/", upload.single("certificado_firma"), async (req, res) => {
         },
       });
 
-      // Crear rangos en tabla separada
+      // Guardar rangos en tabla separada
       for (const n of numeracionesParseadas) {
+        const tipo = n.tipo_documento === "Factura" ? "FACTURA" :
+                     n.tipo_documento === "Nota Crédito" ? "NC" : "ND";
+
         await prisma.rangos.create({
           data: {
-            tipo: n.tipo_documento === "Factura" ? "FACTURA" : n.tipo_documento === "Nota Crédito" ? "NC" : "ND",
+            tipo,
             prefijo: n.prefijo,
             inicio: n.numero_inicial,
             fin: n.numero_final,
@@ -144,6 +177,7 @@ router.post("/", upload.single("certificado_firma"), async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
 
 // === Estado de configuración ===
 router.get("/estado/:id_usuario", async (req, res) => {

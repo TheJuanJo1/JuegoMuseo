@@ -7,7 +7,7 @@ export default function Historial() {
   const API_URL = import.meta.env.VITE_API_URL; 
 
   useEffect(() => {
-    fetch(`${API_URL}/api/facturas-notas/historial`, {
+    fetch("`http://localhost:3000/api/facturas-notas/historial", {
       credentials: "include",
     })
       .then((res) => res.json())

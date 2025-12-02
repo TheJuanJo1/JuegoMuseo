@@ -265,6 +265,7 @@ router.post("/upload", authMiddleware, upload.single("archivo"), async (req, res
           nombre_completo: nombreCliente,
           numero_documento: clienteNIT,
           razon_social: razonSocial,
+          tipo_documento: asString(get(party, "DocumentTypeCode")) || "CC",
         }
       });
     }

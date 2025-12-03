@@ -1,16 +1,20 @@
+// backend/src/routes/forgotPassword.js
 import express from "express";
-import { PrismaClient } from "@prisma/client";
 import jwt from "jsonwebtoken";
-import { sendEmail } from "../mailjet.js"; // ← usar Mailjet
+import { prisma } from "../lib/prisma.js";
+import { sendEmail } from "../mailjet.js";
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 router.post("/", async (req, res) => {
-  const { email } = req.body;
-
   try {
-    // Buscar el usuario
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: "El email es obligatorio" });
+    }
+
+    // Buscar usuario por correo
     const user = await prisma.usuarios.findUnique({
       where: { correo_contacto: email },
     });
@@ -19,7 +23,7 @@ router.post("/", async (req, res) => {
       return res.status(404).json({ error: "Usuario no encontrado" });
     }
 
-    // Crear token que expira en 15 minutos
+    // Crear token con expiración de 15 minutos
     const token = jwt.sign(
       { id: user.id_usuario },
       process.env.JWT_SECRET,
@@ -28,20 +32,27 @@ router.post("/", async (req, res) => {
 
     const link = `${process.env.FRONTEND_URL}/reset-password/${token}`;
 
-    // HTML del correo
+    // Contenido del correo
     const html = `
-      <p>Hola ${user.nombre_usuario || ""},</p>
-      <p>Haz clic en el siguiente enlace para restablecer tu contraseña:</p>
-      <a href="${link}" style="color: #4F46E5; font-weight: bold;">
-        Restablecer contraseña
-      </a>
+      <p>Hola <strong>${user.nombre_usuario}</strong>,</p>
+      <p>Recibimos una solicitud para restablecer tu contraseña.</p>
+      <p>
+        Haz clic en el siguiente enlace para crear una nueva contraseña:
+      </p>
+      <p>
+        <a href="${link}" style="color:#4F46E5; font-size:16px; font-weight:bold;">
+          Restablecer contraseña
+        </a>
+      </p>
       <p>Este enlace expirará en 15 minutos.</p>
+      <br>
+      <p>Si no solicitaste esto, puedes ignorar este correo.</p>
     `;
 
-    // Enviar correo usando Mailjet
+    // Enviar email con Mailjet
     const enviado = await sendEmail(
       email,
-      "Recuperación de contraseña",
+      "Recuperación de contraseña - FluxData",
       html
     );
 
@@ -49,11 +60,11 @@ router.post("/", async (req, res) => {
       return res.status(500).json({ error: "No se pudo enviar el correo" });
     }
 
-    res.json({ msg: "Enlace enviado a tu correo" });
+    return res.json({ msg: "Enlace de recuperación enviado a tu correo" });
 
-  } catch (err) {
-    console.error("Error en forgot-password:", err);
-    res.status(500).json({ error: "Error interno del servidor" });
+  } catch (error) {
+    console.error("Error en forgotPassword:", error);
+    return res.status(500).json({ error: "Error interno del servidor" });
   }
 });
 

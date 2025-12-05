@@ -1,17 +1,17 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import TopBarAdmin from "./TopBarAdmin";
-import Logo from "../assets/Logo.png";
-import B from "../assets/B.png";
-import D1 from "../assets/D1.png";
-import E from "../assets/E.png";
-import R1 from "../assets/R1.png";
-import C2 from "../assets/C2.png";
+import Logo from "../assets/Logo.svg";
+import B from "../assets/B.svg";
+import D1 from "../assets/D1.svg";
+import E from "../assets/E.svg";
+import R1 from "../assets/R1.svg";
+import C2 from "../assets/C2.svg";
 import { API_URL } from "../config";
 
 export default function AdminLayout() {
   const navigate = useNavigate();
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(false); 
 
   const handleLogout = async () => {
     try {
@@ -110,4 +110,9 @@ export default function AdminLayout() {
       </div>
     </div>
   );
+
 }
+
+
+
+

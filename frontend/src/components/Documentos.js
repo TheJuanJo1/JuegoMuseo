@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { API_URL } from "../config";
+import { API_URL } from "../config.js";
+
 
 export default function Documentos() {
   const [docs, setDocs] = useState([]);
@@ -9,9 +10,10 @@ export default function Documentos() {
   const itemsPerPage = 10;
   const [expandedDocId, setExpandedDocId] = useState(null);
 
-  useEffect(() => {
 
-    fetch(`${API_URL}/api/facturas-notas/historial`, {
+  useEffect(() => {
+    fetch(`${API_URL}/api/dashboard-xml/historial`, {
+
       credentials: "include",
     })
       .then((res) => res.json())
@@ -64,8 +66,8 @@ export default function Documentos() {
 
   const descargarArchivo = async (id, tipo) => {
     try {
-
       const res = await fetch(`${API_URL}/api/${tipo}/${id}`, { credentials: "include" });
+
       if (!res.ok) throw new Error("Error descargando archivo");
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);

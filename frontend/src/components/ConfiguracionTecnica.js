@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { API_URL } from "../config";
+import { API_URL } from "../config.js";
 
 export default function ConfiguracionTecnica({ usuarioId }) {
   const [config, setConfig] = useState(null);
@@ -27,7 +27,7 @@ export default function ConfiguracionTecnica({ usuarioId }) {
 
   const handleRegenerarToken = async () => {
     try {
-      const res = await fetch(`${API_URL}/api/token/regenerar/${usuarioId}`, {
+      const res = await fetch(`${API_URL}api/token/regenerar/${usuarioId}`, {
         method: "POST",
       });
       const data = await res.json();
@@ -67,7 +67,7 @@ export default function ConfiguracionTecnica({ usuarioId }) {
           numero_inicial: nuevoRango.numero_inicial,
           numero_final: nuevoRango.numero_final,
           resolucion: "Resolución automática",
-          fecha_resolucion: new Date().toISOString().split("T")[0],
+          fecha_resolucion: new Date().toISOString(),
         }),
       });
 
@@ -101,6 +101,7 @@ export default function ConfiguracionTecnica({ usuarioId }) {
       formData.append("certificado_firma", nuevoCert.archivo);
       formData.append("fecha_expiracion", nuevoCert.fecha_expedicion);
       const res = await fetch(`${API_URL}/api/configuracion/regenerar-certificado/${usuarioId}`, {
+
         method: "POST",
         body: formData,
       });
@@ -142,7 +143,7 @@ export default function ConfiguracionTecnica({ usuarioId }) {
           {numeraciones.map((num) => (
             <tr key={num.id}>
               <td className="border border-gray-300 p-2">{num.prefijo}</td>
-              <td className="border border-gray-300 p-2">{num.inicio} - {num.fin}</td>
+              <td className="border border-gray-300 p-2">{num.numero_inicial} - {num.numero_final}</td>
               <td className="border border-gray-300 p-2">{num.resolucion}</td>
               <td className="border border-gray-300 p-2">{new Date(num.fecha_resolucion).toLocaleDateString()}</td>
               <td className="border border-gray-300 p-2">{num.estado}</td>

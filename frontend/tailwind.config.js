@@ -16,7 +16,7 @@ module.exports = {
         h1: "var(--h1-font-family)",
         h2: "var(--h2-font-family)",
         h3: "var(--h3-font-family)",
-        // 🔤 Work Sans
+        // Work Sans
         worksans: ["Work Sans", "sans-serif"],
       },
     },

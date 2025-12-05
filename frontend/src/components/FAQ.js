@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import backArrow from "../assets/back-arrow.png";
-import Logo1 from "../assets/Logo1.png";
+import backArrow from "../assets/back-arrow.svg";
+import Logo1 from "../assets/Logo1.svg";
 import V2 from "../assets/V2.png";
 
 export default function FAQ() {

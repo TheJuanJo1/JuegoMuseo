@@ -1,9 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 
-// Splash
-import LoadingScreen from "./components/LoadingScreen"; // <-- tu animación inicial
-
 // Formularios y páginas
 import RegisterForm from "./components/RegisterForm";
 import LoginForm from "./components/LoginForm";
@@ -29,13 +26,15 @@ import DashboardAdmin from "./components/DashboardAdmin";
 import EmpresasAdmin from "./components/EmpresasAdmin";
 import RegistrosAdmin from "./components/RegistrosAdmin";
 
-// Wrapper para params
+// Loading Screen
+import LoadingScreen from "./components/LoadingScreen";
+
+// Wrapper para usuarioId
 const FormularioEmpresaWrapper = () => {
   const { usuarioId } = useParams();
   return <FormularioEmpresa usuarioId={usuarioId} />;
 };
 
-// Wrapper para ConfiguracionTecnica
 const ConfiguracionTecnicaWrapper = () => {
   const usuarioId = localStorage.getItem("usuarioId");
   if (!usuarioId) return <Navigate to="/login" />;
@@ -43,16 +42,17 @@ const ConfiguracionTecnicaWrapper = () => {
 };
 
 function App() {
-  const [showSplash, setShowSplash] = useState(true);
+  const [loading, setLoading] = useState(true);
 
+  // Tiempo de duración de la pantalla de carga
   useEffect(() => {
-    // Mostrar el splash por 1.8s (ajusta según tu animación)
-    const timer = setTimeout(() => setShowSplash(false), 1800);
+    const timer = setTimeout(() => setLoading(false), 3000); // 3 segundos
     return () => clearTimeout(timer);
-  }, []); 
-  // <-- Importante: [] permite que solo ocurra en la primera carga real de la página
+  }, []);
 
-  if (showSplash) return <LoadingScreen />;
+  if (loading) {
+    return <LoadingScreen />;
+  }
 
   return (
     <Router>
@@ -81,7 +81,7 @@ function App() {
           <Route path="/admin/registros" element={<RegistrosAdmin />} />
         </Route>
 
-        <Route path="*" element={<Navigate to="/login" />} /> 
+        <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
     </Router>
   );

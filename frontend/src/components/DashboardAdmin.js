@@ -142,9 +142,4 @@ export default function DashboardGlobal() {
 
 </div>
 );
-<<<<<<< HEAD
 }
-=======
-}
-
->>>>>>> 1a7d044b1db0f98056e27d02ea446763672d8298

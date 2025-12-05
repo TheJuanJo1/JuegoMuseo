@@ -143,9 +143,9 @@ export default function ConfiguracionTecnica({ usuarioId }) {
           {numeraciones.map((num) => (
             <tr key={num.id}>
               <td className="border border-gray-300 p-2">{num.prefijo}</td>
-              <td className="border border-gray-300 p-2">{num.numero_inicial} - {num.numero_final}</td>
+              <td className="border border-gray-300 p-2">{num.inicio} - {num.fin}</td>
               <td className="border border-gray-300 p-2">{num.resolucion}</td>
-              <td className="border border-gray-300 p-2">{new Date(num.fecha_resolucion).toLocaleDateString()}</td>
+              <td className="border border-gray-300 p-2">{new Date(num.fecha_desde).toLocaleDateString()}</td>
               <td className="border border-gray-300 p-2">{num.estado}</td>
             </tr>
           ))}
@@ -244,14 +244,7 @@ export default function ConfiguracionTecnica({ usuarioId }) {
           </div>
         </div>
       )}
-      <h3 className="font-semibold mt-6 mb-2">Acceso a API</h3>
-      <p><strong>Token de autenticación:</strong> {token}</p>
-      <button
-        className="text-white px-4 py-2 rounded mt-2 hover:opacity-90 transition-all duration-300"
-        onClick={handleRegenerarToken}
-        style={{ backgroundColor: "#27374D" }}>
-        Regenerar token
-      </button>
+      
     </div>
   );
 }

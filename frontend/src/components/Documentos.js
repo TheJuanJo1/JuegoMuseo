@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import V1 from "../assets/V1.svg";
+import V3 from "../assets/V3.svg";
 import { API_URL } from "../config.js";
 
 
@@ -147,7 +149,15 @@ export default function Documentos() {
                 <React.Fragment key={d.id_documento}>
                   <tr className="hover:bg-gray-50">
                     <td className="p-2 border">{d.tipo_documento}</td>
-                    <td className="p-2 border">{d.numero_documento}</td>
+                    <td className="p-2 border">
+  {(() => {
+    const prefijo = d.tipo_documento === "Factura" ? "FE" :
+                    d.tipo_documento === "Nota Crédito" ? "NC" :
+                    d.tipo_documento === "Nota Débito" ? "ND" : "";
+    return `${prefijo}${d.numero_documento}`;
+  })()}
+</td>
+
                     <td className="p-2 border">
                       {(() => {
                         const cufe = d.cufe || d.cude;
@@ -166,60 +176,83 @@ export default function Documentos() {
                     </td>
                   </tr>
                   {expandedDocId === d.id_documento && (
-                    <tr>
-                      <td colSpan="8" className="bg-gray-50 p-4 border">
-                        <div className="space-y-2">
-                          <p><strong>CUFE completo:</strong> {d.cufe || d.cude || "-"}</p>
-                          <div className="flex space-x-2">
-                            <button
-                              onClick={() => descargarArchivo(d.id_documento, "xml")}
-                              className="bg-blue-900 text-white px-3 py-1 rounded hover:bg-blue-700 transition"
-                            >
-                              Descargar XML
-                            </button>
-                            <button
-                              onClick={() => descargarArchivo(d.id_documento, "pdf")}
-                              className="bg-blue-900 text-white px-3 py-1 rounded hover:bg-blue-700 transition"
-                            >
-                              Descargar PDF
-                            </button>
-                          </div>
-                          <p><strong>Estado DIAN:</strong> {d.estado_dian}</p>
-                          <p className="mt-2"><strong>Acciones:</strong>{" "}
-                            <span className="text-gray-800">
-                              {d.mensaje_dian || "-"}
-                            </span>
-                          </p>
-                          {Array.isArray(d.Producto_Factura) && d.Producto_Factura.length > 0 && (
-                            <>
-                              <h4 className="mt-2 font-semibold">Productos</h4>
-                              <ul className="text-sm">
-                                {d.Producto_Factura.map(p => (
-                                  <li key={p.id_producto}>{p.descripcion} — {p.cantidad} x {p.precio_unitario} (IVA: {p.iva}%)</li>
-                                ))}
-                              </ul>
-                            </>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  )}
+  <tr>
+    <td colSpan="8" className="bg-gray-50 p-4 border">
+      <div className="space-y-2">
+        <p><strong>CUFE completo:</strong> {d.cufe || d.cude || "-"}</p>
+        <div className="flex space-x-2">
+          <button
+            onClick={() => window.open(`http://localhost:3000/api/dashboard-xml/ver-xml/${d.id_documento}`, "_blank")}
+            className="bg-blue-900 text-white px-3 py-1 rounded hover:bg-blue-700 transition"
+          >
+            Ver XML
+          </button>
+        </div>
+        <p><strong>Estado DIAN:</strong> {d.estado_dian}</p>
+        <p className="mt-2"><strong>Acciones:</strong>{" "}
+          <span className="text-gray-800">
+            {d.mensaje_dian || "-"}
+          </span>
+        </p>
+        {Array.isArray(d.Producto_Factura) && d.Producto_Factura.length > 0 && (
+          <>
+            <h4 className="mt-2 font-semibold">Productos</h4>
+            <ul className="text-sm">
+              {d.Producto_Factura.map(p => (
+                <li key={p.id_producto}>{p.descripcion} — {p.cantidad} x {p.precio_unitario} (IVA: {p.iva}%)</li>
+              ))}
+            </ul>
+          </>
+        )}
+      </div>
+    </td>
+  </tr>
+)}
+
                 </React.Fragment>
               ))}
             </tbody>
           </table>
         </div>
-        <div className="flex justify-between items-center mt-2 px-2">
-          <button onClick={() => setPage((p) => Math.max(1, p - 1))}
-            className="bg-white bg-opacity-30 text-black px-3 py-1 rounded hover:bg-opacity-50 transition">
-            Anterior
-          </button>
-          <span className="text-black font-semibold">{page} / {totalPages}</span>
-          <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            className="bg-white bg-opacity-30 text-black px-3 py-1 rounded hover:bg-opacity-50 transition">
-            Siguiente
-          </button>
-        </div>
+        <div className="relative mt-4 flex items-center justify-center">
+  {page > 1 && (
+    <button
+      onClick={() => setPage(page - 1)}
+      className="absolute left-0 flex items-center gap-1 text-[#27374D] hover:underline text-sm"
+    >
+      <img src={V3} alt="Anterior" className="h-4 w-4" /> Anterior
+    </button>
+  )}
+  <div className="flex items-center gap-2 transition-all duration-300 ease-in-out">
+    {page > 1 && (
+      <div
+        className="px-2 py-1 bg-gray-200 text-[#27374D] rounded-md text-xs scale-90 transition-all duration-500 cursor-pointer hover:scale-100"
+        onClick={() => setPage(page - 1)}
+      >
+        {page - 1}
+      </div>
+    )}
+    <div className="px-3 py-1 bg-[#27374D] text-white rounded-md text-base scale-110 shadow-md transition-all duration-500 ease-in-out transform">
+      {page}
+    </div>
+    {page < totalPages && (
+      <div
+        className="px-2 py-1 bg-gray-200 text-[#27374D] rounded-md text-xs scale-90 transition-all duration-500 cursor-pointer hover:scale-100"
+        onClick={() => setPage(page + 1)}
+      >
+        {page + 1}
+      </div>
+    )}
+  </div>
+  {page < totalPages && (
+    <button
+      onClick={() => setPage(page + 1)}
+      className="absolute right-0 flex items-center gap-1 text-[#27374D] hover:underline text-sm"
+    >
+      Siguiente <img src={V1} alt="Siguiente" className="h-4 w-4" />
+    </button>
+  )}
+</div>
       </div>
     </div>
   );

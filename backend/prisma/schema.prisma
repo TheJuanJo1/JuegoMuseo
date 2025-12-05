@@ -178,6 +178,9 @@ model Rangos {
   resolucion String?
   fecha_desde DateTime?
   fecha_hasta DateTime?
+  estado        String   @default("Activo") 
   id_usuario Int
   Usuarios   Usuarios @relation(fields: [id_usuario], references: [id_usuario])
+  @@unique([id_usuario, tipo], name: "id_usuario_tipo")
+
 }

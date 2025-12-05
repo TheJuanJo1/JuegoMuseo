@@ -4,7 +4,7 @@ import fluxLogo from "../assets/fluxdata.svg";
 import backArrow from "../assets/back-arrow.svg";
 import laptopImage from "../assets/laptop.jpg";
 import laptop from "../assets/im.png";
-import { API_URL } from "../config";
+import { API_URL } from "../config.js";
 
 export default function LoginForm() {
   const [emailOrName, setEmailOrName] = useState("");

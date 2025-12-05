@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { BarChart, Bar, XAxis, YAxis, Tooltip,Cell, CartesianGrid, ResponsiveContainer, LabelList } from "recharts";
+<<<<<<< HEAD
 import { API_URL } from "../config";
+=======
+import { API_URL } from "../config.js";
+>>>>>>> 1a7d044b1db0f98056e27d02ea446763672d8298
 
 export default function DashboardGlobal() {
   const [resumen, setResumen] = useState({
@@ -18,6 +22,7 @@ export default function DashboardGlobal() {
     const fetchDashboard = async () => {
       try {
         const res = await fetch(`${API_URL}/api/admin/dashboard`, {
+
           credentials: "include"
         });
         const data = await res.json();
@@ -141,4 +146,9 @@ export default function DashboardGlobal() {
 
 </div>
 );
+<<<<<<< HEAD
 }
+=======
+}
+
+>>>>>>> 1a7d044b1db0f98056e27d02ea446763672d8298

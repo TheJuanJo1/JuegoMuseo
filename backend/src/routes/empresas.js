@@ -2,14 +2,55 @@
 import express from "express";
 import bcrypt from "bcryptjs";
 import { prisma } from "../lib/prisma.js";
-import nodemailer from "nodemailer";
+import Mailjet from "node-mailjet";
 
 const router = express.Router();
-// Obtener todas las empresas registradas
+
+// Configuración de Mailjet
+const mailjet = Mailjet.apiConnect(
+  process.env.MJ_APIKEY_PUBLIC,
+  process.env.MJ_APIKEY_PRIVATE
+);
+
+// ===============================
+// Enviar correo con Mailjet
+// ===============================
+async function enviarCorreo(destinatario, asunto, mensaje) {
+  try {
+    await mailjet
+      .post("send", { version: "v3.1" })
+      .request({
+        Messages: [
+          {
+            From: {
+              Email: process.env.MJ_SENDER,
+              Name: "FluxData"
+            },
+            To: [
+              {
+                Email: destinatario
+              }
+            ],
+            Subject: asunto,
+            HTMLPart: `<p>${mensaje}</p>`
+          }
+        ]
+      });
+
+    console.log("Correo enviado a:", destinatario);
+  } catch (err) {
+    console.error("Error enviando correo Mailjet:", err);
+    throw err;
+  }
+}
+
+// ===============================
+// Obtener todas las empresas
+// ===============================
 router.get("/", async (req, res) => {
   try {
     const empresas = await prisma.usuarios.findMany({
-      where: { rol_usuario: "empresa" }, // solo empresas
+      where: { rol_usuario: "empresa" },
       select: {
         id_usuario: true,
         nombre_usuario: true,
@@ -27,7 +68,10 @@ router.get("/", async (req, res) => {
     res.status(500).json({ error: "Error obteniendo empresas" });
   }
 });
-// Obtener detalle de empresa
+
+// ===============================
+// Obtener una empresa por ID
+// ===============================
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
   try {
@@ -59,8 +103,8 @@ router.get("/:id", async (req, res) => {
         correo_contacto: empresa.correo_contacto,
         estado: empresa.estado,
         fecha_registro: empresa.fecha_registro,
-        direccion: empresa.configuracionTecnica?.direccion_empresa || "No asignada",
-        regimen_tributario: empresa.configuracionTecnica?.regimen_tributario || "No asignado"
+        direccion: empresa.configuracion?.direccion_empresa || "No asignada",
+        regimen_tributario: empresa.configuracion?.regimen_tributario || "No asignado"
       }
     });
   } catch (err) {
@@ -69,7 +113,9 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// Cambiar estado de una empresa
+// ===============================
+// Cambiar estado
+// ===============================
 router.put("/:id/estado", async (req, res) => {
   const { id } = req.params;
   const { estado } = req.body;
@@ -87,18 +133,11 @@ router.put("/:id/estado", async (req, res) => {
   }
 });
 
-// Configuración del transporte de correos
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
-});
-
+// ===============================
+// PRE-REGISTER (envío de código)
+// ===============================
 router.post("/pre-register", async (req, res) => {
   try {
-
     const { nombre_empresa, nit_empresa, correo_contacto, contrasena, confirmar_contrasena } = req.body;
 
     if (!nombre_empresa || !nit_empresa || !correo_contacto || !contrasena || !confirmar_contrasena) {
@@ -108,6 +147,7 @@ router.post("/pre-register", async (req, res) => {
     if (contrasena !== confirmar_contrasena) {
       return res.status(400).json({ error: "Las contraseñas no coinciden" });
     }
+
     const empresaExistente = await prisma.usuarios.findFirst({
       where: {
         OR: [
@@ -122,31 +162,27 @@ router.post("/pre-register", async (req, res) => {
         error: "Ya existe una empresa registrada con ese nombre o NIT."
       });
     }
-    //Hashear la contraseña ANTES de guardarla
+
     const hashedPass = await bcrypt.hash(contrasena, 10);
 
-    // Generar código
     const codigo = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // Guardar en DB (con la contraseña ya encriptada)
     await prisma.codigos_verificacion.create({
       data: {
         correo: correo_contacto,
         codigo,
-        contrasena_temp: hashedPass, // guardamos el hash, no el texto plano
+        contrasena_temp: hashedPass,
         nombre_empresa,
         nit_empresa,
-        expiracion: new Date(Date.now() + 10 * 60 * 1000) // 10 minutos
+        expiracion: new Date(Date.now() + 10 * 60 * 1000)
       }
     });
 
-    // Enviar email
-    await transporter.sendMail({
-      from: `"FluxData" <${process.env.EMAIL_USER}>`,
-      to: correo_contacto,
-      subject: "Código de verificación",
-      text: `Tu código de verificación es: ${codigo}`
-    });
+    await enviarCorreo(
+      correo_contacto,
+      "Código de verificación",
+      `Tu código de verificación es: <b>${codigo}</b>`
+    );
 
     res.json({ msg: "Se envió un código de verificación al correo." });
 
@@ -155,6 +191,10 @@ router.post("/pre-register", async (req, res) => {
     res.status(500).json({ error: "Error en pre-registro" });
   }
 });
+
+// ===============================
+// VERIFY CODE
+// ===============================
 router.post("/verify-code", async (req, res) => {
   try {
     const { correo_contacto: correo, codigo } = req.body;
@@ -195,18 +235,14 @@ router.post("/verify-code", async (req, res) => {
     });
 
   } catch (err) {
-    if (err.code === "P2002" && err.meta?.target?.includes("correo_contacto")) {
-      return res.status(400).json({
-        error: "Ya existe una cuenta registrada con este correo. Intenta iniciar sesión."
-      });
-    }
-
     console.error("Error en /verify-code:", err);
     res.status(500).json({ error: "Error en verificación" });
   }
 });
 
-// Reenviar código
+// ===============================
+// REENVIAR CÓDIGO
+// ===============================
 router.post("/resend-code", async (req, res) => {
   try {
     const { correo_contacto } = req.body;
@@ -215,35 +251,30 @@ router.post("/resend-code", async (req, res) => {
       return res.status(400).json({ error: "El correo es obligatorio" });
     }
 
-    // Buscar registro temporal
     const registro = await prisma.codigos_verificacion.findFirst({
       where: { correo: correo_contacto },
-      orderBy: { id: "desc" } // tomar el más reciente
+      orderBy: { id: "desc" }
     });
 
     if (!registro) {
       return res.status(404).json({ error: "No se encontró un registro previo para este correo" });
     }
 
-    // Generar un nuevo código
     const nuevoCodigo = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // Actualizar el registro con nuevo código y nueva expiración
     await prisma.codigos_verificacion.update({
       where: { id: registro.id },
       data: {
         codigo: nuevoCodigo,
-        expiracion: new Date(Date.now() + 10 * 60 * 1000) // 10 min más
+        expiracion: new Date(Date.now() + 10 * 60 * 1000)
       }
     });
 
-    // Enviar correo con el nuevo código
-    await transporter.sendMail({
-      from: `"FluxData" <${process.env.EMAIL_USER}>`,
-      to: correo_contacto,
-      subject: "Código de verificación - Reenvío",
-      text: `Tu nuevo código de verificación es: ${nuevoCodigo}`
-    });
+    await enviarCorreo(
+      correo_contacto,
+      "Código de verificación - Reenvío",
+      `Tu nuevo código es: <b>${nuevoCodigo}</b>`
+    );
 
     res.json({ msg: "Se ha enviado un nuevo código a tu correo" });
 

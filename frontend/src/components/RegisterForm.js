@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import fluxLogo from "../assets/fluxdata.png";
-import backArrow from "../assets/back-arrow.png";
+import fluxLogo from "../assets/fluxdata.svg";
+import backArrow from "../assets/back-arrow.svg";
 import registerImage from "../assets/register.jpg"; 
-import verifyImage from "../assets/Imagenes (7).jpg";
+import verifyImage from "../assets/im4.jpg";
 import im3 from "../assets/im3.png";
 import im2 from "../assets/im2.png";
-import { API_URL } from "../config";
+import { API_URL } from "../config.js";
 
 export default function RegisterForm() {
   const [form, setForm] = useState({
@@ -231,7 +231,7 @@ export default function RegisterForm() {
               <div className="flex justify-center">
                 <button type="button" onClick={async () => {
                   try {
-                    const res = await fetch(`${API_URL}/api/empresas/resend-code`, {
+                    const res = await fetch(`${API_URL}//api/empresas/resend-code`, {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },
                       body: JSON.stringify({ correo_contacto: form.correo_contacto }),

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { API_URL } from "../config";
+import { API_URL } from "../config.js";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, Legend,
   PieChart, Pie, Cell, ResponsiveContainer
@@ -163,10 +163,26 @@ const Reportes = () => {
     { tipo: "Nota Débito", cantidad: documentos.filter((d) => d.Documento.tipo_documento?.toLowerCase().includes("débito")).length },
   ];
   const dataEstados = [
-    { estado: "Aceptados", valor: estadisticas.Aceptado },
-    { estado: "Rechazados", valor: estadisticas.Rechazado },
-    { estado: "Pendientes", valor: estadisticas.Pendiente },
-  ];
+  {
+    estado: "Aceptados",
+    valor: documentos.filter(
+      d => d.Documento.estado_dian === "Aceptado"
+    ).length
+  },
+  {
+    estado: "Rechazados",
+    valor: documentos.filter(
+      d => d.Documento.estado_dian === "Rechazado"
+    ).length
+  },
+  {
+    estado: "Pendientes",
+    valor: documentos.filter(
+      d => d.Documento.estado_dian === "Pendiente"
+    ).length
+  }
+];
+
   const COLORS = ["#27374D", "#DDE6ED", "#526D82"];
   // Función para agrupar documentos por mes y tipo
 // 1) getMonthlyData mejorado: siempre devuelve los últimos 6 meses y suma con Number()
@@ -278,11 +294,11 @@ const ticks = Array.from(new Set([0, midTick, Math.round(maxMonthly)]));
     <ResponsiveContainer width="100%" height={300}>
      <BarChart
   data={[
-    { categoria: "Total documentos", cantidad: documentos.length },
-    { categoria: "Aceptados", cantidad: estadisticas.Aceptado },
-    { categoria: "Rechazados", cantidad: estadisticas.Rechazado },
-    { categoria: "Pendientes", cantidad: estadisticas.Pendiente }, 
-  ]}>
+  { categoria: "Total documentos", cantidad: documentos.length },
+  { categoria: "Aceptados", cantidad: dataEstados[0].valor },
+  { categoria: "Rechazados", cantidad: dataEstados[1].valor },
+  { categoria: "Pendientes", cantidad: dataEstados[2].valor },
+]}>
   <XAxis dataKey="categoria" />
   <YAxis allowDecimals={false} />
   <Tooltip />
@@ -467,7 +483,7 @@ const ticks = Array.from(new Set([0, midTick, Math.round(maxMonthly)]));
   <React.Fragment key={doc.Documento.id_documento}>
     <tr>
       <td className="p-2 border">{doc.Documento.tipo_documento}</td>
-      <td className="p-2 border">{doc.Documento.numero_serie || "-"}</td>
+      <td className="p-2 border">{doc.Documento.numero_documento || "-"}</td>
       <td className="p-2 border">{doc.Documento.cufe || doc.Documento.cude || "-"}</td>
       <td className="p-2 border">${doc.Documento.valor_total || 0}</td>
       <td className="p-2 border">

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { API_URL } from "../config";
+import { API_URL } from "../config.js";
 
 export default function ConfiguracionTecnica({ usuarioId }) {
   const [config, setConfig] = useState(null);
@@ -9,7 +9,6 @@ export default function ConfiguracionTecnica({ usuarioId }) {
   const [mostrarModalCert, setMostrarModalCert] = useState(false);
   const [nuevoCert, setNuevoCert] = useState({ archivo: null, fecha_expedicion: "" });
   const [nuevoRango, setNuevoRango] = useState({ tipo_documento: "Factura", numero_inicial: "", numero_final: "" });
-
   useEffect(() => {
     const fetchConfig = async () => {
       try {
@@ -28,7 +27,7 @@ export default function ConfiguracionTecnica({ usuarioId }) {
 
   const handleRegenerarToken = async () => {
     try {
-      const res = await fetch(`${API_URL}/api/token/regenerar/${usuarioId}`, {
+      const res = await fetch(`${API_URL}api/token/regenerar/${usuarioId}`, {
         method: "POST",
       });
       const data = await res.json();
@@ -102,6 +101,7 @@ export default function ConfiguracionTecnica({ usuarioId }) {
       formData.append("certificado_firma", nuevoCert.archivo);
       formData.append("fecha_expiracion", nuevoCert.fecha_expedicion);
       const res = await fetch(`${API_URL}/api/configuracion/regenerar-certificado/${usuarioId}`, {
+
         method: "POST",
         body: formData,
       });

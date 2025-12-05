@@ -1,11 +1,10 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import Logo from "../assets/Logo1.png";
+import Logo from "../assets/Logo1.svg";
 import MainImage from "../assets/im0.png";
 
 export default function Inicio() {
   const navigate = useNavigate();
-
   return (
     <div
       className="w-full min-h-screen flex flex-col font-sans overflow-hidden relative"
@@ -42,7 +41,7 @@ export default function Inicio() {
               </button>
             </div>
           </nav>
-        <div className="flex flex-1 items-center justify-between px-12 relative z-20"
+        <div className="flex flex-1 items-center justify-between px-12 relative z-10"
         style={{
           marginTop: "-6%",              
         }}>

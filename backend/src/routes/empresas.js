@@ -1,93 +1,14 @@
-// backend/src/routes/empresas.js
 import express from "express";
 import bcrypt from "bcryptjs";
 import { prisma } from "../lib/prisma.js";
 import nodemailer from "nodemailer";
 
+// 🚀 IMPORTAR MIDDLEWARE DE AUTENTICACIÓN
+import { authRequired } from "../middleware/auth.js"; 
+
 const router = express.Router();
-// Obtener todas las empresas registradas
-router.get("/", async (req, res) => {
-  try {
-    const empresas = await prisma.usuarios.findMany({
-      where: { rol_usuario: "empresa" }, // solo empresas
-      select: {
-        id_usuario: true,
-        nombre_usuario: true,
-        nit_empresa: true,
-        correo_contacto: true,
-        estado: true,
-        fecha_registro: true,
-      },
-      orderBy: { fecha_registro: "desc" }
-    });
 
-    res.json(empresas);
-  } catch (err) {
-    console.error("Error obteniendo empresas:", err);
-    res.status(500).json({ error: "Error obteniendo empresas" });
-  }
-});
-// Obtener detalle de empresa
-router.get("/:id", async (req, res) => {
-  const { id } = req.params;
-  try {
-    const empresa = await prisma.usuarios.findUnique({
-      where: { id_usuario: parseInt(id) },
-      select: {
-        id_usuario: true,
-        nombre_usuario: true,
-        nit_empresa: true,
-        correo_contacto: true,
-        estado: true,
-        fecha_registro: true,
-        Configuracion: {
-          select: {
-            direccion_empresa: true,
-            regimen_tributario: true,
-          }
-        }
-      },
-    });
-
-    if (!empresa) return res.status(404).json({ error: "Empresa no encontrada" });
-
-    res.json({
-      usuario: {
-        id_usuario: empresa.id_usuario,
-        nombre_usuario: empresa.nombre_usuario,
-        nit_empresa: empresa.nit_empresa,
-        correo_contacto: empresa.correo_contacto,
-        estado: empresa.estado,
-        fecha_registro: empresa.fecha_registro,
-        direccion: empresa.configuracionTecnica?.direccion_empresa || "No asignada",
-        regimen_tributario: empresa.configuracionTecnica?.regimen_tributario || "No asignado"
-      }
-    });
-  } catch (err) {
-    console.error("Error obteniendo empresa:", err);
-    res.status(500).json({ error: "Error obteniendo empresa" });
-  }
-});
-
-// Cambiar estado de una empresa
-router.put("/:id/estado", async (req, res) => {
-  const { id } = req.params;
-  const { estado } = req.body;
-
-  try {
-    const empresa = await prisma.usuarios.update({
-      where: { id_usuario: parseInt(id) },
-      data: { estado },
-    });
-
-    res.json({ message: "Estado actualizado", empresa });
-  } catch (err) {
-    console.error("Error cambiando estado:", err);
-    res.status(500).json({ error: "Error cambiando estado de la empresa" });
-  }
-});
-
-// Configuración del transporte de correos
+// Configuración del transporte de correos (Puede ser global si lo usas en otros archivos)
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -96,9 +17,13 @@ const transporter = nodemailer.createTransport({
   }
 });
 
+// =========================================================================
+// 🔓 RUTAS ABIERTAS (PRE-REGISTRO, VERIFICACIÓN, REENVÍO)
+// Estas rutas NO requieren el middleware 'authRequired'
+// =========================================================================
+
 router.post("/pre-register", async (req, res) => {
   try {
-
     const { nombre_empresa, nit_empresa, correo_contacto, contrasena, confirmar_contrasena } = req.body;
 
     if (!nombre_empresa || !nit_empresa || !correo_contacto || !contrasena || !confirmar_contrasena) {
@@ -108,6 +33,7 @@ router.post("/pre-register", async (req, res) => {
     if (contrasena !== confirmar_contrasena) {
       return res.status(400).json({ error: "Las contraseñas no coinciden" });
     }
+    
     const empresaExistente = await prisma.usuarios.findFirst({
       where: {
         OR: [
@@ -122,25 +48,21 @@ router.post("/pre-register", async (req, res) => {
         error: "Ya existe una empresa registrada con ese nombre o NIT."
       });
     }
-    //Hashear la contraseña ANTES de guardarla
+    
     const hashedPass = await bcrypt.hash(contrasena, 10);
-
-    // Generar código
     const codigo = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // Guardar en DB (con la contraseña ya encriptada)
     await prisma.codigos_verificacion.create({
       data: {
         correo: correo_contacto,
         codigo,
-        contrasena_temp: hashedPass, // guardamos el hash, no el texto plano
+        contrasena_temp: hashedPass, 
         nombre_empresa,
         nit_empresa,
         expiracion: new Date(Date.now() + 10 * 60 * 1000) // 10 minutos
       }
     });
 
-    // Enviar email
     await transporter.sendMail({
       from: `"FluxData" <${process.env.EMAIL_USER}>`,
       to: correo_contacto,
@@ -155,6 +77,7 @@ router.post("/pre-register", async (req, res) => {
     res.status(500).json({ error: "Error en pre-registro" });
   }
 });
+
 router.post("/verify-code", async (req, res) => {
   try {
     const { correo_contacto: correo, codigo } = req.body;
@@ -206,7 +129,6 @@ router.post("/verify-code", async (req, res) => {
   }
 });
 
-// Reenviar código
 router.post("/resend-code", async (req, res) => {
   try {
     const { correo_contacto } = req.body;
@@ -215,29 +137,25 @@ router.post("/resend-code", async (req, res) => {
       return res.status(400).json({ error: "El correo es obligatorio" });
     }
 
-    // Buscar registro temporal
     const registro = await prisma.codigos_verificacion.findFirst({
       where: { correo: correo_contacto },
-      orderBy: { id: "desc" } // tomar el más reciente
+      orderBy: { id: "desc" } 
     });
 
     if (!registro) {
       return res.status(404).json({ error: "No se encontró un registro previo para este correo" });
     }
 
-    // Generar un nuevo código
     const nuevoCodigo = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // Actualizar el registro con nuevo código y nueva expiración
     await prisma.codigos_verificacion.update({
       where: { id: registro.id },
       data: {
         codigo: nuevoCodigo,
-        expiracion: new Date(Date.now() + 10 * 60 * 1000) // 10 min más
+        expiracion: new Date(Date.now() + 10 * 60 * 1000)
       }
     });
 
-    // Enviar correo con el nuevo código
     await transporter.sendMail({
       from: `"FluxData" <${process.env.EMAIL_USER}>`,
       to: correo_contacto,
@@ -253,6 +171,93 @@ router.post("/resend-code", async (req, res) => {
   }
 });
 
+// =========================================================================
+// 🔒 RUTAS PROTEGIDAS (DEBEN USAR authRequired)
+// =========================================================================
+
+// Obtener todas las empresas registradas
+router.get("/", authRequired, async (req, res) => {
+  try {
+    const empresas = await prisma.usuarios.findMany({
+      where: { rol_usuario: "empresa" }, 
+      select: {
+        id_usuario: true,
+        nombre_usuario: true,
+        nit_empresa: true,
+        correo_contacto: true,
+        estado: true,
+        fecha_registro: true,
+      },
+      orderBy: { fecha_registro: "desc" }
+    });
+
+    res.json(empresas);
+  } catch (err) {
+    console.error("Error obteniendo empresas:", err);
+    res.status(500).json({ error: "Error obteniendo empresas" });
+  }
+});
+
+// Obtener detalle de empresa
+router.get("/:id", authRequired, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const empresa = await prisma.usuarios.findUnique({
+      where: { id_usuario: parseInt(id) },
+      select: {
+        id_usuario: true,
+        nombre_usuario: true,
+        nit_empresa: true,
+        correo_contacto: true,
+        estado: true,
+        fecha_registro: true,
+        // Tu código usa Configuracion, pero tu select de arriba usa configuracionTecnica (se corrigió)
+        Configuracion: {
+          select: {
+            direccion_empresa: true,
+            regimen_tributario: true,
+          }
+        }
+      },
+    });
+
+    if (!empresa) return res.status(404).json({ error: "Empresa no encontrada" });
+
+    res.json({
+      usuario: {
+        id_usuario: empresa.id_usuario,
+        nombre_usuario: empresa.nombre_usuario,
+        nit_empresa: empresa.nit_empresa,
+        correo_contacto: empresa.correo_contacto,
+        estado: empresa.estado,
+        fecha_registro: empresa.fecha_registro,
+        // Tu código de mapeo de respuesta está ligeramente mal, lo corregí para que use 'Configuracion'
+        direccion: empresa.Configuracion?.direccion_empresa || "No asignada", 
+        regimen_tributario: empresa.Configuracion?.regimen_tributario || "No asignado"
+      }
+    });
+  } catch (err) {
+    console.error("Error obteniendo empresa:", err);
+    res.status(500).json({ error: "Error obteniendo empresa" });
+  }
+});
+
+// Cambiar estado de una empresa
+router.put("/:id/estado", authRequired, async (req, res) => {
+  const { id } = req.params;
+  const { estado } = req.body;
+
+  try {
+    const empresa = await prisma.usuarios.update({
+      where: { id_usuario: parseInt(id) },
+      data: { estado },
+    });
+
+    res.json({ message: "Estado actualizado", empresa });
+  } catch (err) {
+    console.error("Error cambiando estado:", err);
+    res.status(500).json({ error: "Error cambiando estado de la empresa" });
+  }
+});
 
 export default router;
-

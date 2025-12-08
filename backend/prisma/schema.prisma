@@ -16,7 +16,7 @@ model Clientes {
   razon_social      String?
   correo_cliente    String?
   telefono          String?
-  direccion_cliente String?
+  direccion_cliente String
   ciudad            String?
   departamento      String?
   Usuarios   Usuarios? @relation(fields: [id_usuario], references: [id_usuario])
@@ -50,7 +50,7 @@ model Documentos_XML {
   razon_social_cliente String?
   correo_cliente       String?
   telefono_cliente     String?
-  direccion_cliente    String?
+  direccion_cliente    String
   ciudad_cliente       String?
   departamento_cliente String?
   estado_dian String? @default("Pendiente")

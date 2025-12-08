@@ -39,3 +39,15 @@ body {
   background-color: #d1d5db; /* gris claro - Tailwind gray-300 */
   border-radius: 6px;
 }
+.font-workSans {
+  font-family: 'Work Sans', sans-serif;
+}
+/* Chrome, Edge, Safari */
+input::-ms-reveal,
+input::-ms-clear {
+  display: none;
+}
+
+input[type="password"]::-webkit-textfield-decoration-container {
+  display: none;
+}

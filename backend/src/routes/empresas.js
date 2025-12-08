@@ -6,15 +6,15 @@ import Mailjet from "node-mailjet";
 
 const router = express.Router();
 
-// Configuración de Mailjet
+// ===================================================
+// CONFIGURACIÓN DE MAILJET
+// ===================================================
 const mailjet = Mailjet.apiConnect(
   process.env.MJ_APIKEY_PUBLIC,
   process.env.MJ_APIKEY_PRIVATE
 );
 
-// ===============================
-// Enviar correo con Mailjet
-// ===============================
+// Función para enviar correos
 async function enviarCorreo(destinatario, asunto, mensaje) {
   try {
     await mailjet
@@ -24,17 +24,13 @@ async function enviarCorreo(destinatario, asunto, mensaje) {
           {
             From: {
               Email: process.env.MJ_SENDER,
-              Name: "FluxData"
+              Name: "FluxData",
             },
-            To: [
-              {
-                Email: destinatario
-              }
-            ],
+            To: [{ Email: destinatario }],
             Subject: asunto,
-            HTMLPart: `<p>${mensaje}</p>`
-          }
-        ]
+            HTMLPart: `<p>${mensaje}</p>`,
+          },
+        ],
       });
 
     console.log("Correo enviado a:", destinatario);
@@ -44,9 +40,9 @@ async function enviarCorreo(destinatario, asunto, mensaje) {
   }
 }
 
-// ===============================
-// Obtener todas las empresas
-// ===============================
+// ===================================================
+// OBTENER TODAS LAS EMPRESAS
+// ===================================================
 router.get("/", async (req, res) => {
   try {
     const empresas = await prisma.usuarios.findMany({
@@ -59,7 +55,7 @@ router.get("/", async (req, res) => {
         estado: true,
         fecha_registro: true,
       },
-      orderBy: { fecha_registro: "desc" }
+      orderBy: { fecha_registro: "desc" },
     });
 
     res.json(empresas);
@@ -69,11 +65,12 @@ router.get("/", async (req, res) => {
   }
 });
 
-// ===============================
-// Obtener una empresa por ID
-// ===============================
+// ===================================================
+// OBTENER UNA EMPRESA POR ID
+// ===================================================
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
+
   try {
     const empresa = await prisma.usuarios.findUnique({
       where: { id_usuario: parseInt(id) },
@@ -84,16 +81,14 @@ router.get("/:id", async (req, res) => {
         correo_contacto: true,
         estado: true,
         fecha_registro: true,
-        configuracion: {
-          select: {
-            direccion_empresa: true,
-            regimen_tributario: true,
-          }
-        }
+        direccion_empresa: true,
+        regimen_tributario: true,
       },
     });
 
-    if (!empresa) return res.status(404).json({ error: "Empresa no encontrada" });
+    if (!empresa) {
+      return res.status(404).json({ error: "Empresa no encontrada" });
+    }
 
     res.json({
       usuario: {
@@ -103,9 +98,9 @@ router.get("/:id", async (req, res) => {
         correo_contacto: empresa.correo_contacto,
         estado: empresa.estado,
         fecha_registro: empresa.fecha_registro,
-        direccion: empresa.configuracion?.direccion_empresa || "No asignada",
-        regimen_tributario: empresa.configuracion?.regimen_tributario || "No asignado"
-      }
+        direccion: empresa.direccion_empresa || "No asignada",
+        regimen_tributario: empresa.regimen_tributario || "No asignado",
+      },
     });
   } catch (err) {
     console.error("Error obteniendo empresa:", err);
@@ -113,9 +108,9 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// ===============================
-// Cambiar estado
-// ===============================
+// ===================================================
+// CAMBIAR ESTADO
+// ===================================================
 router.put("/:id/estado", async (req, res) => {
   const { id } = req.params;
   const { estado } = req.body;
@@ -133,14 +128,30 @@ router.put("/:id/estado", async (req, res) => {
   }
 });
 
-// ===============================
-// PRE-REGISTER (envío de código)
-// ===============================
+// ===================================================
+// PRE-REGISTER (envío de código con MAILJET)
+// ===================================================
 router.post("/pre-register", async (req, res) => {
   try {
-    const { nombre_empresa, nit_empresa, correo_contacto, contrasena, confirmar_contrasena } = req.body;
+    const {
+      nombre_empresa,
+      direccion_empresa,
+      nit_empresa,
+      regimen_tributario,
+      correo_contacto,
+      contrasena,
+      confirmar_contrasena,
+    } = req.body;
 
-    if (!nombre_empresa || !nit_empresa || !correo_contacto || !contrasena || !confirmar_contrasena) {
+    if (
+      !nombre_empresa ||
+      !nit_empresa ||
+      !correo_contacto ||
+      !contrasena ||
+      !confirmar_contrasena ||
+      !direccion_empresa ||
+      !regimen_tributario
+    ) {
       return res.status(400).json({ error: "Todos los campos son requeridos" });
     }
 
@@ -148,19 +159,29 @@ router.post("/pre-register", async (req, res) => {
       return res.status(400).json({ error: "Las contraseñas no coinciden" });
     }
 
-    const empresaExistente = await prisma.usuarios.findFirst({
+    // Buscar duplicados
+    const duplicados = await prisma.usuarios.findMany({
       where: {
         OR: [
+          { nombre_usuario: nombre_empresa },
           { nit_empresa },
-          { nombre_usuario: nombre_empresa }
-        ]
-      }
+          { direccion_empresa },
+        ],
+      },
     });
 
-    if (empresaExistente) {
-      return res.status(409).json({
-        error: "Ya existe una empresa registrada con ese nombre o NIT."
-      });
+    const errors = {};
+    duplicados.forEach((e) => {
+      if (e.nombre_usuario === nombre_empresa)
+        errors.nombre_empresa = "Ya existe una empresa con ese nombre";
+      if (e.nit_empresa === nit_empresa)
+        errors.nit_empresa = "Ya existe una empresa con este NIT";
+      if (e.direccion_empresa === direccion_empresa)
+        errors.direccion_empresa = "Ya existe una empresa con esta dirección";
+    });
+
+    if (Object.keys(errors).length > 0) {
+      return res.status(409).json({ errors });
     }
 
     const hashedPass = await bcrypt.hash(contrasena, 10);
@@ -174,10 +195,13 @@ router.post("/pre-register", async (req, res) => {
         contrasena_temp: hashedPass,
         nombre_empresa,
         nit_empresa,
-        expiracion: new Date(Date.now() + 10 * 60 * 1000)
-      }
+        direccion_empresa,
+        regimen_tributario,
+        expiracion: new Date(Date.now() + 10 * 60 * 1000),
+      },
     });
 
+    // ✉️ ENVIAR CÓDIGO CON MAILJET
     await enviarCorreo(
       correo_contacto,
       "Código de verificación",
@@ -185,64 +209,62 @@ router.post("/pre-register", async (req, res) => {
     );
 
     res.json({ msg: "Se envió un código de verificación al correo." });
-
   } catch (err) {
     console.error("Error en /pre-register:", err);
     res.status(500).json({ error: "Error en pre-registro" });
   }
 });
 
-// ===============================
+// ===================================================
 // VERIFY CODE
-// ===============================
+// ===================================================
 router.post("/verify-code", async (req, res) => {
   try {
-    const { correo_contacto: correo, codigo } = req.body;
+    const { correo_contacto, codigo } = req.body;
+
+    if (!correo_contacto || !codigo) {
+      return res.status(400).json({ error: "Correo y código son obligatorios" });
+    }
 
     const registro = await prisma.codigos_verificacion.findFirst({
-      where: { correo, codigo }
+      where: { correo: correo_contacto, codigo },
+      orderBy: { id: "desc" },
     });
 
     if (!registro) {
-      return res.status(400).json({ error: "Código inválido" });
+      return res.status(400).json({ error: "Código inválido o expirado" });
     }
 
-    if (new Date() > registro.expiracion) {
-      return res.status(400).json({ error: "El código ha expirado" });
+    if (registro.expiracion < new Date()) {
+      return res.status(400).json({ error: "Código expirado" });
     }
 
-    const empresa = await prisma.usuarios.create({
+    await prisma.usuarios.create({
       data: {
         nombre_usuario: registro.nombre_empresa,
         nit_empresa: registro.nit_empresa,
+        direccion_empresa: registro.direccion_empresa,
+        regimen_tributario: registro.regimen_tributario,
         correo_contacto: registro.correo,
         contrasena_usuario: registro.contrasena_temp,
-        rol_usuario: "empresa"
-      }
+        rol_usuario: "empresa",
+        estado: "activo",
+        fecha_registro: new Date(),
+      },
     });
 
-    await prisma.codigos_verificacion.delete({
-      where: { id: registro.id }
-    });
+    await prisma.codigos_verificacion.delete({ where: { id: registro.id } });
 
-    res.json({
-      message: "Empresa verificada y registrada",
-      empresa: {
-        id: empresa.id_usuario,
-        nombre: empresa.nombre_usuario,
-        correo: empresa.correo_contacto
-      }
-    });
-
-  } catch (err) {
-    console.error("Error en /verify-code:", err);
-    res.status(500).json({ error: "Error en verificación" });
+    res.json({ msg: "Código verificado y empresa registrada correctamente" });
+  } catch (error) {
+    console.error("Error en /verify-code:", error);
+    res.status(500).json({ error: "Error verificando código" });
   }
 });
 
-// ===============================
-// REENVIAR CÓDIGO
-// ===============================
+// ===================================================
+// RESEND CODE (MAILJET)
+// ===================================================
 router.post("/resend-code", async (req, res) => {
   try {
     const { correo_contacto } = req.body;
@@ -253,11 +275,13 @@ router.post("/resend-code", async (req, res) => {
 
     const registro = await prisma.codigos_verificacion.findFirst({
       where: { correo: correo_contacto },
-      orderBy: { id: "desc" }
+      orderBy: { id: "desc" },
     });
 
     if (!registro) {
-      return res.status(404).json({ error: "No se encontró un registro previo para este correo" });
+      return res
+        .status(404)
+        .json({ error: "No se encontró un registro previo para este correo" });
     }
 
     const nuevoCodigo = Math.floor(100000 + Math.random() * 900000).toString();
@@ -266,8 +290,8 @@ router.post("/resend-code", async (req, res) => {
       where: { id: registro.id },
       data: {
         codigo: nuevoCodigo,
-        expiracion: new Date(Date.now() + 10 * 60 * 1000)
-      }
+        expiracion: new Date(Date.now() + 10 * 60 * 1000),
+      },
     });
 
     await enviarCorreo(
@@ -277,12 +301,10 @@ router.post("/resend-code", async (req, res) => {
     );
 
     res.json({ msg: "Se ha enviado un nuevo código a tu correo" });
-
   } catch (error) {
     console.error("Error en /resend-code:", error);
     res.status(500).json({ error: "Error reenviando código" });
   }
 });
-
 
 export default router;

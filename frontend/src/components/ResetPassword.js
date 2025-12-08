@@ -1,9 +1,10 @@
+
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import fluxLogo from "../assets/fluxdata.svg";
 import backArrow from "../assets/back-arrow.svg";
-import laptopImage from "../assets/laptop2.jpg";
-import laptop1 from "../assets/im1.png";
+import laptopImage from "../assets/laptop2.webp";
+import laptop1 from "../assets/im3.webp";
 import { API_URL } from "../config.js";
 
 export default function ResetPassword() {

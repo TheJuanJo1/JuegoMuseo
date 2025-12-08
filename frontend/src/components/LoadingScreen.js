@@ -1,13 +1,23 @@
 import { motion } from "framer-motion";
+import Logo2 from "../assets/Logo2.svg"; 
 
 export default function LogoAnimado() {
   return (
-    <div className="w-full h-screen flex items-center justify-center bg-white">
+    <div className="fixed inset-0 flex items-center justify-center bg-white/90 z-[9999]">
+       <img
+        src={Logo2}
+        alt="FluxData"
+        width={150}
+        height={150}
+        className="mb-1" 
+      />
+
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 1440 810"
-        className="w-3/4 h-auto"
-      >
+        width={720}   
+  height={405}
+        className="w-1/2 max-w-lg h-auto">
         {/* F */}
         <g transform="translate(121.860468, 449.999997)">
           <motion.path
@@ -17,7 +27,7 @@ export default function LogoAnimado() {
             fill="none"
             initial={{ pathLength: 0 }}
             animate={{ pathLength: 1 }}
-            transition={{ duration: 1, delay: 0 }}
+            transition={{ duration: 0.25, delay: 0 }}
           />
         </g>
 
@@ -30,7 +40,7 @@ export default function LogoAnimado() {
             fill="none"
             initial={{ pathLength: 0 }}
             animate={{ pathLength: 1 }}
-            transition={{ duration: 1, delay: 0.2 }}
+            transition={{ duration: 0.25, delay: 0.1 }}
           />
         </g>
 
@@ -43,7 +53,7 @@ export default function LogoAnimado() {
             fill="none"
             initial={{ pathLength: 0 }}
             animate={{ pathLength: 1 }}
-            transition={{ duration: 1, delay: 0.4 }}
+            transition={{ duration: 0.25, delay: 0.2 }}
           />
         </g>
 
@@ -56,7 +66,7 @@ export default function LogoAnimado() {
             fill="none"
             initial={{ pathLength: 0 }}
             animate={{ pathLength: 1 }}
-            transition={{ duration: 1, delay: 0.6 }}
+            transition={{ duration: 0.25, delay: 0.3 }}
           />
         </g>
 
@@ -69,7 +79,7 @@ export default function LogoAnimado() {
             fill="none"
             initial={{ pathLength: 0 }}
             animate={{ pathLength: 1 }}
-            transition={{ duration: 1, delay: 0.8 }}
+            transition={{ duration: 0.25, delay: 0.4 }}
           />
         </g>
 
@@ -82,7 +92,7 @@ export default function LogoAnimado() {
             fill="none"
             initial={{ pathLength: 0 }}
             animate={{ pathLength: 1 }}
-            transition={{ duration: 1, delay: 1 }}
+            transition={{ duration: 0.25, delay: 0.5 }}
           />
         </g>
 
@@ -95,7 +105,7 @@ export default function LogoAnimado() {
             fill="none"
             initial={{ pathLength: 0 }}
             animate={{ pathLength: 1 }}
-            transition={{ duration: 1, delay: 1.2 }}
+            transition={{ duration: 0.25, delay: 0.6 }}
           />
         </g>
 
@@ -108,7 +118,7 @@ export default function LogoAnimado() {
             fill="none"
             initial={{ pathLength: 0 }}
             animate={{ pathLength: 1 }}
-            transition={{ duration: 1, delay: 1.4 }}
+            transition={{ duration: 0.25, delay: 0.7 }}
           />
         </g>
       </svg>

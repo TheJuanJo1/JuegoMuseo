@@ -54,18 +54,18 @@ app.get("/api/auth/me", authRequired, (req, res) => {
 
 // Rutas API
 app.use("/api/auth", authRoutes);
-app.use("/api/empresas", empresasRoutes);
+app.use("/api/empresas", authRequired, empresasRoutes);
 app.use("/api/login", loginRoutes);
 app.use("/api/forgot-password", forgotPasswordRoutes);
 app.use("/api/reset-password", resetPasswordRoutes);
-app.use("/api/ultimos", ultimosRoutes);
-app.use("/api/estadisticas", estadisticasRoutes);
-app.use("/api/filtrar", filtrarRoutes);
-app.use("/api/configuracion", configurarRoutes);
-app.use("/api/token", tokenRoutes);
-app.use("/api/registros", registrosRouter);
-app.use("/api/admin/dashboard", dashboardAdmin);
-app.use("/api/dashboard-xml", xmlDashboardRouter);
+app.use("/api/ultimos", authRequired, ultimosRoutes);
+app.use("/api/estadisticas", authRequired, estadisticasRoutes);
+app.use("/api/filtrar", authRequired, filtrarRoutes);
+app.use("/api/configuracion", authRequired, configurarRoutes);
+app.use("/api/token", authRequired, tokenRoutes);
+app.use("/api/registros", authRequired, registrosRouter);
+app.use("/api/admin/dashboard", authRequired, dashboardAdmin);
+app.use("/api/dashboard-xml", authRequired, xmlDashboardRouter);
 
 // Puerto
 const PORT = process.env.PORT || 3000;

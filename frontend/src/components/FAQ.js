@@ -27,15 +27,15 @@ export default function FAQ() {
     },
   ];
 
-  const toggle = (i) => {
-    setOpenIndex(openIndex === i ? null : i);
-  };
+  const toggle = (i) => setOpenIndex(openIndex === i ? null : i);
 
   return (
     <div className="w-full min-h-screen bg-[#d9e3ea] flex justify-center py-10 px-4">
-      <div className="bg-white w-full max-w-6xl rounded-xl shadow-lg relative overflow-hidden">
 
-        {/* Flecha regresar */}
+      <div className="bg-white w-full max-w-6xl rounded-xl shadow-lg relative overflow-visible"
+           style={{ minHeight: "85vh" }}>
+
+        {/* Flecha */}
         <button
           onClick={() => navigate(-1)}
           className="absolute top-6 left-6 w-7 z-50"
@@ -43,8 +43,8 @@ export default function FAQ() {
           <img src={backArrow} alt="Back" />
         </button>
 
-        {/* Contenido */}
-        <div className="relative px-10 pt-20 pb-40 flex flex-col lg:flex-row gap-10 z-20">
+        {/* Contenido principal */}
+        <div className="relative px-10 pt-20 pb-20 flex flex-col lg:flex-row gap-10 z-20">
 
           {/* IZQUIERDA */}
           <div className="flex-1">
@@ -76,14 +76,28 @@ export default function FAQ() {
               </div>
             ))}
           </div>
+
         </div>
 
-        {/* OLAS — FIJAS SIN MOVERSE */}
-        <div className="absolute bottom-0 left-0 w-full h-48 z-10 pointer-events-none select-none">
+        {/* OLAS — FIJAS, COMPLETAS Y SIN RECORTARSE */}
+        <div
+          className="absolute left-0 w-full"
+          style={{
+            bottom: "-1px",
+            height: "230px",
+            overflow: "visible",
+            zIndex: 10
+          }}
+        >
           <img
             src={V2}
-            alt="olas"
-            className="w-full h-full object-cover"
+            alt="Olas"
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              display: "block",
+            }}
           />
         </div>
 

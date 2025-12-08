@@ -344,7 +344,7 @@ export default function RegisterForm() {
               </div>
 
               {msgCodigo && (
-                <p className="text-red-500 text-center mb-4">{msgCodigo}</p>
+                <p className="text-green-500 text-center mb-4">{msgCodigo}</p>
               )}
 
               <button

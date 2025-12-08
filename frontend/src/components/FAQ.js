@@ -6,80 +6,84 @@ import V2 from "../assets/V2.png";
 
 export default function FAQ() {
   const navigate = useNavigate();
-  const [open, setOpen] = useState(null);
-  const toggle = (i) => setOpen(open === i ? null : i);
+  const [openIndex, setOpenIndex] = useState(null);
 
   const preguntas = [
     {
-      pregunta: "¿Qué documentos maneja?",
-      respuesta:
-        "Invoice (factura), CreditNote (nota crédito), DebitNote (nota débito), ApplicationResponse (respuesta de la DIAN) y AttachedDocument (documentos anexos).",
+      q: "¿Qué documentos maneja?",
+      a: "Invoice (factura), Creditnote (nota crédito), Debitnote (nota débito), ApplicationResponse (respuesta de la DIAN) y AttachedDocument (documentos anexos).",
     },
-    { pregunta: "¿Qué tecnologías se usan?", respuesta: "Node.js, React, PostgreSQL y Prisma." },
     {
-      pregunta: "¿Qué funcionalidades principales tiene?",
-      respuesta:
-        "Gestión de facturas electrónicas, recepción, validación, envío y almacenamiento.",
+      q: "¿Qué tecnologías se usan?",
+      a: "FluxData usa tecnologías modernas como Node.js, React, PostgreSQL y servicios cloud.",
     },
-    { pregunta: "¿Cómo se almacenan los documentos?", respuesta: "En bases de datos PostgreSQL." },
+    {
+      q: "¿Qué funcionalidades principales tiene?",
+      a: "Factura electrónica, notas crédito/débito, consulta de documentos enviados, validación ante la DIAN y más.",
+    },
+    {
+      q: "¿Cómo se almacenan los documentos?",
+      a: "Los documentos se almacenan de forma segura en servidores cifrados y con respaldo automático.",
+    },
   ];
 
+  const toggle = (i) => {
+    setOpenIndex(openIndex === i ? null : i);
+  };
+
   return (
-    <div className="w-full min-h-screen bg-[#E8EEF2] flex items-center justify-center p-4 md:p-0">
-      <div
-        className="relative bg-white rounded-xl shadow-xl w-full h-auto overflow-hidden p-6 md:p-0"
-        style={{ maxWidth: "1200px", minHeight: "90vh" }}
-      >
-        {/* Botón volver */}
-        <img
-          src={backArrow}
-          alt="Volver"
-          className="absolute top-6 left-6 cursor-pointer hover:scale-110 transition-all w-10 h-10"
-          onClick={() => navigate("/")}
-        />
+    <div className="w-full min-h-screen bg-[#d9e3ea] flex justify-center py-10 px-4">
+      <div className="bg-white w-full max-w-6xl rounded-xl shadow-lg overflow-hidden relative">
 
-        {/* Títulos */}
-        <div className="absolute left-8 md:left-20 top-28 md:top-32">
-          <h1 className="font-bold text-4xl md:text-[50px] text-black leading-tight">Preguntas</h1>
-          <h1
-            className="font-bold text-4xl md:text-[50px] leading-tight"
-            style={{ color: "#526D82" }}
-          >
-            frecuentes
-          </h1>
-        </div>
+        {/* Flecha regresar */}
+        <button
+          onClick={() => navigate(-1)}
+          className="absolute top-6 left-6 w-7"
+        >
+          <img src={backArrow} alt="Back" />
+        </button>
 
-        {/* Logo (solo desktop) */}
-        <div className="hidden md:block absolute top-64 left-28">
-          <img src={Logo1} alt="Logo FluxData" className="w-40 md:w-52" />
-        </div>
+        {/* Contenedor principal */}
+        <div className="flex flex-col lg:flex-row px-10 pt-20 pb-10 gap-10">
 
-        {/* Preguntas */}
-        <div className="absolute right-6 md:right-24 top-80 md:top-48 w-[85%] md:w-[35%]">
-          {preguntas.map((item, i) => (
-            <div key={i} className="pb-4">
-              <div
-                onClick={() => toggle(i)}
-                className="flex justify-between items-center border-b pb-3 cursor-pointer"
-              >
-                <span className="text-base md:text-lg text-gray-800">{item.pregunta}</span>
-                <span className="text-xl md:text-2xl ml-4">{open === i ? "−" : "+"}</span>
-              </div>
-              {open === i && (
-                <p className="text-gray-600 mt-2 text-sm md:text-base">{item.respuesta}</p>
-              )}
+          {/* IZQUIERDA */}
+          <div className="flex-1">
+            <h1 className="text-4xl font-bold">Preguntas</h1>
+            <h2 className="text-4xl font-bold text-[#607d94]">frecuentes</h2>
+
+            <div className="mt-6">
+              <img src={Logo1} alt="Logo" className="w-32 opacity-90" />
             </div>
-          ))}
+          </div>
+
+          {/* DERECHA */}
+          <div className="flex-1 mt-4">
+            {preguntas.map((item, i) => (
+              <div key={i} className="border-b py-4">
+                <button
+                  className="w-full flex justify-between items-center text-gray-800 text-sm lg:text-base"
+                  onClick={() => toggle(i)}
+                >
+                  {item.q}
+                  <span className="text-xl">{openIndex === i ? "−" : "+"}</span>
+                </button>
+
+                {openIndex === i && (
+                  <p className="mt-2 text-gray-600 text-sm leading-relaxed pr-6">
+                    {item.a}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* Imagen inferior */}
-        <div className="absolute bottom-0 left-0 w-full h-40 md:h-64 overflow-hidden">
-          <img
-            src={V2}
-            alt="Olas"
-            className="w-full h-full object-cover block"
-          />
-        </div>
+        {/* Imagen de olas */}
+        <img
+          src={V2}
+          alt="olas"
+          className="w-full mt-4 select-none pointer-events-none"
+        />
       </div>
     </div>
   );

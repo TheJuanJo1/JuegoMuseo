@@ -51,34 +51,41 @@ export default function LoginForm() {
 
   return (
     <div
-      className="flex items-center justify-center min-h-screen bg-[#EAF0F6] font-[Work Sans]"
+      className="
+        flex items-center justify-center min-h-screen font-[Work Sans]
+        bg-[#EAF0F6] relative
+      "
       style={{
         backgroundImage: `url(${laptop})`,
         backgroundRepeat: "no-repeat",
-        backgroundPosition: "left center",
-        backgroundSize: "62.5% auto",
+        backgroundPosition: "center",
+        backgroundSize: "cover",
       }}
     >
       <div
         className="
-          shadow-xl rounded-2xl flex overflow-hidden 
-          w-[1150px] h-[700px] 
+          shadow-xl rounded-2xl overflow-hidden 
+          w-[1150px] h-[700px]
+          flex
+          bg-white
+          
           max-xl:w-[900px] max-xl:h-[620px]
-          max-lg:flex-col max-lg:w-[90%] max-lg:h-auto
+          max-lg:w-[90%]
+
+          max-md:flex-col max-md:h-auto max-md:bg-opacity-90
         "
-        style={{ backgroundColor: "#FFFFFF" }}
       >
-        {/* Imagen izquierda */}
+        {/* Imagen lateral — SE OCULTA EN CELULAR */}
         <div
           className="
-            w-1/2 flex items-center justify-center bg-white p-2 rounded-l-2xl
-            max-lg:w-full max-lg:rounded-none max-lg:h-[260px]
+            w-1/2 p-2 flex items-center justify-center bg-white rounded-l-2xl
+            max-md:hidden   /* Ocultar completamente en celular */
           "
         >
           <img
             src={laptopImage}
             alt="Laptop con dashboard"
-            className="object-contain w-[98%] h-[98%] rounded-lg max-lg:rounded-md"
+            className="object-contain w-[98%] h-[98%] rounded-lg"
           />
         </div>
 
@@ -86,17 +93,16 @@ export default function LoginForm() {
         <div
           className="
             w-1/2 flex flex-col justify-between px-12 py-8 rounded-r-2xl
-            max-lg:w-full max-lg:rounded-none max-lg:px-6 max-md:px-4
+            max-md:w-full max-md:px-6 max-md:py-10
           "
           style={{
-            backgroundColor: "#FFFFFF",
             clipPath: "polygon(6% 0, 100% 0, 100% 100%, 0% 100%)",
           }}
         >
-          {/* DESACTIVAR CLIP EN CELULAR */}
+          {/* QUITAR CLIP-PATH EN CELULAR */}
           <style>
             {`
-              @media(max-width: 1024px){
+              @media(max-width: 768px){
                 div[style*="clip-path"] {
                   clip-path: none !important;
                 }

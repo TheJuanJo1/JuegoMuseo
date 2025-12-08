@@ -25,75 +25,60 @@ export default function FAQ() {
   ];
 
   return (
-    <div className="w-full min-h-screen bg-[#E8EEF2] flex items-center justify-center">
+    <div className="w-full min-h-screen bg-[#E8EEF2] flex items-center justify-center p-4 md:p-0">
       <div
-        className="relative bg-white rounded-xl shadow-xl"
-        style={{
-          width: "90%",                
-          maxWidth: "1200px",          
-          height: "90vh",              
-          overflow: "hidden",          
-        }}>
+        className="relative bg-white rounded-xl shadow-xl w-full h-auto overflow-hidden p-6 md:p-0"
+        style={{ maxWidth: "1200px", minHeight: "90vh" }}
+      >
+        {/* Botón volver */}
         <img
           src={backArrow}
           alt="Volver"
-          className="absolute top-6 left-6 cursor-pointer hover:scale-110 transition-all"
-          style={{ height: "41px", width: "41px", objectFit: "contain", }}
-          onClick={() => navigate("/")}/>
-        <div style={{ position: "absolute", top: "7rem", left: "4.8rem" }}>
-            <h1 className="font-bold text-[50px] text-black leading-[3.3rem]">
-                Preguntas
-            </h1>
-            <h1 className="font-bold text-[50px]"
-            style={{ color: "#526D82", lineHeight: "3.3rem" }}>
-                frecuentes
-            </h1>
+          className="absolute top-6 left-6 cursor-pointer hover:scale-110 transition-all w-10 h-10"
+          onClick={() => navigate("/")}
+        />
+
+        {/* Títulos */}
+        <div className="absolute left-8 md:left-20 top-28 md:top-32">
+          <h1 className="font-bold text-4xl md:text-[50px] text-black leading-tight">Preguntas</h1>
+          <h1
+            className="font-bold text-4xl md:text-[50px] leading-tight"
+            style={{ color: "#526D82" }}
+          >
+            frecuentes
+          </h1>
         </div>
-        <div style={{ position: "absolute", top: "15rem", left: "8rem", }}>
-          <img src={Logo1} alt="Logo FluxData" style={{
-            height: "160px", width: "auto",}}/>
-          </div>
-        <div style={{ position: "absolute", top: "12rem", right: "9rem", width: "35%" }}>
+
+        {/* Logo (solo desktop) */}
+        <div className="hidden md:block absolute top-64 left-28">
+          <img src={Logo1} alt="Logo FluxData" className="w-40 md:w-52" />
+        </div>
+
+        {/* Preguntas */}
+        <div className="absolute right-6 md:right-24 top-80 md:top-48 w-[85%] md:w-[35%]">
           {preguntas.map((item, i) => (
-            <div key={i} style={{ paddingBottom: 16 }}>
+            <div key={i} className="pb-4">
               <div
                 onClick={() => toggle(i)}
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  borderBottom: "1px solid #e6edf2",
-                  paddingBottom: 12,
-                  cursor: "pointer",
-                }}>
-                <span style={{ fontSize: "1.03rem", color: "#1f2937" }}>{item.pregunta}</span>
-                <span style={{ fontSize: "1.5rem", marginLeft: 24 }}>{open === i ? "−" : "+"}</span>
+                className="flex justify-between items-center border-b pb-3 cursor-pointer"
+              >
+                <span className="text-base md:text-lg text-gray-800">{item.pregunta}</span>
+                <span className="text-xl md:text-2xl ml-4">{open === i ? "−" : "+"}</span>
               </div>
               {open === i && (
-                <p style={{ color: "#475569", marginTop: 7, fontSize: "0.95rem" }}>{item.respuesta}</p>
+                <p className="text-gray-600 mt-2 text-sm md:text-base">{item.respuesta}</p>
               )}
             </div>
           ))}
         </div>
-        <div
-          aria-hidden="true"
-          style={{
-            position: "absolute",
-            bottom: 0,
-            left: 0,
-            width: "100%",
-            height: "250px",
-            overflow: "hidden",
-          }}>
+
+        {/* Imagen inferior */}
+        <div className="absolute bottom-0 left-0 w-full h-40 md:h-64 overflow-hidden">
           <img
             src={V2}
             alt="Olas"
-            style={{
-              width: "100%",
-              height: "100%",
-              objectFit: "cover", 
-              display: "block",
-            }}/>
+            className="w-full h-full object-cover block"
+          />
         </div>
       </div>
     </div>

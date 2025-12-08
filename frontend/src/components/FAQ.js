@@ -27,24 +27,24 @@ export default function FAQ() {
     },
   ];
 
-  const toggle = (i) => setOpenIndex(openIndex === i ? null : i);
+  const toggle = (i) => {
+    setOpenIndex(openIndex === i ? null : i);
+  };
 
   return (
     <div className="w-full min-h-screen bg-[#d9e3ea] flex justify-center py-10 px-4">
+      <div className="bg-white w-full max-w-6xl rounded-xl shadow-lg overflow-hidden relative">
 
-      <div className="bg-white w-full max-w-6xl rounded-xl shadow-lg relative overflow-visible"
-           style={{ minHeight: "85vh" }}>
-
-        {/* Flecha */}
+        {/* Flecha regresar */}
         <button
           onClick={() => navigate(-1)}
-          className="absolute top-6 left-6 w-7 z-50"
+          className="absolute top-6 left-6 w-7"
         >
           <img src={backArrow} alt="Back" />
         </button>
 
-        {/* Contenido principal */}
-        <div className="relative px-10 pt-20 pb-20 flex flex-col lg:flex-row gap-10 z-20">
+        {/* Contenedor principal */}
+        <div className="flex flex-col lg:flex-row px-10 pt-20 pb-10 gap-10">
 
           {/* IZQUIERDA */}
           <div className="flex-1">
@@ -59,7 +59,7 @@ export default function FAQ() {
           {/* DERECHA */}
           <div className="flex-1 mt-4">
             {preguntas.map((item, i) => (
-              <div key={i} className="border-b py-4 pr-4">
+              <div key={i} className="border-b py-4">
                 <button
                   className="w-full flex justify-between items-center text-gray-800 text-sm lg:text-base"
                   onClick={() => toggle(i)}
@@ -69,38 +69,21 @@ export default function FAQ() {
                 </button>
 
                 {openIndex === i && (
-                  <p className="mt-2 text-gray-600 text-sm leading-relaxed">
+                  <p className="mt-2 text-gray-600 text-sm leading-relaxed pr-6">
                     {item.a}
                   </p>
                 )}
               </div>
             ))}
           </div>
-
         </div>
 
-        {/* OLAS — FIJAS, COMPLETAS Y SIN RECORTARSE */}
-        <div
-          className="absolute left-0 w-full"
-          style={{
-            bottom: "-1px",
-            height: "230px",
-            overflow: "visible",
-            zIndex: 10
-          }}
-        >
-          <img
-            src={V2}
-            alt="Olas"
-            style={{
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              display: "block",
-            }}
-          />
-        </div>
-
+        {/* Imagen de olas */}
+        <img
+          src={V2}
+          alt="olas"
+          className="w-full mt-4 select-none pointer-events-none"
+        />
       </div>
     </div>
   );

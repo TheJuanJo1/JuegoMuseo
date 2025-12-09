@@ -6,9 +6,6 @@ import Mailjet from "node-mailjet";
 
 const router = express.Router();
 
-<<<<<<< HEAD
-// Obtener todas las empresas registradas
-=======
 // ===================================================
 // CONFIGURACIÓN DE MAILJET
 // ===================================================
@@ -46,7 +43,6 @@ async function enviarCorreo(destinatario, asunto, mensaje) {
 // ===================================================
 // OBTENER TODAS LAS EMPRESAS
 // ===================================================
->>>>>>> 078034fc164aa0454262d3d659cb5144dd478b9b
 router.get("/", async (req, res) => {
   try {
     const empresas = await prisma.usuarios.findMany({
@@ -311,9 +307,4 @@ router.post("/resend-code", async (req, res) => {
   }
 });
 
-<<<<<<< HEAD
-
 export default router;
-=======
-export default router;
->>>>>>> 078034fc164aa0454262d3d659cb5144dd478b9b

@@ -20,14 +20,18 @@ import registrosRouter from "./routes/registros.js"
 import dashboardAdmin from "./routes/dashboardAdmin.js"
 import xmlDashboardRouter from "./routes/xmldashboard.js"
 
+
 dotenv.config()
 
 const app = express()
 
-// CORS
+// CORS SOLO PARA DESARROLLO LOCAL
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://localhost:5173"],
+    origin: [
+      "http://localhost:3000",
+      "http://localhost:5173"
+    ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"]
@@ -42,7 +46,7 @@ app.get("/", (req, res) => {
   res.json({ ok: true, msg: "API FluxData funcionando en LOCALHOST" })
 })
 
-// Ruta protegida
+// Ruta protegida de prueba
 app.get("/api/auth/me", authRequired, (req, res) => {
   res.json({ user: req.user })
 })
@@ -59,9 +63,11 @@ app.use("/api/filtrar", filtrarRoutes)
 app.use("/api/token", tokenRoutes)
 app.use("/api/registros", registrosRouter)
 app.use("/api/admin/dashboard", dashboardAdmin)
-app.use("/api/dashboard-xml", xmlDashboardRouter)
+app.use("/api/dashboard-xml", xmlDashboardRouter);
 
-// Iniciar servidor
+
+
+// Puerto
 const PORT = process.env.PORT || 3000
 
 app.listen(PORT, () => {

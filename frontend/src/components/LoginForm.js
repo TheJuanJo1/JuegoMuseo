@@ -40,7 +40,7 @@ const handleSubmit = async (e) => {
 
     if (!res.ok) {
       setMsg(data.error || "Error en login");
-setTimeout(() => setMsg(""), 2000);
+      setTimeout(() => setMsg(""), 2000);
 
       return;
     }
@@ -54,7 +54,7 @@ setTimeout(() => setMsg(""), 2000);
     }
   } catch (err) {
     setMsg("No se pudo conectar con el servidor");
-setTimeout(() => setMsg(""), 2000);
+    setTimeout(() => setMsg(""), 2000);
 
   }
 };

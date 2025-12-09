@@ -1,5 +1,5 @@
 -- CreateTable
-CREATE TABLE "public"."Clientes" (
+CREATE TABLE "Clientes" (
     "id_cliente" SERIAL NOT NULL,
     "tipo_documento" TEXT NOT NULL,
     "numero_documento" TEXT NOT NULL,
@@ -16,7 +16,7 @@ CREATE TABLE "public"."Clientes" (
 );
 
 -- CreateTable
-CREATE TABLE "public"."Documentos_XML" (
+CREATE TABLE "Documentos_XML" (
     "id_documento" SERIAL NOT NULL,
     "tipo_documento" TEXT NOT NULL,
     "numero_documento" TEXT NOT NULL,
@@ -45,6 +45,7 @@ CREATE TABLE "public"."Documentos_XML" (
     "direccion_cliente" TEXT,
     "ciudad_cliente" TEXT,
     "departamento_cliente" TEXT,
+    "mensajes_dian" JSONB,
     "estado_dian" TEXT DEFAULT 'Pendiente',
     "numero_factura" INTEGER,
     "medio_pago" TEXT,
@@ -70,7 +71,7 @@ CREATE TABLE "public"."Documentos_XML" (
 );
 
 -- CreateTable
-CREATE TABLE "public"."Eventos" (
+CREATE TABLE "Eventos" (
     "id_evento" INTEGER NOT NULL,
     "tipo_evento" TEXT NOT NULL,
     "fecha_hora" TIMESTAMP(6) NOT NULL,
@@ -83,7 +84,7 @@ CREATE TABLE "public"."Eventos" (
 );
 
 -- CreateTable
-CREATE TABLE "public"."Producto_Factura" (
+CREATE TABLE "Producto_Factura" (
     "id_producto" SERIAL NOT NULL,
     "codigo" TEXT,
     "descripcion" TEXT NOT NULL,
@@ -100,7 +101,7 @@ CREATE TABLE "public"."Producto_Factura" (
 );
 
 -- CreateTable
-CREATE TABLE "public"."Usuarios" (
+CREATE TABLE "Usuarios" (
     "id_usuario" SERIAL NOT NULL,
     "nombre_usuario" TEXT NOT NULL,
     "rol_usuario" TEXT,
@@ -117,7 +118,7 @@ CREATE TABLE "public"."Usuarios" (
 );
 
 -- CreateTable
-CREATE TABLE "public"."PasswordResetToken" (
+CREATE TABLE "PasswordResetToken" (
     "id" SERIAL NOT NULL,
     "token" TEXT NOT NULL,
     "id_usuario" INTEGER NOT NULL,
@@ -128,7 +129,7 @@ CREATE TABLE "public"."PasswordResetToken" (
 );
 
 -- CreateTable
-CREATE TABLE "public"."codigos_verificacion" (
+CREATE TABLE "codigos_verificacion" (
     "id" SERIAL NOT NULL,
     "correo" TEXT NOT NULL,
     "codigo" TEXT NOT NULL,
@@ -143,7 +144,7 @@ CREATE TABLE "public"."codigos_verificacion" (
 );
 
 -- CreateTable
-CREATE TABLE "public"."Registros_Sistema" (
+CREATE TABLE "Registros_Sistema" (
     "id_registro" SERIAL NOT NULL,
     "fecha_hora" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "id_usuario" INTEGER NOT NULL,
@@ -160,43 +161,43 @@ CREATE TABLE "public"."Registros_Sistema" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Usuarios_nombre_usuario_key" ON "public"."Usuarios"("nombre_usuario");
+CREATE UNIQUE INDEX "Usuarios_nombre_usuario_key" ON "Usuarios"("nombre_usuario");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Usuarios_nit_empresa_key" ON "public"."Usuarios"("nit_empresa");
+CREATE UNIQUE INDEX "Usuarios_nit_empresa_key" ON "Usuarios"("nit_empresa");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Usuarios_correo_contacto_key" ON "public"."Usuarios"("correo_contacto");
+CREATE UNIQUE INDEX "Usuarios_correo_contacto_key" ON "Usuarios"("correo_contacto");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Usuarios_direccion_empresa_key" ON "public"."Usuarios"("direccion_empresa");
+CREATE UNIQUE INDEX "Usuarios_direccion_empresa_key" ON "Usuarios"("direccion_empresa");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "PasswordResetToken_token_key" ON "public"."PasswordResetToken"("token");
+CREATE UNIQUE INDEX "PasswordResetToken_token_key" ON "PasswordResetToken"("token");
 
 -- AddForeignKey
-ALTER TABLE "public"."Clientes" ADD CONSTRAINT "Clientes_id_usuario_fkey" FOREIGN KEY ("id_usuario") REFERENCES "public"."Usuarios"("id_usuario") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Clientes" ADD CONSTRAINT "Clientes_id_usuario_fkey" FOREIGN KEY ("id_usuario") REFERENCES "Usuarios"("id_usuario") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."Documentos_XML" ADD CONSTRAINT "Documentos_XML_id_cliente_fkey" FOREIGN KEY ("id_cliente") REFERENCES "public"."Clientes"("id_cliente") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Documentos_XML" ADD CONSTRAINT "Documentos_XML_id_cliente_fkey" FOREIGN KEY ("id_cliente") REFERENCES "Clientes"("id_cliente") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."Documentos_XML" ADD CONSTRAINT "Documentos_XML_documento_relacionado_fkey" FOREIGN KEY ("documento_relacionado") REFERENCES "public"."Documentos_XML"("id_documento") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Documentos_XML" ADD CONSTRAINT "Documentos_XML_documento_relacionado_fkey" FOREIGN KEY ("documento_relacionado") REFERENCES "Documentos_XML"("id_documento") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."Documentos_XML" ADD CONSTRAINT "Documentos_XML_id_usuario_fkey" FOREIGN KEY ("id_usuario") REFERENCES "public"."Usuarios"("id_usuario") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Documentos_XML" ADD CONSTRAINT "Documentos_XML_id_usuario_fkey" FOREIGN KEY ("id_usuario") REFERENCES "Usuarios"("id_usuario") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."Eventos" ADD CONSTRAINT "id_documento" FOREIGN KEY ("id_documento") REFERENCES "public"."Documentos_XML"("id_documento") ON DELETE NO ACTION ON UPDATE NO ACTION;
+ALTER TABLE "Eventos" ADD CONSTRAINT "id_documento" FOREIGN KEY ("id_documento") REFERENCES "Documentos_XML"("id_documento") ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE "public"."Eventos" ADD CONSTRAINT "id_usuario" FOREIGN KEY ("id_usuario") REFERENCES "public"."Usuarios"("id_usuario") ON DELETE NO ACTION ON UPDATE NO ACTION;
+ALTER TABLE "Eventos" ADD CONSTRAINT "id_usuario" FOREIGN KEY ("id_usuario") REFERENCES "Usuarios"("id_usuario") ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE "public"."Producto_Factura" ADD CONSTRAINT "Producto_Factura_id_documento_fkey" FOREIGN KEY ("id_documento") REFERENCES "public"."Documentos_XML"("id_documento") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Producto_Factura" ADD CONSTRAINT "Producto_Factura_id_documento_fkey" FOREIGN KEY ("id_documento") REFERENCES "Documentos_XML"("id_documento") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."PasswordResetToken" ADD CONSTRAINT "PasswordResetToken_id_usuario_fkey" FOREIGN KEY ("id_usuario") REFERENCES "public"."Usuarios"("id_usuario") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "PasswordResetToken" ADD CONSTRAINT "PasswordResetToken_id_usuario_fkey" FOREIGN KEY ("id_usuario") REFERENCES "Usuarios"("id_usuario") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."Registros_Sistema" ADD CONSTRAINT "Registros_Sistema_id_usuario_fkey" FOREIGN KEY ("id_usuario") REFERENCES "public"."Usuarios"("id_usuario") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Registros_Sistema" ADD CONSTRAINT "Registros_Sistema_id_usuario_fkey" FOREIGN KEY ("id_usuario") REFERENCES "Usuarios"("id_usuario") ON DELETE RESTRICT ON UPDATE CASCADE;

@@ -11,7 +11,8 @@ router.get("/", async (req, res) => {
 
     const payload = jwt.verify(token, process.env.JWT_SECRET);
     const userId = parseInt(payload.sub, 10);
-    if (isNaN(userId)) return res.status(400).json({ error: "ID de usuario inválido" });
+    if (isNaN(userId))
+      return res.status(400).json({ error: "ID de usuario inválido" });
 
     // Traer todos los documentos con su último evento
     const docs = await prisma.documentos_XML.findMany({
@@ -20,15 +21,21 @@ router.get("/", async (req, res) => {
         id_documento: true,
         tipo_documento: true,
         Eventos: {
-          orderBy: { fecha_hora: "desc" },
+          orderBy: {
+            Documentos_XML: { numero_factura: "desc" },
+          },
           take: 1,
           select: { resultado: true },
         },
       },
     });
 
-    let Aceptado = 0, Rechazado = 0, Pendiente = 0;
-    let Factura = 0, NotaCredito = 0, NotaDebito = 0;
+    let Aceptado = 0,
+      Rechazado = 0,
+      Pendiente = 0;
+    let Factura = 0,
+      NotaCredito = 0,
+      NotaDebito = 0;
 
     docs.forEach((doc) => {
       // Estado basado en último evento
@@ -36,7 +43,8 @@ router.get("/", async (req, res) => {
       else {
         const resEvt = doc.Eventos[0].resultado.toLowerCase();
         if (resEvt.includes("aceptado")) Aceptado++;
-        else if (resEvt.includes("rechazado") || resEvt.includes("error")) Rechazado++;
+        else if (resEvt.includes("rechazado") || resEvt.includes("error"))
+          Rechazado++;
         else Pendiente++;
       }
 

@@ -6,7 +6,6 @@ import B from "../assets/B.svg";
 import D1 from "../assets/D1.svg";
 import D2 from "../assets/D2.svg";
 import R from "../assets/R.svg";
-import C from "../assets/C.svg";
 import A from "../assets/A.svg";
 import C2 from "../assets/C2.svg";
 import { API_URL } from "../config";
@@ -92,20 +91,6 @@ export default function MainLayout() {
             >
               <img src={R} alt="Reportes" className="h-7 w-7" />
               {!collapsed && <span>Reportes</span>}
-            </NavLink>
-
-            <NavLink
-              to="/configuracion"
-              className={({ isActive }) =>
-                `flex items-center ${
-                  collapsed ? "justify-center" : "gap-6 pl-6 justify-start"
-                } px-3 py-3 rounded-md transition ${
-                  isActive ? "bg-gray-700 text-white" : "hover:bg-gray-700/60"
-                }`
-              }
-            >
-              <img src={C} alt="Configuración" className="h-7 w-7" />
-              {!collapsed && <span>Configuración Técnica</span>}
             </NavLink>
 
             <NavLink

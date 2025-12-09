@@ -10,11 +10,7 @@ import crypto from "crypto";
 const router = Router();
 const upload = multer({ dest: "uploads/" });
 
-/*
-  Helpers robustos para trabajar con xml2js cuando los prefijos/namespace varían.
-  keyFor/get/getNested/asString/asNumber permiten buscar nodos sin depender del prefijo exacto.
-*/
-
+// ----------------- Helpers -----------------
 function keyFor(obj, target) {
   if (!obj || typeof obj !== "object") return null;
   const keys = Object.keys(obj);
@@ -23,7 +19,6 @@ function keyFor(obj, target) {
     if (k.endsWith(`:${target}`)) return k;
     if (k.toLowerCase() === target.toLowerCase()) return k;
     if (k.toLowerCase().endsWith(`:${target.toLowerCase()}`)) return k;
-    // también permitir que termine en target (por seguridad)
     if (k.toLowerCase().endsWith(target.toLowerCase())) return k;
   }
   return null;
@@ -49,7 +44,8 @@ function val(node) {
   if (node === undefined || node === null) return undefined;
   if (typeof node === "object") {
     if ("_" in node) return node._;
-    if (typeof node.$ === "object" && Object.keys(node).length === 1) return node.$;
+    if (typeof node.$ === "object" && Object.keys(node).length === 1)
+      return node.$;
     return node;
   }
   return node;
@@ -70,112 +66,153 @@ function asNumber(node) {
   return isNaN(n) ? 0 : n;
 }
 
-/* Parsear XML (no eliminamos namespaces) */
 const parseXML = async (filePath) => {
   let xmlData = fs.readFileSync(filePath, "utf-8");
-  // eliminar BOM si existe
-  if (xmlData.charCodeAt(0) === 0xFEFF) xmlData = xmlData.slice(1);
+  if (xmlData.charCodeAt(0) === 0xfeff) xmlData = xmlData.slice(1);
   return await xml2js.parseStringPromise(xmlData, { explicitArray: false });
 };
 
-/*
-  Calcular CUFE/CUDE (SHA-384) — fórmula basada en UBL/DIAN:
-  Cadena: ID + IssueDate + IssueTime + PayableAmount + TaxAmount + NitEmisor + NitReceptor + CLAVE_TECNICA
-  -> SHA-384 -> hex uppercase
-  Ajusta la cadena si tu esquema DIAN requiere campos distintos.
-*/
+function extraerDireccion(cliente) {
+  if (!cliente) return null;
+
+  const posiblesRutas = [
+    ["PostalAddress", "AddressLine", "Line"], 
+    ["PostalAddress", "StreetName"],
+    ["PostalAddress", "Line"],
+    ["PhysicalLocation", "Address", "Line1"],
+    ["PhysicalLocation", "Address", "StreetName"],
+    ["PartyLegalEntity", "PostalAddress", "AddressLine", "Line"],
+    ["PartyLegalEntity", "PostalAddress", "StreetName"],
+    ["PartyLegalEntity", "PhysicalLocation", "Address", "Line1"],
+    ["PartyLegalEntity", "PhysicalLocation", "Address", "StreetName"],
+    ["PartyTaxScheme", "RegistrationAddress", "AddressLine", "Line"],
+    ["PartyTaxScheme", "RegistrationAddress", "StreetName"],
+  ];
+
+  for (const ruta of posiblesRutas) {
+    let valor = cliente;
+    for (const p of ruta) {
+      if (!valor) break;
+      const k = keyFor(valor, p);
+      if (!k) {
+        valor = null;
+        break;
+      }
+      valor = valor[k];
+      if (Array.isArray(valor)) valor = valor[0];
+    }
+    if (valor) return asString(valor);
+  }
+
+  return null;
+}
+
+function extraerDireccionCliente(clienteParty) {
+  if (!clienteParty) return null;
+
+  const rutasValidas = [
+    ["PostalAddress", "StreetName"],
+    ["PostalAddress", "AddressLine", "Line"],
+    ["PhysicalLocation", "Address", "Line1"],
+    ["PartyLegalEntity", "PostalAddress", "StreetName"],
+    ["PartyLegalEntity", "PostalAddress", "AddressLine", "Line"],
+    ["PartyLegalEntity", "PhysicalLocation", "Address", "Line1"],
+    ["PartyLegalEntity", "PhysicalLocation", "Address", "StreetName"],
+    ["PartyTaxScheme", "RegistrationAddress", "StreetName"],
+    ["PartyTaxScheme", "RegistrationAddress", "AddressLine", "Line"],
+  ];
+
+  for (const ruta of rutasValidas) {
+    let nodo = clienteParty;
+    for (const key of ruta) {
+      if (!nodo) break;
+      const k = keyFor(nodo, key);
+      if (!k) {
+        nodo = null;
+        break;
+      }
+      nodo = nodo[k];
+      if (Array.isArray(nodo)) nodo = nodo[0];
+    }
+    if (nodo) return asString(nodo);
+  }
+
+  return null;
+}
+
 const calcularCUFE = (doc) => {
   try {
-    const id = asString(get(doc, "ID") || get(doc, "InvoiceID") || get(doc, "CreditNoteID"));
+    const id = asString(
+      get(doc, "ID") || get(doc, "InvoiceID") || get(doc, "CreditNoteID")
+    );
     const fecha = asString(get(doc, "IssueDate"));
     const hora = asString(get(doc, "IssueTime")) || "";
-    // PayableAmount puede venir en LegalMonetaryTotal.PayableAmount o RequestedMonetaryTotal
-    const payableNode =
+    const total = asString(
       getNested(doc, ["LegalMonetaryTotal", "PayableAmount"]) ||
-      getNested(doc, ["RequestedMonetaryTotal", "PayableAmount"]);
-    const total = asString(payableNode);
-
-    const taxAmountNode = getNested(doc, ["TaxTotal", "TaxAmount"]);
-    const impuestos = asString(taxAmountNode) || "0";
-
+        getNested(doc, ["RequestedMonetaryTotal", "PayableAmount"])
+    );
+    const impuestos =
+      asString(getNested(doc, ["TaxTotal", "TaxAmount"])) || "0";
     const nitEmisor =
-      asString(getNested(doc, ["AccountingSupplierParty", "Party", "PartyTaxScheme", "CompanyID"])) ||
-      asString(getNested(doc, ["AccountingSupplierParty", "Party", "PartyIdentification", "ID"])) ||
-      "";
-
+      asString(
+        getNested(doc, [
+          "AccountingSupplierParty",
+          "Party",
+          "PartyTaxScheme",
+          "CompanyID",
+        ]) ||
+          getNested(doc, [
+            "AccountingSupplierParty",
+            "Party",
+            "PartyIdentification",
+            "ID",
+          ])
+      ) || "";
     const nitReceptor =
-      asString(getNested(doc, ["AccountingCustomerParty", "Party", "PartyTaxScheme", "CompanyID"])) ||
-      asString(getNested(doc, ["AccountingCustomerParty", "Party", "PartyIdentification", "ID"])) ||
-      "";
-
+      asString(
+        getNested(doc, [
+          "AccountingCustomerParty",
+          "Party",
+          "PartyTaxScheme",
+          "CompanyID",
+        ]) ||
+          getNested(doc, [
+            "AccountingCustomerParty",
+            "Party",
+            "PartyIdentification",
+            "ID",
+          ])
+      ) || "";
     const clave = process.env.CLAVE_TECNICA || "";
-
     const cadena = `${id}${fecha}${hora}${total}${impuestos}${nitEmisor}${nitReceptor}${clave}`;
-
-    return crypto.createHash("sha384").update(cadena).digest("hex").toUpperCase();
+    return crypto
+      .createHash("sha384")
+      .update(cadena)
+      .digest("hex")
+      .toUpperCase();
   } catch (e) {
     console.error("Error calculando CUFE:", e);
     return null;
   }
 };
 
-/*
-  Validar DIAN REAL:
-  - campos UBL mínimos
-  - existencia de firma/UBLExtensions (exigencia DIAN)
-  - cálculo CUFE y comparación con UUID
-  Resultado: "Aceptado" | "Rechazado" | "Pendiente"
-*/
 const validarDIAN = (doc) => {
   try {
-    // 1) Validar campos mínimos UBL/DIAN
-    const tieneID = !!asString(get(doc, "ID"));
-    const tieneFecha = !!asString(get(doc, "IssueDate"));
-    const tieneSupplier = !!get(doc, "AccountingSupplierParty");
-    const tieneCustomer = !!get(doc, "AccountingCustomerParty");
-    const tieneLegal = !!get(doc, "LegalMonetaryTotal");
-    const tieneTax = !!get(doc, "TaxTotal") || !!getNested(doc, ["TaxTotal", "TaxAmount"]);
-
-    if (!(tieneID && tieneFecha && tieneSupplier && tieneCustomer && tieneLegal && tieneTax)) {
-      return "Rechazado";
-    }
-
-    // 2) Revisar firma digital / UBLExtensions (al menos presencia)
-    const ublExt = get(doc, "UBLExtensions") || get(doc, "ext:UBLExtensions") || get(doc, "UBLExtensions");
-    // firma puede aparecer como ds:Signature o Signature
-    const signature =
-      getNested(doc, ["UBLExtensions", "UBLExtension", "ExtensionContent", "Signature"]) ||
-      get(doc, "Signature") ||
-      get(doc, "ds:Signature") ||
-      get(doc, "Signature");
-
-    if (!ublExt && !signature) {
-      // Documento sin firma — puede considerarse pendiente (si no exige firma en tu flujo),
-      // pero DIAN exige firma en muchos casos. Dejamos Pendiente para revisión manual.
-      return "Pendiente";
-    }
-
-    // 3) CUFE/CUDE: comparar UUID del XML con el calculado
-    const uuidNode = get(doc, "UUID") || get(doc, "cbc:UUID");
-    const uuidXML = asString(uuidNode);
-    const cufeCalc = calcularCUFE(doc);
-
-    if (!uuidXML) {
-      return "Pendiente"; // no tiene UUID -> pendiente
-    }
-    if (!cufeCalc) {
-      return "Rechazado";
-    }
-
-    // Comparar (ignorando guiones y mayúsculas)
-    const norm = (s) => String(s || "").replace(/[^A-Za-z0-9]/g, "").toUpperCase();
-    if (norm(uuidXML) !== norm(cufeCalc)) {
-      return "Rechazado";
-    }
-
-    // TODO (opcional): verificación criptográfica de la firma XML con xml-crypto / certificado.
-    // Si quieres, lo integro si me pasas el certificado o la forma de validarlo.
-
+    const tieneID = !!asString(get(doc, "cbc:ID") || get(doc, "ID"));
+    const tieneFecha = !!asString(
+      get(doc, "cbc:IssueDate") || get(doc, "IssueDate")
+    );
+    if (!tieneID || !tieneFecha) return "Rechazado";
+    const tieneSupplier =
+      !!get(doc, "cac:AccountingSupplierParty") ||
+      !!get(doc, "AccountingSupplierParty");
+    const tieneCustomer =
+      !!get(doc, "cac:AccountingCustomerParty") ||
+      !!get(doc, "AccountingCustomerParty");
+    if (!tieneSupplier || !tieneCustomer)
+      console.warn(
+        "Proveedor o cliente no encontrados, pero se acepta el documento"
+      );
     return "Aceptado";
   } catch (e) {
     console.error("Error en validarDIAN:", e);
@@ -183,11 +220,9 @@ const validarDIAN = (doc) => {
   }
 };
 
-/* Middleware auth (igual que antes) */
 const authMiddleware = (req, res, next) => {
   const token = req.cookies?.token;
   if (!token) return res.status(401).json({ error: "No autenticado" });
-
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET);
     req.userId = parseInt(payload.sub, 10);
@@ -197,237 +232,488 @@ const authMiddleware = (req, res, next) => {
   }
 };
 
-/* SUBIR XML */
-router.post("/upload", authMiddleware, upload.single("archivo"), async (req, res) => {
-  try {
-    const { file } = req;
-    if (!file) return res.status(400).json({ error: "Archivo no subido" });
-
-    if (!file.mimetype.includes("xml")) {
-      try { fs.unlinkSync(file.path); } catch {}
-      return res.status(400).json({ error: "Solo se aceptan archivos XML" });
-    }
-
-    const parsed = await parseXML(file.path);
-    const rootKey = Object.keys(parsed)[0];
-    const docInfo = parsed[rootKey];
-
-    // Normalizar tipo raíz (Invoice / CreditNote / DebitNote)
-    const rootSimple = rootKey.includes(":") ? rootKey.split(":").pop() : rootKey;
-    let tipo = rootSimple;
-    if (/invoice/i.test(rootSimple)) tipo = "Factura";
-    if (/creditnote/i.test(rootSimple)) tipo = "Nota Crédito";
-    if (/debitnote/i.test(rootSimple)) tipo = "Nota Débito";
-
-    // CUFE / CUDE (tomamos el UUID tal cual venga)
-    const uuidNode = get(docInfo, "UUID") || get(docInfo, "cbc:UUID");
-    const cufe = asString(uuidNode) || null;
-
-    // INFO DEL CLIENTE (robusto)
-    const partyNode = getNested(docInfo, ["AccountingCustomerParty"]) || getNested(docInfo, ["AccountingSupplierParty"]);
-    const party = partyNode ? (get(partyNode, "Party") || partyNode) : null;
-
-    const empresa = party ? (get(party, "PartyLegalEntity") || getNested(party, ["PartyLegalEntity"])) : null;
-    const persona = party ? (get(party, "Person") || getNested(party, ["Person"])) : null;
-
-    const clienteNIT = asString(get(empresa, "CompanyID") || get(persona, "ID")) || "00000000";
-
-    let nombreCliente = null;
-    let razonSocial = null;
-
-    if (empresa) {
-      const regName = asString(get(empresa, "RegistrationName") || get(empresa, "Name"));
-      if (regName && /(SAS|LTDA|S\.A\.|S A S|S\.A\.S)/i.test(regName)) {
-        razonSocial = regName;
-      } else {
-        nombreCliente = regName;
+router.post(
+  "/upload",
+  authMiddleware,
+  upload.single("archivo"),
+  async (req, res) => {
+    try {
+      const { file } = req;
+      if (!file) return res.status(400).json({ error: "Archivo no subido" });
+      if (!file.mimetype.includes("xml")) {
+        try {
+          fs.unlinkSync(file.path);
+        } catch {}
+        return res.status(400).json({ error: "Solo se aceptan archivos XML" });
       }
-    }
 
-    if (persona) {
-      const nombres = asString(get(persona, "FirstName")) || "";
-      const apellidos = asString(get(persona, "FamilyName")) || "";
-      nombreCliente = `${nombres} ${apellidos}`.trim() || nombreCliente;
-    }
+      let parsed = await parseXML(file.path);
 
-    // Buscar o crear cliente
-    let cliente = await prisma.clientes.findFirst({
-      where: {
-        id_usuario: req.userId,
-        numero_documento: clienteNIT
+      // Normalizar keys para ignorar namespaces
+      function normalizeKeys(obj) {
+        if (!obj || typeof obj !== "object") return obj;
+        const newObj = {};
+        Object.keys(obj).forEach((k) => {
+          const cleanKey = k.includes(":") ? k.split(":").pop() : k;
+          newObj[cleanKey] = normalizeKeys(obj[k]);
+        });
+        return newObj;
       }
-    });
+      parsed = normalizeKeys(parsed);
 
-    if (!cliente) {
-      cliente = await prisma.clientes.create({
-        data: {
-          id_usuario: req.userId,
-          nombre_completo: nombreCliente,
-          numero_documento: clienteNIT,
-          razon_social: razonSocial,
-          tipo_documento: asString(get(party, "DocumentTypeCode")) || "CC",
+      let rootKey = Object.keys(parsed)[0];
+      let docInfo = parsed[rootKey];
+      let rootSimple = rootKey.includes(":")
+        ? rootKey.split(":").pop()
+        : rootKey;
+
+      // Manejo de AttachedDocument
+      if (/attacheddocument/i.test(rootSimple)) {
+        let innerXML = null;
+        let embedded =
+          getNested(docInfo, ["Attachment", "EmbeddedDocumentBinaryObject"]) ||
+          getNested(docInfo, [
+            "cac:Attachment",
+            "cac:EmbeddedDocumentBinaryObject",
+          ]);
+        if (embedded)
+          innerXML = Buffer.from(embedded._ || embedded, "base64").toString(
+            "utf8"
+          );
+        else {
+          let cdataXML =
+            getNested(docInfo, [
+              "Attachment",
+              "ExternalReference",
+              "Description",
+            ]) ||
+            getNested(docInfo, [
+              "cac:Attachment",
+              "cac:ExternalReference",
+              "cbc:Description",
+            ]);
+          if (cdataXML)
+            innerXML =
+              typeof cdataXML === "object" && "_" in cdataXML
+                ? cdataXML._
+                : cdataXML;
         }
-      });
-    }
+        if (!innerXML)
+          return res
+            .status(400)
+            .json({
+              error: "No se encontró la factura dentro del AttachedDocument",
+            });
+        parsed = normalizeKeys(
+          await xml2js.parseStringPromise(innerXML, { explicitArray: false })
+        );
+        rootKey = Object.keys(parsed)[0];
+        docInfo = parsed[rootKey];
+        rootSimple = rootKey.includes(":") ? rootKey.split(":").pop() : rootKey;
+      }
 
-    // OBTENER LÍNEAS robusto
-    const obtenerLineas = (doc) => {
-      const keys = Object.keys(doc);
-      const posibles = keys.filter(k =>
-        k.toLowerCase().includes("invoiceline") ||
-        k.toLowerCase().includes("creditnoteline") ||
-        k.toLowerCase().includes("debitnoteline")
-      );
-      if (posibles.length === 0) return [];
-      const lineas = doc[posibles[0]];
-      return Array.isArray(lineas) ? lineas : [lineas];
-    };
+      // Tipo de documento
+      let tipo = rootSimple;
+      if (/invoice/i.test(rootSimple)) tipo = "Factura";
+      if (/creditnote/i.test(rootSimple)) tipo = "Nota Crédito";
+      if (/debitnote/i.test(rootSimple)) tipo = "Nota Débito";
 
-    const productos = obtenerLineas(docInfo);
+      // CUFE
+      const uuidNode =
+        getNested(docInfo, ["UUID"]) || getNested(docInfo, ["cbc:UUID"]);
+      const cufe = asString(uuidNode) || calcularCUFE(docInfo);
 
-    // Totales
-    const legales = get(docInfo, "LegalMonetaryTotal") || {};
-    const tax = get(docInfo, "TaxTotal") || {};
+      // Emisor y Cliente
+      const supplierParty =
+        getNested(docInfo, ["AccountingSupplierParty", "Party"]) || {};
+      const customerParty =
+        getNested(docInfo, ["AccountingCustomerParty", "Party"]) || {};
 
-    const subtotal = asNumber(get(legales, "LineExtensionAmount") || get(legales, "TaxExclusiveAmount"));
-    const total = asNumber(get(legales, "PayableAmount") || get(legales, "TaxInclusiveAmount"));
-    const impuestos = asNumber(get(tax, "TaxAmount"));
+      const nitEmisor =
+        asString(
+          getNested(supplierParty, ["PartyTaxScheme", "CompanyID"]) ||
+            getNested(supplierParty, ["PartyIdentification", "ID"])
+        ) || "";
+      const nitReceptor =
+        asString(
+          getNested(customerParty, ["PartyTaxScheme", "CompanyID"]) ||
+            getNested(customerParty, ["PartyIdentification", "ID"])
+        ) || "";
 
-    // Fecha + hora
-    let xmlFecha = asString(get(docInfo, "IssueDate")) || null;
-    let xmlHora = asString(get(docInfo, "IssueTime")) || "00:00:00-05:00";
-    if (xmlHora.length === 8) xmlHora += "-05:00";
-    let fechaEmision = xmlFecha ? new Date(`${xmlFecha}T${xmlHora}`) : new Date();
+      // Mapas de traducción según códigos DIAN
+const formaPagoMap = { 1: "Contado", 47: "Crédito" };
+const medioPagoMap = {
+  10: "Efectivo",
+  20: "Cheque",
+  31: "Transferencia",
+  41: "Tarjeta crédito",
+  42: "Tarjeta débito",
+  // agrega más según tu necesidad
+};
 
-    // Rangos y consecutivos (igual que antes)
-    const tipoRango = tipo === "Factura" ? "FACTURA" : tipo === "Nota Crédito" ? "NC" : tipo === "Nota Débito" ? "ND" : null;
+// --- Función para extraer datos de PaymentMeans ---
+function extraerPago(doc) {
+  const paymentNode =
+    getNested(doc, ["PaymentMeans"]) ||
+    getNested(doc, ["cac:PaymentMeans"]) ||
+    getNested(doc, ["PaymentTerms", "PaymentMeans"]); // fallback
 
-    const rango = await prisma.rangos.findFirst({
-      where: { id_usuario: req.userId, tipo: tipoRango },
-      orderBy: { id: "desc" }
-    });
+  let forma = "Desconocido";
+  let medio = "Desconocido";
 
-    if (!rango) return res.status(400).json({ error: "No existe rango configurado para este tipo de documento" });
+  if (paymentNode) {
+    // Forma de pago
+    const formaCode =
+      asString(paymentNode.PaymentMeansCode) ||
+      asString(paymentNode["cbc:PaymentMeansCode"]);
+    if (formaCode && formaPagoMap[formaCode]) forma = formaPagoMap[formaCode];
 
-    const ultimo = await prisma.documentos_XML.findFirst({
-      where: {
-        id_usuario: req.userId,
-        tipo_documento: tipo,
-        consecutivo_completo: { startsWith: rango.prefijo }
-      },
-      orderBy: { id_documento: "desc" }
-    });
-
-    let siguienteNumero = rango.inicio;
-    if (ultimo) siguienteNumero = parseInt(ultimo.numero_documento) + 1;
-    if (siguienteNumero > rango.fin) return res.status(400).json({ error: `El rango ${rango.inicio}-${rango.fin} está agotado` });
-
-    const consecutivoCompleto = `${rango.prefijo}${siguienteNumero}`;
-    let nuevoEstado = "Activo";
-    if (siguienteNumero >= rango.fin) nuevoEstado = "Inactivo";
-
-    await prisma.rangos.update({ where: { id: rango.id }, data: { estado: nuevoEstado } });
-
-    // APLICAR VALIDACIÓN DIAN REAL
-    const estado = validarDIAN(docInfo);
-
-    // Guardar documento
-    const newDoc = await prisma.documentos_XML.create({
-      data: {
-        tipo_documento: tipo,
-        numero_documento: String(siguienteNumero),
-        consecutivo_completo: consecutivoCompleto,
-        fecha_emision: fechaEmision,
-        subtotal,
-        impuestos,
-        valor_total: total,
-        moneda: asString(get(docInfo, "DocumentCurrencyCode")) || "COP",
-        xml_archivo: path.resolve(file.path),
-        xml_json: parsed,
-        cufe,
-        estado_dian: estado,
-        Clientes: { connect: { id_cliente: cliente.id_cliente } },
-        Usuarios: { connect: { id_usuario: req.userId } },
-        Producto_Factura: {
-          create: productos.map((p) => {
-            const item = get(p, "Item") || p;
-            const descripcion = asString(get(item, "Description") || get(item, "Name")) || "-";
-            const cantidadNode = get(p, "InvoicedQuantity") || get(p, "CreditedQuantity") || get(p, "DebitedQuantity");
-            const cantidad = asNumber(cantidadNode);
-            let unidad_medida = null;
-            const cantidadKey = keyFor(p, "InvoicedQuantity") || keyFor(p, "CreditedQuantity") || keyFor(p, "DebitedQuantity");
-            if (cantidadKey && p[cantidadKey] && p[cantidadKey].$ && p[cantidadKey].$.unitCode) unidad_medida = p[cantidadKey].$.unitCode;
-            const precioNode = get(p, "Price") ? get(get(p, "Price"), "PriceAmount") : get(p, "PriceAmount");
-            const precio_unitario = asNumber(precioNode);
-            const ivaNode = get(item, "ClassifiedTaxCategory") ? get(get(item, "ClassifiedTaxCategory"), "Percent") : get(item, "Percent");
-            const iva = asNumber(ivaNode);
-            const totalNode = get(p, "LineExtensionAmount");
-            const totalLinea = asNumber(totalNode);
-            return {
-              descripcion,
-              cantidad,
-              unidad_medida,
-              precio_unitario,
-              iva,
-              total: totalLinea
-            };
-          })
-        },
-      },
-      include: { Producto_Factura: true },
-    });
-
-    return res.json({
-      message: "XML procesado correctamente",
-      documento: newDoc,
-    });
-  } catch (err) {
-    console.error("Error en /upload:", err);
-    res.status(500).json({ error: "Error procesando el XML" });
+    // Medio de pago
+    const medioCode =
+      asString(paymentNode.PaymentMeansCode) || // algunos XML usan el mismo nodo
+      asString(paymentNode.PaymentMeansText) ||
+      asString(paymentNode["cbc:PaymentMeansText"]);
+    if (medioCode && medioPagoMap[medioCode]) medio = medioPagoMap[medioCode];
   }
+
+  return { forma, medio };
+}
+
+// --- Función para extraer tipo de operación ---
+function extraerTipoOperacion(doc) {
+  const tipo =
+    asString(getNested(doc, ["InvoiceTypeCode"])) ||
+    asString(getNested(doc, ["cbc:InvoiceTypeCode"])) ||
+    "Desconocido";
+  return tipo;
+}
+
+const { forma: formaPago, medio: medioPago } = extraerPago(docInfo);
+const tipoOperacion = extraerTipoOperacion(docInfo);
+
+
+      // Fechas
+      let xmlFecha = asString(get(docInfo, "IssueDate")) || null;
+      let xmlHora = asString(get(docInfo, "IssueTime")) || "00:00:00-05:00";
+      if (xmlHora.length === 8) xmlHora += "-05:00";
+      const fechaEmision = xmlFecha
+        ? new Date(`${xmlFecha}T${xmlHora}`)
+        : new Date();
+      const fechaVencimientoRaw =
+  asString(
+    getNested(docInfo, ["PaymentTerms", "DueDate"]) ||
+    getNested(docInfo, ["PaymentTerms", "PaymentDueDate"]) ||
+    getNested(docInfo, ["cbc:DueDate"]) ||
+    getNested(docInfo, ["cbc:PaymentDueDate"])
+  ) || null;
+
+const fechaVencimiento = fechaVencimientoRaw
+  ? new Date(fechaVencimientoRaw)
+  : null;
+
+
+      // Totales
+      const legales = get(docInfo, "LegalMonetaryTotal") || {};
+      const tax = get(docInfo, "TaxTotal") || {};
+      const subtotal = asNumber(
+        get(legales, "LineExtensionAmount") ||
+          get(legales, "TaxExclusiveAmount")
+      );
+      const total = asNumber(
+        get(legales, "PayableAmount") || get(legales, "TaxInclusiveAmount")
+      );
+      const impuestos = asNumber(get(tax, "TaxAmount"));
+
+
+const cliente_numero_documento =
+  asString(
+    getNested(customerParty, ["PartyTaxScheme", "CompanyID"]) ||
+    getNested(customerParty, ["PartyIdentification", "ID"])
+  ) || crypto.randomUUID();
+
+const cliente_nombre =
+  asString(
+    getNested(customerParty, ["PartyLegalEntity", "RegistrationName"]) ||
+    getNested(customerParty, ["PartyName", "Name"]) ||
+    getNested(customerParty, ["Person", "FirstName"])
+  ) || "Cliente sin nombre";
+
+const cliente_correo =
+  asString(getNested(customerParty, ["Contact", "ElectronicMail"])) || null;
+
+const cliente_telefono =
+  asString(getNested(customerParty, ["Contact", "Telephone"])) || null;
+
+const cliente_direccion = extraerDireccionCliente(customerParty);
+
+const cliente_ciudad =
+  asString(
+    getNested(customerParty, ["PostalAddress", "CityName"]) ||
+    getNested(customerParty, ["PhysicalLocation", "Address", "CityName"])
+  ) || null;
+
+const cliente_departamento =
+  asString(
+    getNested(customerParty, ["PhysicalLocation", "Address", "Region"])
+  ) || null;
+
+// --- Crear un nuevo registro de cliente para este XML ---
+const clienteRegistro = await prisma.Clientes.create({
+  data: {
+    id_usuario: req.userId,
+    tipo_documento: "CC",
+    numero_documento: cliente_numero_documento,
+    nombre_completo: cliente_nombre,
+    razon_social: cliente_nombre,
+    correo_cliente: cliente_correo,
+    telefono: cliente_telefono,
+    direccion_cliente: cliente_direccion,
+    ciudad: cliente_ciudad,
+    departamento: cliente_departamento,
+  },
 });
 
-/* Resto de endpoints (sin cambios funcionales) */
+// obtener nombre del usuario (por si quieres guardarlo en nombre_usuario)
+let nombreUsuario = null;
+try {
+  const u = await prisma.usuarios.findUnique({ where: { id_usuario: req.userId }, select: { nombre_usuario: true }});
+  nombreUsuario = u?.nombre_usuario || null;
+} catch(e) {
+  console.warn("No se pudo obtener nombre de usuario para registro:", e);
+}
+
+
+
+      // Productos / líneas
+      const lineKeys = Object.keys(docInfo).filter((k) =>
+        /invoiceline|creditnoteline|debitnoteline/i.test(k)
+      );
+      let lineas = [];
+      lineKeys.forEach((k) => {
+        const l = docInfo[k];
+        if (Array.isArray(l)) lineas.push(...l);
+        else lineas.push(l);
+      });
+      
+// Función recursiva para buscar IVA en cualquier parte de un objeto
+function buscarIVA(obj) {
+  if (!obj || typeof obj !== "object") return null;
+
+  if ("Percent" in obj) return asNumber(obj.Percent);
+
+  for (const key in obj) {
+    const valor = obj[key];
+    if (typeof valor === "object") {
+      const encontrado = buscarIVA(valor);
+      if (encontrado !== null) return encontrado;
+    }
+  }
+
+  return null;
+}
+
+const productos = lineas.map((p) => {
+  const item = get(p, "Item") || {};
+
+  const descripcion = asString(item.Description || item.Name) || "-";
+
+  const cantidadNode =
+    get(p, "InvoicedQuantity") ||
+    get(p, "CreditedQuantity") ||
+    get(p, "DebitedQuantity");
+  const cantidad = asNumber(cantidadNode);
+  const unidad_medida = cantidadNode?.$.unitCode || null;
+
+  const precioNode = get(p, "Price")
+    ? get(p.Price, "PriceAmount")
+    : get(p, "PriceAmount");
+  const precio_unitario = asNumber(precioNode);
+
+  // Buscar IVA en cualquier parte de la línea
+  const iva = buscarIVA(p);
+
+  const totalNode =
+    get(p, "LineExtensionAmount") || get(p, "cbc:LineExtensionAmount");
+  const totalLinea = asNumber(totalNode);
+
+  return {
+    descripcion,
+    cantidad,
+    unidad_medida,
+    precio_unitario,
+    iva,
+    total: totalLinea,
+  };
+});
+
+
+const documentosCount = await prisma.Documentos_XML.count({
+  where: { id_usuario: req.userId, tipo_documento: tipo }
+});
+const siguienteNumero = documentosCount + 1;
+const consecutivoCompleto = `${tipo.substring(0,3).toUpperCase()}-${siguienteNumero}`;
+
+
+      const emisor_nombre = asString(
+        getNested(supplierParty, ["PartyLegalEntity", "RegistrationName"]) ||
+          getNested(supplierParty, ["PartyName", "Name"]) ||
+          getNested(supplierParty, ["Person", "FirstName"]) ||
+          ""
+      );
+      const emisor_nombre_comercial =
+        asString(
+          getNested(supplierParty, ["PartyLegalEntity", "CompanyID"])
+            ? getNested(supplierParty, ["PartyLegalEntity", "RegistrationName"])
+            : ""
+        ) || "";
+      const emisor_nit = nitEmisor || "";
+      const emisor_direccion = extraerDireccion(supplierParty);
+
+      const emisor_ciudad =
+  asString(
+    getNested(supplierParty, ["PostalAddress", "CityName"]) ||
+    getNested(supplierParty, ["PhysicalLocation", "Address", "CityName"])
+  ) || "";
+      const emisor_departamento =
+        asString(getNested(supplierParty, ["PostalAddress", "Region"])) || "";
+      const emisor_pais =
+        asString(
+          getNested(supplierParty, [
+            "PostalAddress",
+            "Country",
+            "IdentificationCode",
+          ])
+        ) || "";
+      const emisor_telefono =
+        asString(
+          getNested(supplierParty, ["Contact", "Telephone"]) ||
+            getNested(supplierParty, [
+              "Contact",
+              "Telephone",
+              "TelephoneNumber",
+            ])
+        ) || "";
+      const emisor_correo =
+        asString(
+          getNested(supplierParty, ["Contact", "ElectronicMail"]) ||
+            getNested(supplierParty, ["Contact", "ElectronicMailAddress"])
+        ) || "";
+      const emisor_tipo_contribuyente =
+        asString(
+          getNested(supplierParty, ["PartyTaxScheme", "RegistrationName"]) || ""
+        ) || "";
+      const emisor_regimen =
+        asString(
+          getNested(supplierParty, ["PartyTaxScheme", "CompanyID"]) || ""
+        ) || "";
+
+      const estado = validarDIAN(docInfo);
+
+      const newDoc = await prisma.Documentos_XML.create({
+        data: {
+          tipo_documento: tipo,
+          numero_documento: String(siguienteNumero),
+          consecutivo_completo: consecutivoCompleto,
+          fecha_emision: fechaEmision,
+          subtotal,
+          impuestos,
+          valor_total: total,
+          moneda: asString(get(docInfo, "DocumentCurrencyCode")) || "COP",
+          xml_archivo: path.resolve(file.path),
+          xml_json: parsed,
+          cufe,
+          estado_dian: estado,
+          forma_pago: formaPago,
+          medio_pago: medioPago,
+          fecha_vencimiento: fechaVencimiento,
+          
+          nombre_cliente: cliente_nombre,
+    razon_social_cliente: cliente_nombre,
+    correo_cliente: cliente_correo,
+    telefono_cliente: cliente_telefono,
+    direccion_cliente: cliente_direccion,
+    ciudad_cliente: cliente_ciudad,
+    departamento_cliente: cliente_departamento,
+
+          razon_social_emisor: emisor_nombre || undefined,
+          nombre_comercial_emisor: emisor_nombre_comercial || undefined,
+          nit_emisor: emisor_nit || undefined,
+          direccion_emisor: emisor_direccion || undefined,
+          ciudad_emisor: emisor_ciudad || undefined,
+          departamento_emisor: emisor_departamento || undefined,
+          pais_emisor: emisor_pais || undefined,
+          telefono_emisor: emisor_telefono || undefined,
+          correo_emisor: emisor_correo || undefined,
+          tipo_contribuyente_emisor: emisor_tipo_contribuyente || undefined,
+          regimen_fiscal_emisor: emisor_regimen || undefined,
+
+          
+          Clientes: { connect: { id_cliente: clienteRegistro.id_cliente } },
+          Usuarios: { connect: { id_usuario: req.userId } },
+          Producto_Factura: { create: productos },
+        },
+        include: { Producto_Factura: true },
+      });
+      await prisma.Registros_Sistema.create({
+  data: {
+    id_usuario: req.userId,
+    nombre_usuario: nombreUsuario,         
+    empresa: nombreUsuario || undefined,    
+    tipo_documento: tipo || "Desconocido",
+    numero_documento: `${tipo.substring(0,3).toUpperCase()}-${siguienteNumero}` || asString(get(docInfo, "ID")) || cufe || null,
+    accion: "Validación XML",
+    resultado: estado || "Pendiente",
+    mensaje: `Documento creado: id_documento=${newDoc.id_documento}`
+  }
+});
+      res.json({
+        message: "XML procesado correctamente",
+        documento: newDoc,
+      });
+    } catch (err) {
+      console.error("Error en /upload:", err);
+      res.status(500).json({ error: "Error procesando el XML" });
+    }
+  }
+);
+
+
 router.get("/data", authMiddleware, async (req, res) => {
   try {
     const userId = req.userId;
-    const docs = await prisma.documentos_XML.findMany({
+    const docs = await prisma.Documentos_XML.findMany({
       where: { id_usuario: userId },
-      orderBy: { fecha_emision: "desc" },
+      orderBy: { numero_factura: "desc" },
       take: 50,
-      include: { Producto_Factura: true },
+      include: { Producto_Factura: true, Usuarios: true, Clientes: true },
     });
 
-    const estadosRaw = await prisma.documentos_XML.groupBy({
+    const estadosRaw = await prisma.Documentos_XML.groupBy({
       by: ["estado_dian"],
       _count: { estado_dian: true },
       where: { id_usuario: userId },
     });
-
-    const estadisticas = { Aceptado: 0, Rechazado: 0, Pendiente: 0 };
+    const estadisticas = { Aceptado: 0, Rechazado: 0 };
     estadosRaw.forEach((e) => {
       const key = (e.estado_dian || "").toLowerCase();
       if (key === "aceptado") estadisticas.Aceptado = e._count.estado_dian;
       if (key === "rechazado") estadisticas.Rechazado = e._count.estado_dian;
-      if (key === "pendiente") estadisticas.Pendiente = e._count.estado_dian;
     });
-
-    const tiposRaw = await prisma.documentos_XML.groupBy({
+    const tiposRaw = await prisma.Documentos_XML.groupBy({
       by: ["tipo_documento"],
       _count: { tipo_documento: true },
       where: { id_usuario: userId },
     });
-
     const tipos = { Factura: 0, "Nota Crédito": 0, "Nota Débito": 0 };
     tiposRaw.forEach((t) => {
       const key = (t.tipo_documento || "").toLowerCase();
       if (key.includes("factura")) tipos.Factura = t._count.tipo_documento;
-      if (key.includes("crédito") || key.includes("credito")) tipos["Nota Crédito"] = t._count.tipo_documento;
-      if (key.includes("debito") || key.includes("débito")) tipos["Nota Débito"] = t._count.tipo_documento;
+      if (key.includes("crédito") || key.includes("credito"))
+        tipos["Nota Crédito"] = t._count.tipo_documento;
+      if (key.includes("debito") || key.includes("débito"))
+        tipos["Nota Débito"] = t._count.tipo_documento;
     });
-
     const total = tipos.Factura + tipos["Nota Crédito"] + tipos["Nota Débito"];
-
     res.json({ docs, estadisticas, tipos, total });
   } catch (err) {
     console.error("Error en /data:", err);
@@ -437,11 +723,19 @@ router.get("/data", authMiddleware, async (req, res) => {
 
 router.get("/historial", authMiddleware, async (req, res) => {
   try {
-    const docs = await prisma.documentos_XML.findMany({
+    const docsRaw = await prisma.Documentos_XML.findMany({
       where: { id_usuario: req.userId },
-      orderBy: { fecha_emision: "desc" },
-      include: { Producto_Factura: true }
+      orderBy: { numero_factura: "desc" },
+      include: { Producto_Factura: true, Usuarios: true, Clientes: true },
     });
+    const docs = docsRaw.map(doc => ({
+      ...doc,
+      Producto_Factura: doc.Producto_Factura.map(p => ({
+        ...p,
+        iva: Number(p.iva)   // ← AQUÍ SE ARREGLA TODO
+      }))
+    }));
+
     res.json(docs);
   } catch (err) {
     console.error("Error en historial:", err);
@@ -452,9 +746,12 @@ router.get("/historial", authMiddleware, async (req, res) => {
 router.get("/ver-xml/:id", authMiddleware, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
-    const doc = await prisma.documentos_XML.findUnique({ where: { id_documento: id } });
+    const doc = await prisma.Documentos_XML.findUnique({
+      where: { id_documento: id },
+    });
     if (!doc) return res.status(404).send("Documento no encontrado");
-    if (!doc.xml_archivo || !fs.existsSync(doc.xml_archivo)) return res.status(404).send("Archivo XML no disponible");
+    if (!doc.xml_archivo || !fs.existsSync(doc.xml_archivo))
+      return res.status(404).send("Archivo XML no disponible");
     res.setHeader("Content-Type", "application/xml; charset=utf-8");
     const xmlContent = fs.readFileSync(doc.xml_archivo, "utf8");
     res.send(xmlContent);

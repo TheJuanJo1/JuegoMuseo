@@ -3,7 +3,46 @@ import { useNavigate } from "react-router-dom";
 import {
   LineChart, Line, ResponsiveContainer, PieChart, Pie, Cell, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid,
 } from "recharts";
+import LoadingScreen from "./LoadingScreen";
+
 import { API_URL } from "../config.js";
+
+function miniAlert(msg) {
+  const box = document.createElement("div");
+
+  box.textContent = msg;
+
+  // estilos con JS, SIN CSS externo
+  box.style.position = "fixed";
+  box.style.top = "50%";
+  box.style.left = "50%";
+  box.style.transform = "translate(-50%, -50%)";
+  box.style.background = "white";
+  box.style.padding = "30px 40px";  // cuadro más grande
+  box.style.width = "350px";        // tamaño ancho
+  box.style.maxWidth = "90%";
+  box.style.borderRadius = "15px";  // esquinas redondas
+  box.style.boxShadow = "0 0 20px rgba(0,0,0,0.25)";
+  box.style.zIndex = "9999";
+  box.style.fontSize = "18px";
+  box.style.textAlign = "center";
+  box.style.fontFamily = "'Work Sans', sans-serif"; // fuente solicitada
+  box.style.fontWeight = "500";
+  box.style.lineHeight = "1.4";
+
+  document.body.appendChild(box);
+
+  // desaparecer con animación suave sin CSS
+  setTimeout(() => {
+    box.style.transition = "opacity 0.5s";
+    box.style.opacity = "0";
+
+    setTimeout(() => {
+      box.remove();
+    }, 500);
+  }, 3000);
+}
+
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -12,7 +51,7 @@ export default function Dashboard() {
   const [estadisticas, setEstadisticas] = useState({ Aceptado: 0, Rechazado: 0, Pendiente: 0 });
   const [tipos, setTipos] = useState({ Factura: 0, "Nota Crédito": 0, "Nota Débito": 0 });
   const [totalDocs, setTotalDocs] = useState(0);
-
+  const [loading, setLoading] = useState(false);
   const estadoColors = ["#27374D", "#DDE6ED", "#526D82"];
   const [modalOpen, setModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState(null);
@@ -87,33 +126,63 @@ export default function Dashboard() {
   };
 
   // Subida de archivos
-  const handleFileUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+ const handleFileUpload = async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  e.target.value = "";
 
-    const formData = new FormData();
-    formData.append("archivo", file);
+  // validar que sea XML
+  if (!file.name.toLowerCase().endsWith(".xml")) {
+    miniAlert("Archivo no válido. Debes subir un XML.");
+    return;
+  }
 
+  const formData = new FormData();
+  formData.append("archivo", file);
+
+  setLoading(true); // Mostrar animación de carga
+
+  let messageToShow = ""; // guardamos el mensaje que queremos mostrar después
+
+  try {
+    const res = await fetch(`${API_URL}/api/dashboard-xml/upload`, {
+      method: "POST",
+      body: formData,
+      credentials: "include",
+    });
+
+    let data;
     try {
-      const res = await fetch(`${API_URL}/api/dashboard-xml/upload`, {
-        method: "POST",
-        body: formData,
-        credentials: "include",
-      });
-
-      const data = await res.json();
-      alert(data.message || "Archivo procesado correctamente");
-
-      // Recargar datos automáticamente
-      loadData();
-    } catch (err) {
-      console.error(err);
-      alert("Error subiendo el archivo");
+      data = await res.json();
+    } catch {
+      messageToShow = "Error inesperado: el servidor no respondió bien.";
+      return;
     }
-  };
+
+    if (res.ok) {
+      messageToShow = data.message || "XML procesado correctamente";
+    } else {
+      messageToShow = data.error || "Error procesando el archivo.";
+    }
+
+    // Recargar datos del dashboard
+    await loadData();
+
+  } catch (err) {
+    console.error(err);
+    messageToShow = "Error al subir el archivo";
+  } finally {
+    // Esperar un tiempo antes de ocultar loading y mostrar mensaje
+    setTimeout(() => {
+      setLoading(false); // ocultar animación
+      if (messageToShow) miniAlert(messageToShow); // mostrar mensaje después
+    }, 1500); // duración de la animación
+  }
+};
 
   return (
     <div className="p-6">
+      {loading && <LoadingScreen />}
       <div className="mb-6">
         <button onClick={() => document.getElementById("fileUpload").click()}
         className="text-white px-4 py-2 rounded shadow transition"
@@ -165,28 +234,56 @@ export default function Dashboard() {
 
       {/* Gráficos de estado y totales */}
       <div className="flex space-x-4 mb-6">
-        {/* Estado documentos */}
-        <div className="bg-white p-4 rounded shadow w-1/3 relative">
-          <h3 className="text-lg font-semibold mb-2">Estado documentos</h3>
-          <button onClick={() => openModal("estado")} className="absolute top-2 right-2 text-blue-600 hover:underline">Más detalles</button>
-          <div className="flex items-center">
-            <div className="relative w-[120px] h-[120px]">
-              <ResponsiveContainer>
-                <PieChart>
-                  <Pie data={estadoDocs} dataKey="value" innerRadius={40} outerRadius={55} paddingAngle={2}>
-                    {estadoDocs.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={estadoColors[index % estadoColors.length]} />
-                    ))}
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <p className="text-lg font-bold">{totalDocs.toLocaleString()}</p>
-                <p className="text-xs text-gray-500">Documentos</p>
-              </div>
-            </div>
-          </div>
-        </div>
+<div
+  className="bg-white p-4 rounded shadow w-1/3 flex cursor-pointer"
+  onClick={() => openModal("estado")}
+>
+  <div className="mr-2 "> 
+    <h3 className="text-lg font-semibold mb-2">Estado documentos</h3>
+    <div className="ml-4 relative w-[120px] h-[120px]">
+      <ResponsiveContainer>
+        <PieChart>
+          <Pie
+            data={estadoDocs}
+            dataKey="value"
+            innerRadius={40}
+            outerRadius={55}
+            paddingAngle={2}
+          >
+            {estadoDocs.map((entry, index) => (
+              <Cell
+                key={`cell-${index}`}
+                fill={estadoColors[index % estadoColors.length]}
+              />
+            ))}
+          </Pie>
+        </PieChart>
+      </ResponsiveContainer>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <p className="text-lg font-bold">{totalDocs.toLocaleString()}</p>
+        <p className="text-xs text-gray-500">Documentos</p>
+      </div>
+    </div>
+  </div>
+
+  {/* Circulos pequeños con números */}
+  <div className="flex flex-col justify-center ml-2 space-y-2"> {/* Círculos más hacia la izquierda */}
+    <div className="flex items-center space-x-2">
+      <span
+        className="w-4 h-4 rounded-full"
+        style={{ backgroundColor: "#526D82" }}
+      ></span>
+      <span>Aceptados: {estadisticas.Aceptado}</span>
+    </div>
+    <div className="flex items-center space-x-2">
+      <span
+        className="w-4 h-4 rounded-full"
+        style={{ backgroundColor: "#BFCDD8" }}
+      ></span>
+      <span>Rechazados: {estadisticas.Rechazado}</span>
+    </div>
+  </div>
+</div>
 
         {/* Total por tipo */}
         <div className="bg-white p-4 rounded shadow w-1/3 relative">

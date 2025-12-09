@@ -28,15 +28,11 @@ const app = express()
 // CORS SOLO PARA DESARROLLO LOCAL
 app.use(
   cors({
-<<<<<<< HEAD
-    origin: process.env.FRONTEND_URL,
-=======
     origin: [
       "http://localhost:3000",
       "https://fluxdata-phi.vercel.app",
       "http://localhost:5173"
     ],
->>>>>>> 078034fc164aa0454262d3d659cb5144dd478b9b
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"]

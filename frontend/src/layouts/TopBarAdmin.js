@@ -1,13 +1,12 @@
+// src/layouts/TopBarAdmin.js
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import fluxLogo from "../assets/fluxdata.svg";
 
 export default function TopBarAdmin() {
   const location = useLocation();
   const [title, setTitle] = useState("");
   const [showWelcome, setShowWelcome] = useState(true);
 
-  // Simulación: obtener nombre del SuperAdmin
   const username = localStorage.getItem("username") || "SuperAdmin";
 
   useEffect(() => {
@@ -32,15 +31,23 @@ export default function TopBarAdmin() {
   }, [location, showWelcome, username]);
 
   return (
-    <header className="flex items-center justify-between px-6 py-4 bg-white border-b border-gray-200 shadow-sm">
-      {/* Logo + Título */}
-      <div className="flex items-center gap-10">
-        <img
-          src={fluxLogo}
-          alt="FluxData"
-          className="h-5 w-auto object-contain ml-6"
-        />
-        <h1 className="text-lg font-semibold text-gray-800 transition-all duration-500">
+    <header
+      className="
+        fixed
+        top-0
+        z-40
+        bg-white
+        w-full
+        h-[80px]
+        flex
+        items-center
+        px-6
+        border-b border-gray-200
+        shadow-sm
+      "
+    >
+      <div className="flex items-center gap-6">
+        <h1 className="font-worksans text-[30px] text-gray-800 transition-all duration-500 ml-5">
           {title}
         </h1>
       </div>

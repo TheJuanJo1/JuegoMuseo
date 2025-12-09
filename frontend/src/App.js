@@ -9,8 +9,6 @@ import ResetPassword from "./components/ResetPassword";
 import Inicio from "./components/Inicio";
 import FAQ from "./components/FAQ";
 
-// Formulario obligatorio después del login
-import FormularioEmpresa from "./components/FormularioEmpresa";
 
 // Páginas con layout
 import MainLayout from "./layouts/MainLayout";
@@ -20,7 +18,6 @@ import Documentos from "./components/Documentos";
 import Historial from "./components/Historial";
 import Reportes from "./components/Reportes";
 import Ayuda from "./components/Ayuda";
-import ConfiguracionTecnica from "./components/ConfiguracionTecnica";
 
 import DashboardAdmin from "./components/DashboardAdmin";
 import EmpresasAdmin from "./components/EmpresasAdmin";
@@ -29,24 +26,12 @@ import RegistrosAdmin from "./components/RegistrosAdmin";
 // Loading Screen
 import LoadingScreen from "./components/LoadingScreen";
 
-// Wrapper para usuarioId
-const FormularioEmpresaWrapper = () => {
-  const { usuarioId } = useParams();
-  return <FormularioEmpresa usuarioId={usuarioId} />;
-};
-
-const ConfiguracionTecnicaWrapper = () => {
-  const usuarioId = localStorage.getItem("usuarioId");
-  if (!usuarioId) return <Navigate to="/login" />;
-  return <ConfiguracionTecnica usuarioId={usuarioId} />;
-};
-
 function App() {
   const [loading, setLoading] = useState(true);
 
   // Tiempo de duración de la pantalla de carga
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 3000); // 3 segundos
+    const timer = setTimeout(() => setLoading(false), 1700); 
     return () => clearTimeout(timer);
   }, []);
 
@@ -64,7 +49,6 @@ function App() {
         <Route path="/register" element={<RegisterForm />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
-        <Route path="/empresa/:usuarioId" element={<FormularioEmpresaWrapper />} />
 
         <Route element={<MainLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
@@ -72,7 +56,6 @@ function App() {
           <Route path="/historial" element={<Historial />} />
           <Route path="/reportes" element={<Reportes />} />
           <Route path="/ayuda" element={<Ayuda />} />
-          <Route path="/configuracion" element={<ConfiguracionTecnicaWrapper />} />
         </Route>
 
         <Route element={<AdminLayout />}>
@@ -80,7 +63,6 @@ function App() {
           <Route path="/admin/empresas" element={<EmpresasAdmin />} />
           <Route path="/admin/registros" element={<RegistrosAdmin />} />
         </Route>
-
         <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
     </Router>

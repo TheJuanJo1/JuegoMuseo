@@ -75,7 +75,8 @@ router.post("/", async (req, res) => {
         Producto_Factura: true,
         Usuarios: true
       },
-      orderBy: { fecha_emision: "desc" }
+      orderBy: { numero_factura: "desc" },
+
     });
 
     res.json(docsFiltrados);

@@ -30,14 +30,15 @@ router.get("/", async (req, res) => {
     }));
 
     // Últimos 5 documentos
-    const ultimosDocs = documentos.map(d => ({
-      empresa: d.Usuarios?.nombre_usuario || "Sin Empresa",
-      tipo: d.tipo_documento,
-      numero_serie: d.numero_serie, 
-      fecha: new Date(d.fecha_emision).toLocaleDateString(),
-      estado: d.estado_dian,
-      estadoEmpresa: d.Usuarios?.estado || "Inactivo"
-    }));
+   const ultimosDocs = documentos.map(d => ({
+  empresa: d.Usuarios?.nombre_usuario || "Sin Empresa",
+  tipo: d.tipo_documento,
+  numero_serie: d.consecutivo_completo || d.numero_documento,
+  fecha: new Date(d.fecha_emision).toLocaleDateString(),
+  estado: d.estado_dian,
+  estadoEmpresa: d.Usuarios?.estado || "Inactivo"
+}));
+
 
     // Documentos validados por semana
     const semanasMap = {};

@@ -9,8 +9,6 @@ import crypto from "crypto";
 
 const router = Router();
 const upload = multer({ dest: "uploads/" });
-
-// ----------------- Helpers -----------------
 function keyFor(obj, target) {
   if (!obj || typeof obj !== "object") return null;
   const keys = Object.keys(obj);
@@ -197,27 +195,84 @@ const calcularCUFE = (doc) => {
 };
 
 const validarDIAN = (doc) => {
+  const mensajes = [];
+  let estado = "Aceptado";
+
   try {
-    const tieneID = !!asString(get(doc, "cbc:ID") || get(doc, "ID"));
-    const tieneFecha = !!asString(
-      get(doc, "cbc:IssueDate") || get(doc, "IssueDate")
-    );
-    if (!tieneID || !tieneFecha) return "Rechazado";
-    const tieneSupplier =
-      !!get(doc, "cac:AccountingSupplierParty") ||
-      !!get(doc, "AccountingSupplierParty");
-    const tieneCustomer =
-      !!get(doc, "cac:AccountingCustomerParty") ||
-      !!get(doc, "AccountingCustomerParty");
-    if (!tieneSupplier || !tieneCustomer)
-      console.warn(
-        "Proveedor o cliente no encontrados, pero se acepta el documento"
-      );
-    return "Aceptado";
+    // --- Validación de ID ---
+    const idDoc = asString(get(doc, "cbc:ID") || get(doc, "ID"));
+    if (!idDoc) {
+      estado = "Rechazado";
+      mensajes.push("Falta el campo ID en el documento.");
+    } else {
+      mensajes.push("ID presente.");
+    }
+
+    // --- Validación de fecha ---
+    const fechaDocStr = asString(get(doc, "cbc:IssueDate") || get(doc, "IssueDate"));
+    if (!fechaDocStr) {
+      estado = "Rechazado";
+      mensajes.push("Falta la fecha de emisión (IssueDate).");
+    } else {
+      mensajes.push("Fecha de emisión presente.");
+      const fechaDoc = new Date(fechaDocStr);
+      const fechaActual = new Date();
+      if (fechaDoc > fechaActual) {
+        mensajes.push("La fecha del documento es futura.");
+      }
+    }
+
+    // --- Validación de CUFE / CUDE ---
+    const cufeNode = get(doc, "UUID") || get(doc, "cbc:UUID") || get(doc, "CUFE") || get(doc, "CUDE");
+    const cufe = asString(cufeNode);
+    if (!cufe) {
+      estado = "Rechazado";
+      mensajes.push("No se encontró CUFE/CUDE.");
+    } else {
+      mensajes.push("CUFE/CUDE presente.");
+    }
+
+    // --- Validación de totales ---
+    const subtotalNode = getNested(doc, ["LegalMonetaryTotal", "LineExtensionAmount"]) || getNested(doc, ["TaxExclusiveAmount"]);
+    const totalNode = getNested(doc, ["LegalMonetaryTotal", "PayableAmount"]) || getNested(doc, ["TaxInclusiveAmount"]);
+    const subtotal = asNumber(subtotalNode);
+    const total = asNumber(totalNode);
+
+    if (subtotal <= 0) {
+      estado = "Rechazado";
+      mensajes.push("Subtotal es cero o negativo.");
+    } else {
+      mensajes.push(`Subtotal: ${subtotal}`);
+    }
+
+    if (total <= 0) {
+      estado = "Rechazado";
+      mensajes.push("Total es cero o negativo.");
+    } else {
+      mensajes.push(`Total: ${total}`);
+    }
+
+    // --- Validación de proveedor y cliente ---
+    const tieneSupplier = !!get(doc, "cac:AccountingSupplierParty") || !!get(doc, "AccountingSupplierParty");
+    const tieneCustomer = !!get(doc, "cac:AccountingCustomerParty") || !!get(doc, "AccountingCustomerParty");
+
+    if (!tieneSupplier) mensajes.push("Proveedor no encontrado.");
+    else mensajes.push("Proveedor presente.");
+
+    if (!tieneCustomer) mensajes.push("Cliente no encontrado.");
+    else mensajes.push("Cliente presente.");
+
+    // --- NIT cliente ---
+    const nitCliente = asString(get(doc, "cac:AccountingCustomerParty/cbc:CustomerAssignedAccountID") || get(doc, "AccountingCustomerParty/cbc:CustomerAssignedAccountID"));
+    if (nitCliente && !/^\d+$/.test(nitCliente)) mensajes.push("NIT del cliente no numérico.");
+    else if (nitCliente) mensajes.push("NIT del cliente válido.");
+
   } catch (e) {
-    console.error("Error en validarDIAN:", e);
-    return "Rechazado";
+    estado = "Rechazado";
+    mensajes.push("Error procesando el documento: " + e.message);
   }
+
+  return { estado, mensajes };
 };
 
 const authMiddleware = (req, res, next) => {
@@ -482,6 +537,7 @@ try {
   console.warn("No se pudo obtener nombre de usuario para registro:", e);
 }
 
+const validacion = validarDIAN(docInfo);
 
 
       // Productos / líneas
@@ -622,7 +678,8 @@ const consecutivoCompleto = `${tipo.substring(0,3).toUpperCase()}-${siguienteNum
           xml_archivo: path.resolve(file.path),
           xml_json: parsed,
           cufe,
-          estado_dian: estado,
+          estado_dian: validacion.estado,
+          mensajes_dian: validacion.mensajes,
           forma_pago: formaPago,
           medio_pago: medioPago,
           fecha_vencimiento: fechaVencimiento,
@@ -662,7 +719,7 @@ const consecutivoCompleto = `${tipo.substring(0,3).toUpperCase()}-${siguienteNum
     tipo_documento: tipo || "Desconocido",
     numero_documento: `${tipo.substring(0,3).toUpperCase()}-${siguienteNumero}` || asString(get(docInfo, "ID")) || cufe || null,
     accion: "Validación XML",
-    resultado: estado || "Pendiente",
+    resultado: validacion.estado,
     mensaje: `Documento creado: id_documento=${newDoc.id_documento}`
   }
 });
@@ -762,3 +819,4 @@ router.get("/ver-xml/:id", authMiddleware, async (req, res) => {
 });
 
 export default router;
+

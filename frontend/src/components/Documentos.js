@@ -111,7 +111,6 @@ export default function Documentos() {
               <option value="">Todos los estados</option>
               <option value="Aceptado">Aceptado</option>
               <option value="Rechazado">Rechazado</option>
-              <option value="Pendiente">Pendiente</option>
             </select>
           </div>
           <input
@@ -211,7 +210,7 @@ export default function Documentos() {
                           <p className="mt-2">
                             <strong>Acciones:</strong>{" "}
                             <span className="text-gray-800">
-                              {d.mensaje_dian || "-"}
+                              {d.mensajes_dian || "-"}
                             </span>
                           </p>
                           {Array.isArray(d.Producto_Factura) &&

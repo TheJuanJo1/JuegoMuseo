@@ -6,12 +6,9 @@ frontend/node_modules/
 backend/.env
 frontend/.env
 
-# Ignorar builds/dist
+# Ignorar builds / dist
 backend/dist/
 frontend/dist/
 
-# Archivos del sistema
-.DS_Store
-node_modules
-
+# Ignorar uploads temporales
 backend/uploads/

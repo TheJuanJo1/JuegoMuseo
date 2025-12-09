@@ -31,7 +31,6 @@ function miniAlert(msg) {
   box.style.lineHeight = "1.4";
 
   document.body.appendChild(box);
-
   // desaparecer con animación suave sin CSS
   setTimeout(() => {
     box.style.transition = "opacity 0.5s";
@@ -42,13 +41,11 @@ function miniAlert(msg) {
     }, 500);
   }, 3000);
 }
-
-
 export default function Dashboard() {
   const navigate = useNavigate();
   const [docs, setDocs] = useState([]);
   const [filter, setFilter] = useState(null);
-  const [estadisticas, setEstadisticas] = useState({ Aceptado: 0, Rechazado: 0, Pendiente: 0 });
+  const [estadisticas, setEstadisticas] = useState({ Aceptado: 0, Rechazado: 0 });
   const [tipos, setTipos] = useState({ Factura: 0, "Nota Crédito": 0, "Nota Débito": 0 });
   const [totalDocs, setTotalDocs] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -110,7 +107,6 @@ export default function Dashboard() {
   const estadoDocs = useMemo(() => [
     { name: "Aceptados", value: estadisticas.Aceptado },
     { name: "Rechazados", value: estadisticas.Rechazado },
-    { name: "Pendientes", value: estadisticas.Pendiente },
   ], [estadisticas]);
 
   const totalPorTipo = useMemo(() => [

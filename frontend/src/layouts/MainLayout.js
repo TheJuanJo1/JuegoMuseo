@@ -16,7 +16,7 @@ export default function MainLayout() {
 
   const handleLogout = async () => {
     try {
-      await fetch(`${API_URL}//api/logout`, {
+      await fetch(`${API_URL}/api/logout`, {
         method: "POST",
         credentials: "include",
       });

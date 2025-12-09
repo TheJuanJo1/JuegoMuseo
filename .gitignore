@@ -6,7 +6,6 @@ frontend/node_modules/
 backend/.env
 frontend/.env
 
-<<<<<<< HEAD
 # Ignorar builds / dist
 backend/dist/
 frontend/dist/

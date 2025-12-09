@@ -5,11 +5,11 @@ import nodemailer from "nodemailer";
 
 const router = express.Router();
 const prisma = new PrismaClient();
-
 router.post("/", async (req, res) => {
   const { email } = req.body;
 
   try {
+
     const user = await prisma.Usuarios.findUnique({
       where: { correo_contacto: email },
     });
@@ -17,7 +17,6 @@ router.post("/", async (req, res) => {
     if (!user) {
       return res.status(404).json({ error: "Usuario no encontrado" });
     }
-
     const token = jwt.sign({ id: user.id_usuario }, process.env.JWT_SECRET, {
       expiresIn: "15m",
     });

@@ -5,7 +5,6 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 const router = express.Router();
-
 router.post("/", async (req, res) => {
   try {
     const { token, password } = req.body;
@@ -13,7 +12,6 @@ router.post("/", async (req, res) => {
     if (!token || !password) {
       return res.status(400).json({ error: "Token y contraseña requeridos" });
     }
-
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -31,3 +29,4 @@ router.post("/", async (req, res) => {
 });
 
 export default router;
+

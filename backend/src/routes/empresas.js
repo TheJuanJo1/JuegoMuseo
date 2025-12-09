@@ -62,14 +62,12 @@ router.get("/:id", async (req, res) => {
         regimen_tributario: empresa.regimen_tributario || "No asignado"
       }
     });
-
   } catch (err) {
     console.error("Error obteniendo empresa:", err);
     res.status(500).json({ error: "Error obteniendo empresa" });
   }
 });
 
-// Cambiar estado de una empresa
 router.put("/:id/estado", async (req, res) => {
   const { id } = req.params;
   const { estado } = req.body;
@@ -86,7 +84,6 @@ router.put("/:id/estado", async (req, res) => {
     res.status(500).json({ error: "Error cambiando estado de la empresa" });
   }
 });
-
 // Configuración del transporte de correos
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -130,7 +127,6 @@ router.post("/pre-register", async (req, res) => {
     if (Object.keys(errors).length > 0) {
       return res.status(409).json({ errors });
     }
-
     // Hashear la contraseña
     const hashedPass = await bcrypt.hash(contrasena, 10);
 
@@ -160,14 +156,12 @@ router.post("/pre-register", async (req, res) => {
     });
 
     res.json({ msg: "Se envió un código de verificación al correo." });
-
   } catch (err) {
     console.error("Error en /pre-register:", err);
     res.status(500).json({ error: "Error en pre-registro" });
   }
 });
 
-// Verificar código de registro
 router.post("/verify-code", async (req, res) => {
   try {
     const { correo_contacto, codigo } = req.body;
@@ -175,7 +169,6 @@ router.post("/verify-code", async (req, res) => {
     if (!correo_contacto || !codigo) {
       return res.status(400).json({ error: "Correo y código son obligatorios" });
     }
-
     // Buscar el registro temporal en la tabla de códigos
     const registro = await prisma.codigos_verificacion.findFirst({
       where: { correo: correo_contacto, codigo },
@@ -185,8 +178,6 @@ router.post("/verify-code", async (req, res) => {
     if (!registro) {
       return res.status(400).json({ error: "Código inválido o expirado" });
     }
-
-    // Verificar que el código no haya expirado
     if (registro.expiracion < new Date()) {
       return res.status(400).json({ error: "Código expirado" });
     }
@@ -210,7 +201,6 @@ router.post("/verify-code", async (req, res) => {
     await prisma.codigos_verificacion.delete({ where: { id: registro.id } });
 
     res.json({ msg: "Código verificado y empresa registrada correctamente" });
-
   } catch (error) {
     console.error("Error en /verify-code:", error);
     res.status(500).json({ error: "Error verificando código" });
@@ -219,6 +209,7 @@ router.post("/verify-code", async (req, res) => {
 
 
 // Reenviar código
+
 router.post("/resend-code", async (req, res) => {
   try {
     const { correo_contacto } = req.body;
@@ -226,7 +217,6 @@ router.post("/resend-code", async (req, res) => {
     if (!correo_contacto) {
       return res.status(400).json({ error: "El correo es obligatorio" });
     }
-
     // Buscar registro temporal
     const registro = await prisma.codigos_verificacion.findFirst({
       where: { correo: correo_contacto },
@@ -258,7 +248,6 @@ router.post("/resend-code", async (req, res) => {
     });
 
     res.json({ msg: "Se ha enviado un nuevo código a tu correo" });
-
   } catch (error) {
     console.error("Error en /resend-code:", error);
     res.status(500).json({ error: "Error reenviando código" });

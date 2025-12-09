@@ -9,7 +9,6 @@ import crypto from "crypto";
 
 const router = Router();
 const upload = multer({ dest: "uploads/" });
-
 function keyFor(obj, target) {
   if (!obj || typeof obj !== "object") return null;
   const keys = Object.keys(obj);
@@ -276,8 +275,6 @@ const validarDIAN = (doc) => {
   return { estado, mensajes };
 };
 
-
-
 const authMiddleware = (req, res, next) => {
   const token = req.cookies?.token;
   if (!token) return res.status(401).json({ error: "No autenticado" });
@@ -539,6 +536,7 @@ try {
 } catch(e) {
   console.warn("No se pudo obtener nombre de usuario para registro:", e);
 }
+
 const validacion = validarDIAN(docInfo);
 
 
@@ -821,3 +819,4 @@ router.get("/ver-xml/:id", authMiddleware, async (req, res) => {
 });
 
 export default router;
+

@@ -30,6 +30,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:3000",
+
       "http://localhost:5173"
     ],
     credentials: true,
@@ -43,8 +44,9 @@ app.use(cookieParser())
 
 // Ruta base
 app.get("/", (req, res) => {
+
   res.json({ ok: true, msg: "API FluxData funcionando en LOCALHOST" })
-})
+
 
 // Ruta protegida de prueba
 app.get("/api/auth/me", authRequired, (req, res) => {
@@ -72,4 +74,7 @@ const PORT = process.env.PORT || 3000
 
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`)
+
+})
+
 })

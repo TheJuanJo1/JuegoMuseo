@@ -9,15 +9,10 @@ router.get("/", async (req, res) => {
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const take = parseInt(limit);
+
     const where = {};
 
-    // Filtrar por nombre de empresa (usuario)
-    if (nombre_usuario) {
-      where.nombre_usuario = { contains: nombre_usuario, mode: "insensitive" };
-      }
-    
-
-    // Filtrar por tipo de documento (Factura, Nota Crédito, Nota Débito)
+    // Filtro por tipo de documento (en registros)
     if (tipo) {
       where.tipo_documento = {
         contains: tipo,
@@ -25,10 +20,24 @@ router.get("/", async (req, res) => {
       };
     }
 
-    // Filtrar por resultado (Aceptado, Pendiente, Rechazado)
+    // Filtro por resultado (en registros)
     if (resultado) {
-      where.resultado = { contains: resultado, mode: "insensitive" };
+      where.resultado = {
+        contains: resultado,
+        mode: "insensitive",
+      };
     }
+
+    // --- Filtro por nombre_usuario PERO en la relación Usuarios ---
+    if (nombre_usuario) {
+      where.Usuarios = {
+        nombre_usuario: {
+          contains: nombre_usuario,
+          mode: "insensitive",
+        },
+      };
+    }
+
     const registros = await prisma.Registros_Sistema.findMany({
       where,
       orderBy: { fecha_hora: "desc" },
@@ -40,6 +49,7 @@ router.get("/", async (req, res) => {
         },
       },
     });
+
     const total = await prisma.Registros_Sistema.count({ where });
     const totalPages = Math.ceil(total / take);
 
@@ -49,6 +59,7 @@ router.get("/", async (req, res) => {
       total_paginas: totalPages,
       total_registros: total,
     });
+
   } catch (err) {
     console.error("Error al obtener registros:", err);
     res.status(500).json({ error: "Error al obtener registros" });

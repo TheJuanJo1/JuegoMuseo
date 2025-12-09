@@ -117,7 +117,6 @@ const cambiarPagina = async (nuevaPagina) => {
         </div>
       </div>
       <div className="bg-white p-6 rounded-2xl shadow-md">
-        {/* CAMPOS DE FILTRO FUERA DEL CUADRO BLANCO */}
 {mostrarFiltros && (
   <div className="mb-6 p-4 bg-gray-50 rounded-md shadow-sm flex flex-wrap gap-4">
     
@@ -190,7 +189,7 @@ const cambiarPagina = async (nuevaPagina) => {
                         {new Date(r.fecha_hora).toLocaleString("es-CO", { hour12: false })}
                         </td><td className="px-4 py-2 border">{r.nombre_usuario}</td>
                         <td className="px-4 py-2 border">{r.tipo_documento}</td>
-                        <td className="px-4 py-2 border">{r.numero_serie}</td>
+                        <td className="px-4 py-2 border">{r.numero_documento}</td>
                         <td className="px-4 py-2 border">{r.accion}</td>
                         <td className="px-4 py-2 border font-semibold">{r.resultado}</td>
                         <td className="px-4 py-2 border">{r.mensaje}</td>

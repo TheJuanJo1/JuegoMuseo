@@ -10,28 +10,18 @@ datasource db {
 model Clientes {
   id_cliente        Int      @id @default(autoincrement())
   tipo_documento    String   // CC, NIT, TI, PAS...
-  numero_documento  String   @unique
+  numero_documento  String   
   nombre_completo   String
+  id_usuario        Int?
   razon_social      String?
   correo_cliente    String?
   telefono          String?
-  direccion_cliente String?
+  direccion_cliente String
   ciudad            String?
   departamento      String?
   Usuarios   Usuarios? @relation(fields: [id_usuario], references: [id_usuario])
-  id_usuario Int?
   Documentos_XML    Documentos_XML[]
-}
 
-model Configuraciones_Firmas {
-  id_config   Int      @id(map: "id_config")
-  ruta        String
-  certificado String
-  contrasena  String
-  metodo      String
-  firma       String
-  id_usuario  Int      @unique
-  Usuarios    Usuarios @relation(fields: [id_usuario], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction, map: "id_usuario")
 }
 
 model Documentos_XML {
@@ -56,7 +46,31 @@ model Documentos_XML {
   xml_json             Json? 
   id_cliente           Int?
   id_rango             Int?
+  nombre_cliente       String?
+  razon_social_cliente String?
+  correo_cliente       String?
+  telefono_cliente     String?
+  direccion_cliente    String
+  ciudad_cliente       String?
+  departamento_cliente String?
   estado_dian String? @default("Pendiente")
+  numero_factura Int?
+  medio_pago                   String?
+  fecha_vencimiento            DateTime?
+  tipo_operacion               String?
+  razon_social_emisor          String?
+  nombre_comercial_emisor      String?
+  nit_emisor                   String?
+  tipo_contribuyente_emisor    String?
+  regimen_fiscal_emisor        String?
+  responsabilidad_tributaria_emisor String?
+  actividad_economica_emisor   String?
+  pais_emisor                  String?
+  departamento_emisor          String?
+  ciudad_emisor                String?
+  direccion_emisor             String?
+  telefono_emisor              String?
+  correo_emisor                String?
   Clientes             Clientes? @relation(fields: [id_cliente], references: [id_cliente])
   documento_relacionado  Int?
   DocumentoPadre        Documentos_XML? @relation("DocumentoRelacion", fields: [documento_relacionado], references: [id_documento])
@@ -95,8 +109,6 @@ model Producto_Factura {
   Documentos_XML   Documentos_XML @relation(fields: [id_documento], references: [id_documento])
 }
 
-
-
 model Usuarios {
   id_usuario         Int      @id @default(autoincrement())
   nombre_usuario     String   @unique
@@ -104,20 +116,18 @@ model Usuarios {
   contrasena_usuario String
   nit_empresa        String   @unique
   correo_contacto    String   @unique
+  direccion_empresa  String   @unique
+  regimen_tributario String 
   estado             String    @default("activo") 
   createdAt          DateTime  @default(now())
   fecha_registro     DateTime  @default(now())
-  Configuraciones_Firmas Configuraciones_Firmas?
   Documentos_XML      Documentos_XML[]
   Clientes            Clientes[]
-  Configuracion       Configuracion_Tecnica?
-  Rangos              Rangos[]
   Registros_Sistema   Registros_Sistema[]
   Eventos             Eventos[]
   PasswordResetToken PasswordResetToken[]
 
 }
-
 
 model PasswordResetToken {
   id         Int      @id @default(autoincrement())
@@ -135,22 +145,10 @@ model codigos_verificacion {
   contrasena_temp String
   nombre_empresa  String
   nit_empresa     String
+  direccion_empresa  String?  
+  regimen_tributario String? 
   expiracion      DateTime
 }
-
-model Configuracion_Tecnica {
-  id_configuracion   Int      @id @default(autoincrement())
-  id_usuario         Int      @unique
-  direccion_empresa  String?
-  regimen_tributario String
-  certificado_firma  String   // Ruta del .p12
-  contrasena_cert    String
-  fecha_expiracion   DateTime
-  token_api          String
-  numeraciones       Json     @default("[]") // Info adicional DIAN
-  usuario            Usuarios @relation(fields: [id_usuario], references: [id_usuario])
-}
-
 
 model Registros_Sistema {
   id_registro      Int      @id @default(autoincrement())
@@ -167,20 +165,4 @@ model Registros_Sistema {
   Usuarios         Usuarios @relation(fields: [id_usuario], references: [id_usuario])
 
   @@map("Registros_Sistema")
-}
-
-model Rangos {
-  id         Int      @id @default(autoincrement())
-  tipo       String   // FACTURA, NC, ND
-  prefijo    String   // Ej: SE, FE, NE
-  inicio     Int
-  fin        Int
-  resolucion String?
-  fecha_desde DateTime?
-  fecha_hasta DateTime?
-  estado        String   @default("Activo") 
-  id_usuario Int
-  Usuarios   Usuarios @relation(fields: [id_usuario], references: [id_usuario])
-  @@unique([id_usuario, tipo], name: "id_usuario_tipo")
-
 }

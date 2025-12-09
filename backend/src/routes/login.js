@@ -53,7 +53,16 @@ router.post("/", async (req, res) => {
           { nombre_usuario: emailOrName },
         ],
       },
+      select: {
+        id_usuario: true,
+        contrasena_usuario: true,
+        rol_usuario: true,
+        estado: true,
+        correo_contacto: true,
+        nombre_usuario: true,
+      },
     });
+
 
     if (!user) return res.status(401).json({ error: "Credenciales inválidas" });
 

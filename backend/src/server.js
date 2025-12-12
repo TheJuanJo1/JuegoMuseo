@@ -30,6 +30,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:3000",
+      "https://fluxdata-ten.vercel.app",
       "http://localhost:5173"
     ],
     credentials: true,

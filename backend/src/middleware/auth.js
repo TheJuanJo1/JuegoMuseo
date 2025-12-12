@@ -18,3 +18,4 @@ export function authRequired(req, res, next) {
   }
 }
 
+// Se arreglo
